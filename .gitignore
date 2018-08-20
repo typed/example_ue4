@@ -37,6 +37,7 @@ DerivedDataCache
 Saved
 Build
 Binaries
+Tmp
 *.db
 *.sln
 *.opendb
