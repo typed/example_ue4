@@ -13,8 +13,9 @@ UCLASS()
 class EXAMPLE_UE4_API Aexample_ue4GameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
-	
-	
+		
+public:
+
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage);
 	
 };
