@@ -4,23 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Blueprint/UserWidget.h"
-#include "ScriptHelperClient.generated.h"
+#include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
+#include "ExampleGameInstance.h"
+#include "GameHelper.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class EXAMPLE_UE4_API UScriptHelperClient : public UObject
+class EXAMPLE_UE4_API UGameHelper : public UObject
 {
 	GENERATED_BODY()
 	
 public:
 
 	UFUNCTION(BlueprintCallable)
-	static UUserWidget* CreateUserWidget(FString name);
+	static UExampleGameInstance* GetGameInstance();
 	
-	UFUNCTION(BlueprintCallable)
-	static void GC();
 	
 };

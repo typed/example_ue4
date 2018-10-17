@@ -2,10 +2,11 @@
 
 #include "ScriptHelperClient.h"
 #include "SluaActor.h"
+#include "Engine/Engine.h"
 
 
 
-UUserWidget* UScriptHelperClient::GetWidget(FString name)
+UUserWidget* UScriptHelperClient::CreateUserWidget(FString name)
 {
 	TArray<FStringFormatArg> Args;
 	Args.Add(name);
@@ -22,4 +23,9 @@ UUserWidget* UScriptHelperClient::GetWidget(FString name)
 		return nullptr;
 	UUserWidget* widget = CreateWidget<UUserWidget>(wld, uclass);
 	return widget;
+}
+
+void UScriptHelperClient::GC()
+{
+	GEngine->ForceGarbageCollection(true);
 }
