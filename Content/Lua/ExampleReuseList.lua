@@ -1,22 +1,43 @@
 local ScriptHelperClient = import('ScriptHelperClient')
 ExampleReuseList = ExampleReuseList or {
-    m_ui = nil,
+    ui = nil,
+    ReuseList = nil,
 }
 function ExampleReuseList.Show()
     local ui = slua.loadUI('/Game/ExampleReuseList/ExampleReuseListUI.ExampleReuseListUI')
-    ui:AddToViewport(0)
-    ExampleReuseList.m_ui = ui
-    local btnClose = ui:FindWidget("Button_Close")
-    btnClose.OnClicked:Add(ExampleReuseList.OnClose)
+    ui:AddToViewport(1)
+    ExampleReuseList.ui = ui
+    local Button_Close = ui:FindWidget("Button_Close")
+    Button_Close.OnClicked:Add(ExampleReuseList.OnClose)
+
+    local ButtonItem1 = ui:FindWidget("ButtonItem1")
+    ButtonItem1.OnClicked:Add(ExampleReuseList.OnClickItem1)
+
+    ExampleReuseList.ReuseList = ui:FindWidget("ReuseList")
+
 end
 
 function ExampleReuseList.Hide()
-    if ExampleReuseList.m_ui then
-        ExampleReuseList.m_ui:RemoveFromViewport()
-        ExampleReuseList.m_ui = nil
+    if ExampleReuseList.ui then
+        ExampleReuseList.ui:RemoveFromViewport()
+        ExampleReuseList.ui = nil
     end
 end
 
 function ExampleReuseList.OnClose()
     ExampleReuseList.Hide()
+    print("ExampleReuseList.OnClose")
+end
+
+function ExampleReuseList.OnClickItem1()
+    local ReuseList = ExampleReuseList.ReuseList
+    ReuseList.OnUpdateItem:Clear()
+    ReuseList.OnUpdateItem:Add(ExampleReuseList.OnUpdateItem1)
+    local itmClass = ScriptHelperClient.LoadUserWidgetClass("/Game/ExampleReuseList/TestReuseListItem.TestReuseListItem")
+    --ReuseList:Test(itmClass)
+    ReuseList:Reload(100, 100, 0, 0, itmClass, 0, 0)
+end
+
+function ExampleReuseList.OnUpdateItem1(widget,idx)
+    print("OnUpdateItem1 idx="..idx)
 end

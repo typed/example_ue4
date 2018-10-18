@@ -20,6 +20,9 @@ class EXAMPLE_UE4_API UGameHelper : public UObject
 public:
 
 	UFUNCTION(BlueprintCallable)
+	static UWorld* GetWorld();
+
+	UFUNCTION(BlueprintCallable)
 	static UExampleGameInstance* GetGameInstance();
 	
 	

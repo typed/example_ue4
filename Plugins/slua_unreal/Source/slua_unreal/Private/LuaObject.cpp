@@ -707,6 +707,20 @@ namespace slua {
 		return 0;
     }
 
+	int pushUClassProperty(lua_State* L, UProperty* prop, uint8* parms) {
+		auto p = Cast<UClassProperty>(prop);
+		ensure(p);
+		UClass* cls = Cast<UClass>(p->GetPropertyValue(parms));
+		return LuaObject::pushClass(L, cls);
+	}
+
+	int checkUClassProperty(lua_State* L, UProperty* prop, uint8* parms, int i) {
+		auto p = Cast<UClassProperty>(prop);
+		ensure(p);
+		p->SetPropertyValue(parms, LuaObject::checkValue<UClass*>(L, i));
+		return 0;
+	}
+
     // search obj from registry, push cached obj and return true if find it
     bool LuaObject::getFromCache(lua_State* L,void* obj) {
         LuaState* ls = LuaState::get(L);
@@ -844,6 +858,8 @@ namespace slua {
         regPusher(UMapProperty::StaticClass(),pushUMapProperty);
         regPusher(UStructProperty::StaticClass(),pushUStructProperty);
 		regPusher(UEnumProperty::StaticClass(), pushEnumProperty);
+
+		regPusher(UClassProperty::StaticClass(), pushUClassProperty);
 		
         regChecker<UIntProperty>();
         regChecker<UInt64Property>();
@@ -861,6 +877,7 @@ namespace slua {
         regChecker(UMapProperty::StaticClass(),checkUMapProperty);
         regChecker(UDelegateProperty::StaticClass(),checkUDelegateProperty);
         regChecker(UStructProperty::StaticClass(),checkUStructProperty);
+		regChecker(UClassProperty::StaticClass(), checkUClassProperty);
 		
 		LuaWrapper::init(L);
 		LuaEnums::init(L);

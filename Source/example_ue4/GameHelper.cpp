@@ -2,10 +2,19 @@
 
 #include "GameHelper.h"
 
+UWorld* UGameHelper::GetWorld()
+{
+	return GEngine->GetWorld();
+}
+
 UExampleGameInstance* UGameHelper::GetGameInstance()
 {
-	if (GEngine->GetWorld() != nullptr && GEngine->GetWorld()->GetGameInstance() != nullptr) {
-		return Cast<UExampleGameInstance>(GEngine->GetWorld()->GetGameInstance());
+	UWorld* pWorld = GetWorld();
+	if (pWorld != nullptr) {
+		UGameInstance* pGameInstance = pWorld->GetGameInstance();
+		if (pGameInstance != nullptr) {
+			return Cast<UExampleGameInstance>(pGameInstance);
+		}
 	}
 	return nullptr;
 }

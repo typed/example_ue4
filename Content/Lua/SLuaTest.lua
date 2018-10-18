@@ -1,4 +1,6 @@
+require 'log_tree'
+require 'ExampleMain'
 require 'ExampleReuseList'
-ExampleReuseList.Show()
+ExampleMain.Show()
 function Tick(dt,actor)
 end

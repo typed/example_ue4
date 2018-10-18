@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "UObject/Class.h"
 #include "Blueprint/UserWidget.h"
 #include "ScriptHelperClient.generated.h"
 
@@ -22,5 +23,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	static void GC();
+
+	UFUNCTION(BlueprintCallable)
+	static UClass* LoadUserWidgetClass(FString name);
 	
 };

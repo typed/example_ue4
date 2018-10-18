@@ -5,7 +5,6 @@
 #include "Engine/Engine.h"
 
 
-
 UUserWidget* UScriptHelperClient::CreateUserWidget(FString name)
 {
 	TArray<FStringFormatArg> Args;
@@ -28,4 +27,14 @@ UUserWidget* UScriptHelperClient::CreateUserWidget(FString name)
 void UScriptHelperClient::GC()
 {
 	GEngine->ForceGarbageCollection(true);
+}
+
+UClass* UScriptHelperClient::LoadUserWidgetClass(FString name)
+{
+	TArray<FStringFormatArg> Args;
+	Args.Add(name);
+	// load blueprint widget from cpp, need add '_C' tail
+	auto cui = FString::Format(TEXT("Blueprint'{0}_C'"), Args);
+	UClass* uclass = LoadClass<UUserWidget>(NULL, *cui);
+	return uclass;
 }
