@@ -2,14 +2,14 @@
 
 #include "GameHelper.h"
 
-UWorld* UGameHelper::GetWorld()
+UWorld* UGameHelper::GetMyWorld()
 {
 	return GEngine->GetWorld();
 }
 
 UExampleGameInstance* UGameHelper::GetGameInstance()
 {
-	UWorld* pWorld = GetWorld();
+	UWorld* pWorld = GetMyWorld();
 	if (pWorld != nullptr) {
 		UGameInstance* pGameInstance = pWorld->GetGameInstance();
 		if (pGameInstance != nullptr) {

@@ -1,3 +1,4 @@
+SHC = import('ScriptHelperClient')
 require 'log_tree'
 require 'ExampleMain'
 require 'ExampleReuseList'

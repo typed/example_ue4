@@ -88,3 +88,5 @@ function _G.log_tree(desc, var)
         print(line);
     end
 end
+
+_G.log = print

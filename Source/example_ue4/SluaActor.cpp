@@ -73,6 +73,7 @@ void ASluaActor::Tick(float DeltaTime)
 	auto slua = FindComponentByClass<USluaComponent>();
 	if(!slua) return;
 	slua->State()->call("Tick", DeltaTime, this);
+	//GEngine->ForceGarbageCollection(true);
 }
 
 void ASluaActor::SetFName(FName name) {

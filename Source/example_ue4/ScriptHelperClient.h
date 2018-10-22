@@ -25,6 +25,14 @@ public:
 	static void GC();
 
 	UFUNCTION(BlueprintCallable)
-	static UClass* LoadUserWidgetClass(FString name);
+	static UClass* LoadClass(FString name);
+
+	UFUNCTION(BlueprintCallable)
+	static void TraceAllObject();
+
+	UFUNCTION(BlueprintCallable)
+	static void TestShowUserWidget(FString name, int idx);
 	
 };
+
+DECLARE_LOG_CATEGORY_EXTERN(LogScriptHelper, Verbose, All);

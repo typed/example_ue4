@@ -1,22 +1,25 @@
-local ScriptHelperClient = import('ScriptHelperClient')
 ExampleMain = ExampleMain or {
-    m_ui = nil,
 }
 function ExampleMain.Show()
     local ui = slua.loadUI('/Game/ExampleMain/ExampleMainUI.ExampleMainUI')
+    --local ui = SHC.CreateUserWidget('/Game/ExampleMain/ExampleMainUI.ExampleMainUI_C')
+    
     ui:AddToViewport(0)
-    ExampleMain.m_ui = ui
 
     local Button_GC = ui:FindWidget("Button_GC")
+    Button_GC.OnClicked:Clear()
     Button_GC.OnClicked:Add(ExampleMain.OnGC)
 
     local Button_ReuseList = ui:FindWidget("Button_ReuseList")
+    Button_ReuseList.OnClicked:Clear()
     Button_ReuseList.OnClicked:Add(ExampleMain.OnClick_Button_ReuseList)
 
 end
 
 function ExampleMain.OnGC()
-    ScriptHelperClient.GC()
+    SHC.GC()
+    SHC.TraceAllObject()
+    collectgarbage("collect")
 end
 
 function ExampleMain.OnClick_Button_ReuseList()
