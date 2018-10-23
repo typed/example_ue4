@@ -4,7 +4,7 @@ ExampleMain = class("ExampleMain", '/Game/ExampleMain/ExampleMainUI.ExampleMainU
 function ExampleMain:ctor()
 
     local Button_GC = self.widget:FindWidget("Button_GC")
-    Button_GC.OnClicked:Add(function() self:OnGC() end)
+    Button_GC.OnClicked:Add(function() ExampleMain:OnGC() end)
 
     local Button_ReuseList = self.widget:FindWidget("Button_ReuseList")
     Button_ReuseList.OnClicked:Add(function() self:OnClick_Button_ReuseList() end)

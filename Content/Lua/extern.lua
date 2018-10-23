@@ -4,12 +4,10 @@ function class(classname, url)
     local cls = {}
     cls.__classname = classname
     cls.ctor        = function() end
-    cls.binding     = function() end
     function cls.new(...)
         local obj = {}
         setmetatable(obj, cls)
         cls.__index = cls
-        --obj.__class = cls
         obj.widget = slua.loadUI(url)
         obj.widget:SetLuaTable(obj)
         obj:ctor(...)
@@ -28,13 +26,13 @@ function class(classname, url)
             end
         end
     end
-    function cls.bind(w,...)
+    function cls.bind(wd,...)
         local obj = {}
         setmetatable(obj, cls)
         cls.__index = cls
-        obj.widget = w
+        obj.widget = wd
         obj.widget:SetLuaTable(obj)
-        obj:binding(...)
+        obj:ctor(...)
         return obj
     end
     function cls:unbind()

@@ -50,10 +50,10 @@ function ExampleReuseList:OnUpdateItem1(widget,idx)
 end
 
 TestReuseListItem = class("TestReuseListItem", "/Game/ExampleReuseList/TestReuseListItem.TestReuseListItem")
-function TestReuseListItem:binding(parent)
+function TestReuseListItem:ctor(parent)
     self.m_parent = parent
     self.m_idx = 0
-    self.ItmList = {}
+    --self.ItmList = {}
     self.widget.Button_BG.OnClicked:Add(function() self:OnClickItem1BG() end)
 end
 function TestReuseListItem:SetIdx(idx)
@@ -64,7 +64,7 @@ function TestReuseListItem:GetIdx()
 end
 function TestReuseListItem:OnClickItem1BG()
     local idx = self.m_idx
-    local itm = self.ItmList[idx]
+    --local itm = self.ItmList[idx]
     log("ExampleReuseList.OnClickItem1BG idx="..idx)
 end
 function TestReuseListItem:UpdateData()
