@@ -37,13 +37,13 @@ local function tab2string(visited, path, base, tab)
     local idx = 1;
 	for k, v in pairs(tab) do
         local vtype = type(v);
-        local header = base..(idx < size and "├─ " or "└─ ")..var2string(k);
+        local header = base..(idx < size and "|- " or "|- ")..var2string(k);
         if vtype == "table" then
         	local vpath = visited[v];
         	if vpath then
         		lines[#lines + 1] = header..": "..vpath;
         	else
-                local out = tab2string(visited, path.."/"..var2string(k), base..(idx < size and "│  " or "   "), v);
+                local out = tab2string(visited, path.."/"..var2string(k), base..(idx < size and "|  " or "   "), v);
                 if type(out) == "string" then
                     lines[#lines + 1] = header..": "..out;
                 else
