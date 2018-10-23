@@ -8,12 +8,13 @@ function ExampleReuseList:ctor()
     self.ItmList = {}
 
     self.Button_Close = self.widget:FindWidget("Button_Close")
-    self.Button_Close.OnClicked:Add(function() self:del() end)
+    self.Button_Close.OnClicked:Add(function() self:Hide() end)
 
     self.ButtonItem1 = self.widget:FindWidget("ButtonItem1")
     self.ButtonItem1.OnClicked:Add(function() self:OnClickItem1() end)
 
     self.ReuseList = self.widget:FindWidget("ReuseList")
+    self.ItemWidgetList = {}
 
 end
 
@@ -21,8 +22,14 @@ function ExampleReuseList:Show()
     self.widget:AddToViewport(1)
 end
 
+function ExampleReuseList:Hide()
+    for i,v in ipairs(self.ItemWidgetList) do
+        v:unbind()
+    end
+    self:del()
+end
+
 function ExampleReuseList:OnClickItem1()
-    
     self.ReuseList.OnUpdateItem:Clear()
     self.ReuseList.OnUpdateItem:Add(function(...) self:OnUpdateItem1(...) end)
     self.ReuseList.OnCreateItem:Clear()
@@ -31,26 +38,35 @@ function ExampleReuseList:OnClickItem1()
     self.ReuseList:Reload(100, 100, 0, 0, itmClass, 0, 0)
 end
 
-function ExampleReuseList:OnClickItem1BG(widget)
-    local idx = widget:GetLuaTable().idx
-    local itm = self.ItmList[idx]
-    log("ExampleReuseList.OnClickItem1BG idx="..idx)
-end
-
 function ExampleReuseList:OnCreateItem1(widget)
-    local function OnClick()
-        self:OnClickItem1BG(widget)
-    end
-    widget.Button_BG.OnClicked:Add(OnClick)
-    local tbl = {}
-    widget:SetLuaTable(tbl)
+    local itm_widget = TestReuseListItem.bind(widget, self)
+    table.insert(self.ItemWidgetList, itm_widget)
 end
 
 function ExampleReuseList:OnUpdateItem1(widget,idx)
-    widget:GetLuaTable().idx = idx
-    local itmdata = self.ItmList[idx]
-    --item:UpdateItem(ExampleReuseList.ItmData[idx].itm)
-    --widget:GetBind():UpdateData(ExampleReuseList.ItmData[idx])
-    widget.TextBlockName:SetText(idx)
-    --Item.SetData(widget.Comonn_item, {})
+    local itm_widget = widget:GetLuaTable()
+    itm_widget:SetIdx(idx)
+    itm_widget:UpdateData()
+end
+
+TestReuseListItem = class("TestReuseListItem", "/Game/ExampleReuseList/TestReuseListItem.TestReuseListItem")
+function TestReuseListItem:binding(parent)
+    self.m_parent = parent
+    self.m_idx = 0
+    self.ItmList = {}
+    self.widget.Button_BG.OnClicked:Add(function() self:OnClickItem1BG() end)
+end
+function TestReuseListItem:SetIdx(idx)
+    self.m_idx = idx
+end
+function TestReuseListItem:GetIdx()
+    return self.m_idx
+end
+function TestReuseListItem:OnClickItem1BG()
+    local idx = self.m_idx
+    local itm = self.ItmList[idx]
+    log("ExampleReuseList.OnClickItem1BG idx="..idx)
+end
+function TestReuseListItem:UpdateData()
+    self.widget.TextBlockName:SetText(self.m_idx)
 end
