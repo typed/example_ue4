@@ -1,7 +1,8 @@
 SHC = import('ScriptHelperClient')
 require 'log_tree'
+require 'extern'
 require 'ExampleMain'
 require 'ExampleReuseList'
-ExampleMain.Show()
+local w = ExampleMain.new() w:Show()
 function Tick(dt,actor)
 end
