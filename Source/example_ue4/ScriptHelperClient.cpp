@@ -32,7 +32,7 @@ void UScriptHelperClient::GC()
 
 UClass* UScriptHelperClient::LoadClass(FString name)
 {
-	return ::LoadClass<UClass>(NULL, *name);
+	return ::LoadClass<UUserWidget>(NULL, *name);
 }
 
 void UScriptHelperClient::TraceAllObject()
