@@ -15,10 +15,6 @@ class SLUA_UNREAL_API USluaUserWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-    USluaUserWidget(const FObjectInitializer& ObjectInitializer);
     ~USluaUserWidget();
-
-    int m_luaID;
-    static int s_luaID;
 	
 };

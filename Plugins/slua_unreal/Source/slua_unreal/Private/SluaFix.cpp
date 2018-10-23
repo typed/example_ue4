@@ -3,7 +3,7 @@
 #include "LuaCppBinding.h"
 #include "SluaUserWidget.h"
 
-#define SLUA_REFID_USERTABLE_MAPPING "SLUA_REFID_USERTABLE_MAPPING"
+#define SLUA_PTR_USERTABLE_MAPPING "SLUA_PTR_USERTABLE_MAPPING"
 
 namespace slua {
 
@@ -14,33 +14,33 @@ namespace slua {
 
     void SluaFix::init(lua_State* L)
     {
-        lua_pushstring(L, SLUA_REFID_USERTABLE_MAPPING);
+        lua_pushstring(L, SLUA_PTR_USERTABLE_MAPPING);
         lua_newtable(L);
         lua_rawset(L, LUA_REGISTRYINDEX);
 
         //slua fix
-        REG_EXTENSION_METHOD_IMP(USluaUserWidget, "SetLuaTable", {
-            CheckUD(USluaUserWidget,L,1);
+        REG_EXTENSION_METHOD_IMP(UUserWidget, "SetLuaTable", {
+            CheckUD(UUserWidget,L,1);
             if (UD == nullptr) {
                 return 0;
             }
             if (lua_istable(L, 2)) {
                 int tbl = lua_tovalue(L, 2, 0);
-                SluaFix::add_usertable_by_refid(L, UD->m_luaID, tbl);
+                SluaFix::add_usertable_by_ptr(L, UD, tbl);
                 return 0;
             }
             if (lua_isnil(L, 2)) {
-                SluaFix::remove_usertable_by_refid(L, UD->m_luaID);
+                SluaFix::remove_usertable_by_ptr(L, UD);
                 return 0;
             }
             return 0;
         });
-        REG_EXTENSION_METHOD_IMP(USluaUserWidget, "GetLuaTable", {
-            CheckUD(USluaUserWidget,L,1);
+        REG_EXTENSION_METHOD_IMP(UUserWidget, "GetLuaTable", {
+            CheckUD(UUserWidget,L,1);
             if (UD == nullptr) {
                 return 0;
             }
-            return SluaFix::get_usertable_by_refid(L, UD->m_luaID);
+            return SluaFix::get_usertable_by_ptr(L, UD);
         });
 
     }
@@ -61,33 +61,33 @@ namespace slua {
         printf("\n");
     }
     
-    void SluaFix::add_usertable_by_refid(lua_State* L, int refid, int usertable)
+    void SluaFix::add_usertable_by_ptr(lua_State* L, void* ptr, int usertable)
     {
-        lua_pushstring(L, SLUA_REFID_USERTABLE_MAPPING);
-        lua_rawget(L, LUA_REGISTRYINDEX);                               /* stack: refid_usertable */
-        lua_pushinteger(L, refid);                                      /* stack: refid_usertable refid */
-        lua_pushvalue(L, usertable);                                    /* stack: refid_usertable refid usertable */
-        lua_rawset(L, -3);                                              /* refid_usertable[refid] = usertable, stack: usertable */
+        lua_pushstring(L, SLUA_PTR_USERTABLE_MAPPING);
+        lua_rawget(L, LUA_REGISTRYINDEX);                               /* stack: ptr_usertable */
+        lua_pushlightuserdata(L, ptr);                                  /* stack: ptr_usertable ptr */
+        lua_pushvalue(L, usertable);                                    /* stack: ptr_usertable ptr usertable */
+        lua_rawset(L, -3);                                              /* ptr_usertable[refid] = usertable, stack: usertable */
         lua_pop(L, 1);                                                  /* stack: - */
     }
     
-    int SluaFix::get_usertable_by_refid(lua_State* L, int refid)
+    int SluaFix::get_usertable_by_ptr(lua_State* L, void* ptr)
     {
-        lua_pushstring(L, SLUA_REFID_USERTABLE_MAPPING);
-        lua_rawget(L, LUA_REGISTRYINDEX);                               /* stack: ... refid_usertable */
-        lua_pushinteger(L, refid);                                      /* stack: ... refid_usertable refid */
-        lua_rawget(L, -2);                                              /* stack: ... refid_usertable usertable */
+        lua_pushstring(L, SLUA_PTR_USERTABLE_MAPPING);
+        lua_rawget(L, LUA_REGISTRYINDEX);                               /* stack: ... ptr_usertable */
+        lua_pushlightuserdata(L, ptr);                                  /* stack: ... ptr_usertable ptr */
+        lua_rawget(L, -2);                                              /* stack: ... ptr_usertable usertable */
         lua_remove(L, -2);
         return 1;
     }
     
-    void SluaFix::remove_usertable_by_refid(lua_State* L, int refid)
+    void SluaFix::remove_usertable_by_ptr(lua_State* L, void* ptr)
     {
-        lua_pushstring(L, SLUA_REFID_USERTABLE_MAPPING);
-        lua_rawget(L, LUA_REGISTRYINDEX);                               /* stack: refid_usertable */
-        lua_pushinteger(L, refid);                                      /* stack: refid_usertable refid */
-        lua_pushnil(L);                                                 /* stack: refid_usertable refid nil */
-        lua_rawset(L, -3);                                              /* refid_usertable[refid] = nil, stack: nil */
+        lua_pushstring(L, SLUA_PTR_USERTABLE_MAPPING);
+        lua_rawget(L, LUA_REGISTRYINDEX);                               /* stack: ptr_usertable */
+        lua_pushlightuserdata(L, ptr);                                  /* stack: ptr_usertable ptr */
+        lua_pushnil(L);                                                 /* stack: ptr_usertable ptr nil */
+        lua_rawset(L, -3);                                              /* ptr_usertable[ptr] = nil, stack: nil */
         lua_pop(L, 1);                                                  /* stack: - */
     }
 

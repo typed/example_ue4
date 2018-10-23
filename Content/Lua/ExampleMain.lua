@@ -16,7 +16,6 @@ function ExampleMain.Show()
         }
     }
     ui:SetLuaTable(tbl)
-    ui:SetLuaTable(nil)
 
     local Button_GC = ui:FindWidget("Button_GC")
     Button_GC.OnClicked:Clear()
