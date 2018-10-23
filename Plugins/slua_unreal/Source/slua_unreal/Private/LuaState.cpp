@@ -30,6 +30,7 @@
 #include "LuaMap.h"
 #include "LuaDebugExtension.h"
 #include "LuaMemoryProfile.h"
+#include "SluaFix.h"
 
 namespace slua {
     int import(lua_State *L) {
@@ -240,6 +241,7 @@ namespace slua {
         LuaClass::reg(L);
         LuaArray::reg(L);
         LuaMap::reg(L);
+        SluaFix::init(L);
 
         lua_settop(L,0);
 

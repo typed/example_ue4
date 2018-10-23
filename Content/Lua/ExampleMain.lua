@@ -1,10 +1,22 @@
 ExampleMain = ExampleMain or {
+    ui = nil,
 }
 function ExampleMain.Show()
     local ui = slua.loadUI('/Game/ExampleMain/ExampleMainUI.ExampleMainUI')
     --local ui = SHC.CreateUserWidget('/Game/ExampleMain/ExampleMainUI.ExampleMainUI_C')
-    
     ui:AddToViewport(0)
+    ExampleMain.ui = ui
+
+    local tbl = {
+        name = "aaa",
+        age = 11,
+        list = {
+            [1] = {n1=1, n2=100},
+            [2] = {n1=2, n2=200},
+        }
+    }
+    ui:SetLuaTable(tbl)
+    ui:SetLuaTable(nil)
 
     local Button_GC = ui:FindWidget("Button_GC")
     Button_GC.OnClicked:Clear()
@@ -23,5 +35,6 @@ function ExampleMain.OnGC()
 end
 
 function ExampleMain.OnClick_Button_ReuseList()
-    ExampleReuseList.Show()
+    log_tree("ui:GetLuaTable", ExampleMain.ui:GetLuaTable())
+    --ExampleReuseList.Show()
 end
