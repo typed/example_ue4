@@ -1,4 +1,10 @@
-
+local function clear_userdata(tbl)
+    for k,v in pairs(tbl) do
+        if type(v) == "userdata" then
+            tbl[k] = nil
+        end
+    end
+end
 --Create an class.
 function class(classname, url)
     local cls = {}
@@ -18,12 +24,7 @@ function class(classname, url)
             self.widget:SetLuaTable(nil)
             self.widget:RemoveFromViewport()
             self.widget = nil
-            for k,v in pairs(self) do
-                --log(""..type(v).." "..tostring(v))
-                if type(v) == "userdata" then
-                    self[k] = nil
-                end
-            end
+            clear_userdata(self)
         end
     end
     function cls.bind(wd,...)
@@ -39,12 +40,7 @@ function class(classname, url)
         if self.widget then
             self.widget:SetLuaTable(nil)
             self.widget = nil
-            for k,v in pairs(self) do
-                --log(""..type(v).." "..tostring(v))
-                if type(v) == "userdata" then
-                    self[k] = nil
-                end
-            end
+            clear_userdata(self)
         end
     end
     return cls

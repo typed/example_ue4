@@ -14,7 +14,7 @@ function ExampleReuseList:ctor()
     self.ButtonItem1.OnClicked:Add(function() self:OnClickItem1() end)
 
     self.ReuseList = self.widget:FindWidget("ReuseList")
-    self.ItemWidgetList = {}
+    self.Item1WidgetList = {}
 
 end
 
@@ -23,7 +23,7 @@ function ExampleReuseList:Show()
 end
 
 function ExampleReuseList:Hide()
-    for i,v in ipairs(self.ItemWidgetList) do
+    for i,v in ipairs(self.Item1WidgetList) do
         v:unbind()
     end
     self:del()
@@ -40,7 +40,7 @@ end
 
 function ExampleReuseList:OnCreateItem1(widget)
     local itm_widget = TestReuseListItem.bind(widget, self)
-    table.insert(self.ItemWidgetList, itm_widget)
+    table.insert(self.Item1WidgetList, itm_widget)
 end
 
 function ExampleReuseList:OnUpdateItem1(widget,idx)
