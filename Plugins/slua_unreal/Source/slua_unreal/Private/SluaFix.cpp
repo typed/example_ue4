@@ -19,8 +19,8 @@ namespace slua {
         lua_rawset(L, LUA_REGISTRYINDEX);
 
         //slua fix
-        REG_EXTENSION_METHOD_IMP(UUserWidget, "SetLuaTable", {
-            CheckUD(UUserWidget,L,1);
+        REG_EXTENSION_METHOD_IMP(USluaUserWidget, "SetLuaTable", {
+            CheckUD(USluaUserWidget,L,1);
             if (UD == nullptr) {
                 return 0;
             }
@@ -35,8 +35,8 @@ namespace slua {
             }
             return 0;
         });
-        REG_EXTENSION_METHOD_IMP(UUserWidget, "GetLuaTable", {
-            CheckUD(UUserWidget,L,1);
+        REG_EXTENSION_METHOD_IMP(USluaUserWidget, "GetLuaTable", {
+            CheckUD(USluaUserWidget,L,1);
             if (UD == nullptr) {
                 return 0;
             }

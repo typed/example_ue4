@@ -21,7 +21,7 @@ UUserWidget* UScriptHelperClient::CreateUserWidget(FString name)
 	if (!wld)
 		return nullptr;
 	UUserWidget* widget = CreateWidget<UUserWidget>(wld, uclass);
-	UE_LOG(LogScriptHelper, Log, TEXT("UScriptHelperClient::CreateUserWidget World:%x Name: %s"), wld, *(wld->GetName()));
+	//UE_LOG(LogScriptHelper, Log, TEXT("UScriptHelperClient::CreateUserWidget World:%x Name: %s"), wld, *(wld->GetName()));
 	return widget;
 }
 

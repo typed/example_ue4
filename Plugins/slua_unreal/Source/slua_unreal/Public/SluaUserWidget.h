@@ -13,8 +13,11 @@ UCLASS()
 class SLUA_UNREAL_API USluaUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
-public:
-    ~USluaUserWidget();
+
+protected:
+
+    virtual void NativeDestruct();
 	
 };
+
+DECLARE_LOG_CATEGORY_EXTERN(LogSluaUserWidget, Verbose, All);

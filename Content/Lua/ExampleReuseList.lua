@@ -23,6 +23,10 @@ function ExampleReuseList:Show()
 end
 
 function ExampleReuseList:Hide()
+    self.Button_Close.OnClicked:Clear()
+    self.ButtonItem1.OnClicked:Clear()
+    self.ReuseList.OnUpdateItem:Clear()
+    self.ReuseList.OnCreateItem:Clear()
     for i,v in ipairs(self.Item1WidgetList) do
         v:unbind()
     end
@@ -50,6 +54,7 @@ function ExampleReuseList:OnUpdateItem1(widget,idx)
 end
 
 TestReuseListItem = class("TestReuseListItem", "/Game/ExampleReuseList/TestReuseListItem.TestReuseListItem")
+
 function TestReuseListItem:ctor(parent)
     self.m_parent = parent
     self.m_idx = 0
