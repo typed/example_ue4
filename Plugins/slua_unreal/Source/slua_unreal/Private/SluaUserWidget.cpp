@@ -14,5 +14,5 @@ void USluaUserWidget::NativeDestruct()
     if (LuaState::get() && LuaState::get()->getLuaState()) {
         SluaFix::remove_usertable_by_ptr(LuaState::get()->getLuaState(), this);
     }
-    UE_LOG(LogSluaUserWidget, Log, TEXT("USluaUserWidget::NativeDestruct World:%x Name: %s"), this, *GetName());
+    //UE_LOG(LogSluaUserWidget, Log, TEXT("USluaUserWidget::NativeDestruct World:%x Name: %s"), this, *GetName());
 }
