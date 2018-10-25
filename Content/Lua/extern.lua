@@ -24,7 +24,7 @@ function class(classname, url)
             self.widget:SetLuaTable(nil)
             self.widget:RemoveFromViewport()
             self.widget = nil
-            clear_userdata(self)
+            --clear_userdata(self)
         end
     end
     function cls.bind(wd,...)
@@ -39,8 +39,9 @@ function class(classname, url)
     function cls:unbind()
         if self.widget then
             self.widget:SetLuaTable(nil)
+            --self.widget:RemoveFromViewport()
             self.widget = nil
-            clear_userdata(self)
+            --clear_userdata(self)
         end
     end
     return cls

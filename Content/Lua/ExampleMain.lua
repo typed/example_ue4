@@ -4,7 +4,7 @@ ExampleMain = class("ExampleMain", '/Game/ExampleMain/ExampleMainUI.ExampleMainU
 function ExampleMain:ctor()
 
     local Button_GC = self.widget:FindWidget("Button_GC")
-    Button_GC.OnClicked:Add(function() ExampleMain:OnGC() end)
+    Button_GC.OnClicked:Add(function() self:OnGC() end)
 
     local Button_ReuseList = self.widget:FindWidget("Button_ReuseList")
     Button_ReuseList.OnClicked:Add(function() self:OnClick_Button_ReuseList() end)
@@ -19,10 +19,11 @@ function ExampleMain:Show()
     self.widget:AddToViewport(0)
 end
 
-function ExampleMain.OnGC()
+function ExampleMain:OnGC()
     SHC.GC()
     SHC.TraceAllObject()
     collectgarbage("collect")
+    MRI.m_cMethods.DumpMemorySnapshotSingleObject(nil, "SingleObjRef-Object", -1, "widget", self.widget)
 end
 
 function ExampleMain:OnClick_Button_ReuseList()
