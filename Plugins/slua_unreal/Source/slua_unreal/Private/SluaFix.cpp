@@ -27,11 +27,9 @@ namespace slua {
             if (lua_istable(L, 2)) {
                 int tbl = lua_tovalue(L, 2, 0);
                 SluaFix::add_usertable_by_ptr(L, UD, tbl);
-                return 0;
             }
-            if (lua_isnil(L, 2)) {
+            else if (lua_isnil(L, 2)) {
                 SluaFix::remove_usertable_by_ptr(L, UD);
-                return 0;
             }
             return 0;
         });
