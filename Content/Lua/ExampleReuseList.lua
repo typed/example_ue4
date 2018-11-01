@@ -51,7 +51,7 @@ function ExampleReuseList:OnClickItem1()
 end
 
 function ExampleReuseList:OnCreateItem1(widget)
-    local itm_widget = TestReuseListItem.bind(widget, self, self.ItmList)
+    local itm_widget = TestReuseListItem.bind(widget, self)
     table.insert(self.Item1WidgetList, itm_widget)
 end
 
@@ -68,13 +68,13 @@ end
 
 TestReuseListItem = class("TestReuseListItem", "/Game/ExampleReuseList/TestReuseListItem.TestReuseListItem")
 
-function TestReuseListItem:construct(parent, itmList)
-    --self.m_parent = parent
+function TestReuseListItem:construct(parent)
+    self.m_parent = parent
     self.m_idx = 0
-    self.ItmList = itmList
     self.widget.Button_BG.OnClicked:Add(function() self:OnClickItem1BG() end)
 end
 function TestReuseListItem:destruct()
+    self.m_parent = nil
     self.widget.Button_BG.OnClicked:Clear()
 end
 function TestReuseListItem:SetIdx(idx)

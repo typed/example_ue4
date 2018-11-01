@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Runtime/UMG/Public/UMG.h"
 #include "ReusePageC.generated.h"
 
 /**
@@ -15,9 +16,7 @@ class EXAMPLE_UE4_API UReusePageC : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-
-	UFUNCTION(BlueprintCallable)
-	void Init();
+    UReusePageC(const FObjectInitializer& ObjectInitializer);
 
 protected:
 

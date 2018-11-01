@@ -25,11 +25,11 @@ function ExampleMain:Show()
 end
 
 function ExampleMain:OnGC()
+    collectgarbage("collect")
     SHC.GC()
     SHC.TraceAllObject()
-    collectgarbage("collect")
     --DumpSingleObjRef(self.widget)
-    MRI.m_cMethods.DumpMemorySnapshot("", "All", -1)
+    --MRI.m_cMethods.DumpMemorySnapshot("", "All", -1)
     --log_tree("debug.getregistry().SLUA_PTR_USERTABLE_MAPPING", debug.getregistry().SLUA_PTR_USERTABLE_MAPPING)
 end
 

@@ -2,7 +2,8 @@
 
 #include "ReusePageC.h"
 
-void UReusePageC::Init()
+UReusePageC::UReusePageC(const FObjectInitializer& ObjectInitializer)
+    :Super(ObjectInitializer)
 {
 
 }
