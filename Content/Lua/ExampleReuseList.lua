@@ -6,6 +6,7 @@ ExampleReuseList = class("ExampleReuseList", '/Game/ExampleReuseList/ExampleReus
 function ExampleReuseList:construct()
 
     self.ItmList = {}
+    self.Item1WidgetList = {}
 
     self.Button_Close = self.widget:FindWidget("Button_Close")
     self.Button_Close.OnClicked:Add(function() self:Hide() end)
@@ -17,8 +18,15 @@ function ExampleReuseList:construct()
     self.Button_4.OnClicked:Add(function() self:OnClear() end)
 
     self.ReuseListC = self.widget:FindWidget("ReuseListC")
-    self.Item1WidgetList = {}
 
+    --[[
+    self.ReuseListC.OnUpdateItem:Clear()
+    self.ReuseListC.OnUpdateItem:Add(function(...) self:OnUpdateItem1(...) end)
+    self.ReuseListC.OnCreateItem:Clear()
+    self.ReuseListC.OnCreateItem:Add(function(...) self:OnCreateItem1(...) end)
+    local itmClass = SHC.LoadClass("/Game/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
+    self.ReuseListC:Reload(1000, 100, 0, 0, itmClass, 0, 0, true)
+    ]]
 end
 
 function ExampleReuseList:destruct()
@@ -47,7 +55,7 @@ function ExampleReuseList:OnClickItem1()
     self.ReuseListC.OnCreateItem:Clear()
     self.ReuseListC.OnCreateItem:Add(function(...) self:OnCreateItem1(...) end)
     local itmClass = SHC.LoadClass("/Game/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
-    self.ReuseListC:Reload(100, 100, 0, 0, itmClass, 0, 0, true)
+    self.ReuseListC:Reload(5000, 100, 0, 0, itmClass, 0, 0, true)
 end
 
 function ExampleReuseList:OnCreateItem1(widget)
@@ -74,7 +82,6 @@ function TestReuseListItem:construct(parent)
     self.widget.Button_BG.OnClicked:Add(function() self:OnClickItem1BG() end)
 end
 function TestReuseListItem:destruct()
-    self.m_parent = nil
     self.widget.Button_BG.OnClicked:Clear()
 end
 function TestReuseListItem:SetIdx(idx)

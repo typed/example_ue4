@@ -53,9 +53,9 @@ public:
     UFUNCTION(BlueprintCallable)
     virtual int32 GetCurrentEnd();
 
-protected:
+    virtual bool Initialize();
 
-    virtual void NativeConstruct();
+protected:
 
     virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 

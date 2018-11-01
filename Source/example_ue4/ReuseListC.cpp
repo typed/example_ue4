@@ -39,10 +39,10 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     NeedJump = false;
 }
 
-void UReuseListC::NativeConstruct()
+bool UReuseListC::Initialize()
 {
-    Super::NativeConstruct();
-
+    if (!Super::Initialize())
+        return false;
     ScrollBoxList = Cast<UScrollBox>(GetWidgetFromName(FName(TEXT("ScrollBoxList"))));
     ensure(ScrollBoxList.IsValid());
 
@@ -54,7 +54,7 @@ void UReuseListC::NativeConstruct()
 
     CanvasPanelList = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelList"))));
     ensure(CanvasPanelList.IsValid());
-
+    return true;
 }
 
 void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
