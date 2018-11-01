@@ -1,5 +1,5 @@
 
-ExampleMain = class("ExampleMain", '/Game/ExampleMain/ExampleMainUI.ExampleMainUI')
+ExampleMain = ClassPanel("ExampleMain", '/Game/ExampleMain/ExampleMainUI.ExampleMainUI')
 
 function ExampleMain:construct()
 
@@ -20,10 +20,6 @@ function ExampleMain:Trace()
     log("ExampleMain:Trace "..tostring(self.widget))
 end
 
-function ExampleMain:Show()
-    self.widget:AddToViewport(0)
-end
-
 function ExampleMain:OnGC()
     collectgarbage("collect")
     SHC.GC()
@@ -35,5 +31,5 @@ end
 
 function ExampleMain:OnClick_Button_ReuseList()
     local w = ExampleReuseList.new()
-    w:Show()
+    w:Open()
 end

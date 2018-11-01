@@ -49,3 +49,27 @@ function class(classname, url)
     end
     return cls
 end
+
+local g_PanelOrder = 0
+local g_lstPanel = {}
+function ClassPanel(classname, url)
+    local cls = class(classname, url)
+    function cls:Close()
+        self:del()
+        for i,v in ipairs(g_lstPanel) do
+            if v == self then
+                table.remove(g_lstPanel, i)
+                return
+            end
+        end
+    end
+    function cls:Open()
+        self.widget:AddToViewport(g_PanelOrder)
+        table.insert(g_lstPanel, self)
+        g_PanelOrder = g_PanelOrder + 1
+        if #g_lstPanel >= 3 then
+            g_lstPanel[1]:Close()
+        end
+    end
+    return cls
+end

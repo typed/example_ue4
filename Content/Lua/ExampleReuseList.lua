@@ -1,7 +1,7 @@
 
 
 
-ExampleReuseList = class("ExampleReuseList", '/Game/ExampleReuseList/ExampleReuseListUI.ExampleReuseListUI')
+ExampleReuseList = ClassPanel("ExampleReuseList", '/Game/ExampleReuseList/ExampleReuseListUI.ExampleReuseListUI')
 
 function ExampleReuseList:construct()
 
@@ -9,7 +9,7 @@ function ExampleReuseList:construct()
     self.Item1WidgetList = {}
 
     self.Button_Close = self.widget:FindWidget("Button_Close")
-    self.Button_Close.OnClicked:Add(function() self:Hide() end)
+    self.Button_Close.OnClicked:Add(function() self:Close() end)
 
     self.ButtonItem1 = self.widget:FindWidget("ButtonItem1")
     self.ButtonItem1.OnClicked:Add(function() self:OnClickItem1() end)
@@ -39,14 +39,6 @@ function ExampleReuseList:destruct()
         v:unbind()
     end
     self.Item1WidgetList = {}
-end
-
-function ExampleReuseList:Show()
-    self.widget:AddToViewport(1)
-end
-
-function ExampleReuseList:Hide()
-    self:del()
 end
 
 function ExampleReuseList:OnClickItem1()
