@@ -4,7 +4,7 @@ require("log_tree")
 require("extern")
 require("ExampleMain")
 require("ExampleReuseList")
-local w = ExampleMain.new() w:Show()
+local w = ExampleMain.new() w:Open()
 function Tick(dt,actor)
 end
 
