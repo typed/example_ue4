@@ -3,7 +3,7 @@
 
 ExampleReuseList = class("ExampleReuseList", '/Game/ExampleReuseList/ExampleReuseListUI.ExampleReuseListUI')
 
-function ExampleReuseList:ctor()
+function ExampleReuseList:construct()
 
     self.ItmList = {}
 
@@ -13,9 +13,24 @@ function ExampleReuseList:ctor()
     self.ButtonItem1 = self.widget:FindWidget("ButtonItem1")
     self.ButtonItem1.OnClicked:Add(function() self:OnClickItem1() end)
 
-    self.ReuseList = self.widget:FindWidget("ReuseList")
+    self.Button_4 = self.widget:FindWidget("Button_4")
+    self.Button_4.OnClicked:Add(function() self:OnClear() end)
+
+    self.ReuseListC = self.widget:FindWidget("ReuseListC")
     self.Item1WidgetList = {}
 
+end
+
+function ExampleReuseList:destruct()
+    self.Button_4.OnClicked:Clear()
+    self.Button_Close.OnClicked:Clear()
+    self.ButtonItem1.OnClicked:Clear()
+    self.ReuseListC.OnUpdateItem:Clear()
+    self.ReuseListC.OnCreateItem:Clear()
+    for i,v in ipairs(self.Item1WidgetList) do
+        v:unbind()
+    end
+    self.Item1WidgetList = {}
 end
 
 function ExampleReuseList:Show()
@@ -23,23 +38,16 @@ function ExampleReuseList:Show()
 end
 
 function ExampleReuseList:Hide()
-    self.Button_Close.OnClicked:Clear()
-    self.ButtonItem1.OnClicked:Clear()
-    self.ReuseList.OnUpdateItem:Clear()
-    self.ReuseList.OnCreateItem:Clear()
-    for i,v in ipairs(self.Item1WidgetList) do
-        v:unbind()
-    end
     self:del()
 end
 
 function ExampleReuseList:OnClickItem1()
-    self.ReuseList.OnUpdateItem:Clear()
-    self.ReuseList.OnUpdateItem:Add(function(...) self:OnUpdateItem1(...) end)
-    self.ReuseList.OnCreateItem:Clear()
-    self.ReuseList.OnCreateItem:Add(function(...) self:OnCreateItem1(...) end)
+    self.ReuseListC.OnUpdateItem:Clear()
+    self.ReuseListC.OnUpdateItem:Add(function(...) self:OnUpdateItem1(...) end)
+    self.ReuseListC.OnCreateItem:Clear()
+    self.ReuseListC.OnCreateItem:Add(function(...) self:OnCreateItem1(...) end)
     local itmClass = SHC.LoadClass("/Game/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
-    self.ReuseList:Reload(100, 100, 0, 0, itmClass, 0, 0)
+    self.ReuseListC:Reload(100, 100, 0, 0, itmClass, 0, 0, true)
 end
 
 function ExampleReuseList:OnCreateItem1(widget)
@@ -53,13 +61,21 @@ function ExampleReuseList:OnUpdateItem1(widget,idx)
     itm_widget:UpdateData()
 end
 
+function ExampleReuseList:OnClear()
+    --DumpSingleObjRef(self)
+    log_tree("debug.getregistry().SLUA_PTR_USERTABLE_MAPPING", debug.getregistry().SLUA_PTR_USERTABLE_MAPPING)
+end
+
 TestReuseListItem = class("TestReuseListItem", "/Game/ExampleReuseList/TestReuseListItem.TestReuseListItem")
 
-function TestReuseListItem:ctor(parent, itmList)
-    self.m_parent = parent
+function TestReuseListItem:construct(parent, itmList)
+    --self.m_parent = parent
     self.m_idx = 0
     self.ItmList = itmList
     self.widget.Button_BG.OnClicked:Add(function() self:OnClickItem1BG() end)
+end
+function TestReuseListItem:destruct()
+    self.widget.Button_BG.OnClicked:Clear()
 end
 function TestReuseListItem:SetIdx(idx)
     self.m_idx = idx

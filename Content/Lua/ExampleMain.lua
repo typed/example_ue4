@@ -1,14 +1,19 @@
 
 ExampleMain = class("ExampleMain", '/Game/ExampleMain/ExampleMainUI.ExampleMainUI')
 
-function ExampleMain:ctor()
+function ExampleMain:construct()
 
-    local Button_GC = self.widget:FindWidget("Button_GC")
-    Button_GC.OnClicked:Add(function() self:OnGC() end)
+    self.Button_GC = self.widget:FindWidget("Button_GC")
+    self.Button_GC.OnClicked:Add(function() self:OnGC() end)
 
-    local Button_ReuseList = self.widget:FindWidget("Button_ReuseList")
-    Button_ReuseList.OnClicked:Add(function() self:OnClick_Button_ReuseList() end)
+    self.Button_ReuseList = self.widget:FindWidget("Button_ReuseList")
+    self.Button_ReuseList.OnClicked:Add(function() self:OnClick_Button_ReuseList() end)
 
+end
+
+function ExampleMain:destruct()
+    self.Button_GC.OnClicked:Clear()
+    self.Button_ReuseList.OnClicked:Clear()
 end
 
 function ExampleMain:Trace()
@@ -23,7 +28,9 @@ function ExampleMain:OnGC()
     SHC.GC()
     SHC.TraceAllObject()
     collectgarbage("collect")
-    MRI.m_cMethods.DumpMemorySnapshotSingleObject(nil, "SingleObjRef-Object", -1, "widget", self.widget)
+    --DumpSingleObjRef(self.widget)
+    MRI.m_cMethods.DumpMemorySnapshot("", "All", -1)
+    --log_tree("debug.getregistry().SLUA_PTR_USERTABLE_MAPPING", debug.getregistry().SLUA_PTR_USERTABLE_MAPPING)
 end
 
 function ExampleMain:OnClick_Button_ReuseList()

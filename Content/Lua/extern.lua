@@ -9,18 +9,20 @@ end
 function class(classname, url)
     local cls = {}
     cls.__classname = classname
-    cls.ctor        = function() end
+    cls.construct   = function() end
+    cls.destruct    = function() end
     function cls.new(...)
         local obj = {}
         setmetatable(obj, cls)
         cls.__index = cls
         obj.widget = slua.loadUI(url)
         obj.widget:SetLuaTable(obj)
-        obj:ctor(...)
+        obj:construct(...)
         return obj
     end
     function cls:del()
         if self.widget then
+            self:destruct()
             self.widget:SetLuaTable(nil)
             self.widget:RemoveFromViewport()
             self.widget = nil
@@ -33,11 +35,12 @@ function class(classname, url)
         cls.__index = cls
         obj.widget = wd
         obj.widget:SetLuaTable(obj)
-        obj:ctor(...)
+        obj:construct(...)
         return obj
     end
     function cls:unbind()
         if self.widget then
+            self:destruct()
             self.widget:SetLuaTable(nil)
             --self.widget:RemoveFromViewport()
             self.widget = nil

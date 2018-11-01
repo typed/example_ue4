@@ -12,11 +12,18 @@
 UCLASS()
 class SLUA_UNREAL_API USluaUserWidget : public UUserWidget
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
+
+public:
+    virtual void RemoveFromParent();
 
 protected:
 
     virtual void NativeDestruct();
+
+private:
+
+    void RemoveLuaTable();
 	
 };
 
