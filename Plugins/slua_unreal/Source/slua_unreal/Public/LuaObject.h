@@ -432,6 +432,9 @@ namespace slua {
                 return ud->ud;
             }
         }
+        else if (lt == LUA_TNIL || lt == LUA_TNONE) {
+            return nullptr;
+        }
     errorpath:
         luaL_error(L, "checkValue error at %d",p);
         return nullptr;

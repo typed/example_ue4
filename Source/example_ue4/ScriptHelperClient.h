@@ -25,7 +25,10 @@ public:
 	static void GC();
 
 	UFUNCTION(BlueprintCallable)
-	static UClass* LoadClass(FString name);
+	static UClass* LoadUserWidgetClass(FString name);
+
+    UFUNCTION(BlueprintCallable)
+    static UClass* LoadBpClass(FString name);
 
     UFUNCTION(BlueprintCallable)
     static UObject* LoadObjet(FString name);
@@ -35,6 +38,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static void TestShowUserWidget(FString name, int idx);
+
+    UFUNCTION(BlueprintCallable)
+    static void TraceClass(FString name);
 	
 };
 

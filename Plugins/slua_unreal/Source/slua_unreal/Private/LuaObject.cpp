@@ -857,9 +857,8 @@ namespace slua {
         regPusher(UArrayProperty::StaticClass(),pushUArrayProperty);
         regPusher(UMapProperty::StaticClass(),pushUMapProperty);
         regPusher(UStructProperty::StaticClass(),pushUStructProperty);
-		regPusher(UEnumProperty::StaticClass(), pushEnumProperty);
-
-		regPusher(UClassProperty::StaticClass(), pushUClassProperty);
+        regPusher(UEnumProperty::StaticClass(), pushEnumProperty);
+        regPusher(UClassProperty::StaticClass(), pushUClassProperty);
 		
         regChecker<UIntProperty>();
         regChecker<UInt64Property>();
@@ -877,7 +876,7 @@ namespace slua {
         regChecker(UMapProperty::StaticClass(),checkUMapProperty);
         regChecker(UDelegateProperty::StaticClass(),checkUDelegateProperty);
         regChecker(UStructProperty::StaticClass(),checkUStructProperty);
-		regChecker(UClassProperty::StaticClass(), checkUClassProperty);
+        regChecker(UClassProperty::StaticClass(), checkUClassProperty);
 		
 		LuaWrapper::init(L);
 		LuaEnums::init(L);

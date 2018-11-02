@@ -12,7 +12,7 @@ DEFINE_LOG_CATEGORY(LogScriptHelper);
 
 UUserWidget* UScriptHelperClient::CreateUserWidget(FString name)
 {
-	TSubclassOf<UUserWidget> uclass = ::LoadClass<UUserWidget>(NULL, *name);
+	TSubclassOf<UUserWidget> uclass = ::LoadClass<UUserWidget>(nullptr, *name);
 	if (uclass == nullptr)
 		return nullptr;
 	if (!ASluaActor::instance)
@@ -30,14 +30,19 @@ void UScriptHelperClient::GC()
 	GEngine->ForceGarbageCollection(true);
 }
 
-UClass* UScriptHelperClient::LoadClass(FString name)
+UClass* UScriptHelperClient::LoadUserWidgetClass(FString name)
 {
 	return ::LoadClass<UUserWidget>(nullptr, *name);
 }
 
 UObject* UScriptHelperClient::LoadObjet(FString name)
 {
-    return ::LoadClass<UObject>(nullptr, *name);
+    return ::LoadObject<UObject>(nullptr, *name);
+}
+
+UClass* UScriptHelperClient::LoadBpClass(FString name)
+{
+    return ::LoadObject<UClass>(nullptr, *name);
 }
 
 void UScriptHelperClient::TraceAllObject()
@@ -56,4 +61,39 @@ void UScriptHelperClient::TestShowUserWidget(FString name, int idx)
 {
 	TWeakObjectPtr<UUserWidget> w = UScriptHelperClient::CreateUserWidget(name);
 	w->AddToViewport(idx);
+}
+
+void UScriptHelperClient::TraceClass(FString name)
+{
+    UClass* pClass = nullptr;
+    pClass = ::LoadClass<UClass>(nullptr, *name);
+    if (pClass == nullptr) {
+        pClass = ::LoadObject<UClass>(nullptr, *name);
+    }
+    if (pClass == nullptr) {
+        UE_LOG(LogScriptHelper, Log, TEXT("UClass not found."), *name);
+        return;
+    }
+    UE_LOG(LogScriptHelper, Log, TEXT("UClass %s"), *pClass->GetName());
+    for (TFieldIterator<UProperty> it(pClass); it; ++it) {
+        UProperty* prop = *it;
+        if (prop->GetOwnerClass() != pClass) {
+            continue;
+        }
+        uint64 propflag = prop->GetPropertyFlags();
+        UE_LOG(LogScriptHelper, Log, TEXT("Class Member %s propflag %x"), *prop->GetName(), propflag);
+    }
+    for (TFieldIterator<UFunction> FuncIt(pClass); FuncIt; ++FuncIt) {
+        UFunction* func = *FuncIt;
+        if (func->GetOwnerClass() != pClass) {
+            continue;
+        }
+        int32 i = 1;
+        UE_LOG(LogScriptHelper, Log, TEXT("Function %s"), *func->GetName());
+        for (TFieldIterator<UProperty> it(func); it && (it->PropertyFlags&CPF_Parm); ++it) {
+            UProperty* prop = *it;
+            uint64 propflag = prop->GetPropertyFlags();
+            UE_LOG(LogScriptHelper, Log, TEXT("Param%d %s propflag %x"), i++, *prop->GetName(), propflag);
+        }
+    }
 }

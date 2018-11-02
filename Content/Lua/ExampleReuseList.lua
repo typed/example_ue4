@@ -8,6 +8,10 @@ function ExampleReuseList:construct()
     self.ItmList = {}
     self.Item1WidgetList = {}
 
+    self.Image1 = self.widget:FindWidget("Image1")
+
+    UICom.SetImage("/Game/Texture/UMG/wupingicon_baiyingjianzhi.wupingicon_baiyingjianzhi", self.Image1)
+
     self.Button_Close = self.widget:FindWidget("Button_Close")
     self.Button_Close.OnClicked:Add(function() self:Close() end)
 
@@ -30,6 +34,9 @@ function ExampleReuseList:construct()
     local itmClass = SHC.LoadClass("/Game/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
     self.ReuseListC:Reload(1000, 100, 0, 0, itmClass, 0, 0, true)
     ]]
+
+    
+
 end
 
 function ExampleReuseList:destruct()
@@ -54,7 +61,7 @@ function ExampleReuseList:OnClickItem1()
     self.ReuseListC.OnUpdateItem:Add(function(...) self:OnUpdateItem1(...) end)
     self.ReuseListC.OnCreateItem:Clear()
     self.ReuseListC.OnCreateItem:Add(function(...) self:OnCreateItem1(...) end)
-    local itmClass = SHC.LoadClass("/Game/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
+    local itmClass = SHC.LoadBpClass("/Game/Example/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
     self.ReuseListC:Reload(5000, 100, 0, 0, itmClass, 0, 0, true)
 end
 
@@ -80,10 +87,12 @@ TestReuseListItem = class("TestReuseListItem", "/Game/Example/ExampleReuseList/T
 function TestReuseListItem:construct(parent)
     self.m_parent = parent
     self.m_idx = 0
-    self.widget.Button_BG.OnClicked:Add(function() self:OnClickItem1BG() end)
+    self.Button_BG = self.widget:FindWidget("Button_BG")
+    self.Button_BG.OnClicked:Add(function() self:OnClickItem1BG() end)
+    self.ImageIcon = self.widget:FindWidget("ImageIcon")
 end
 function TestReuseListItem:destruct()
-    self.widget.Button_BG.OnClicked:Clear()
+    self.Button_BG.OnClicked:Clear()
 end
 function TestReuseListItem:SetIdx(idx)
     self.m_idx = idx
