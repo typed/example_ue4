@@ -9,11 +9,15 @@ function ExampleMain:construct()
     self.Button_ReuseList = self.widget:FindWidget("Button_ReuseList")
     self.Button_ReuseList.OnClicked:Add(function() self:OnClick_Button_ReuseList() end)
 
+    self.Button_ReusePage = self.widget:FindWidget("Button_ReusePage")
+    self.Button_ReusePage.OnClicked:Add(function() self:OnClick_Button_ReusePage() end)
+
 end
 
 function ExampleMain:destruct()
     self.Button_GC.OnClicked:Clear()
     self.Button_ReuseList.OnClicked:Clear()
+    self.Button_ReusePage.OnClicked:Clear()
 end
 
 function ExampleMain:Trace()
@@ -31,5 +35,10 @@ end
 
 function ExampleMain:OnClick_Button_ReuseList()
     local w = ExampleReuseList.new()
+    w:Open()
+end
+
+function ExampleMain:OnClick_Button_ReusePage()
+    local w = ExampleReusePage.new()
     w:Open()
 end
