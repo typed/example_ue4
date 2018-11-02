@@ -24,14 +24,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static void GC();
 
-	UFUNCTION(BlueprintCallable)
-	static UClass* LoadUserWidgetClass(FString name);
-
     UFUNCTION(BlueprintCallable)
     static UClass* LoadBpClass(FString name);
 
     UFUNCTION(BlueprintCallable)
-    static UObject* LoadObjet(FString name);
+    static UObject* LoadRes(FString name);
 
 	UFUNCTION(BlueprintCallable)
 	static void TraceAllObject();

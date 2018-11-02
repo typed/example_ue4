@@ -30,12 +30,7 @@ void UScriptHelperClient::GC()
 	GEngine->ForceGarbageCollection(true);
 }
 
-UClass* UScriptHelperClient::LoadUserWidgetClass(FString name)
-{
-	return ::LoadClass<UUserWidget>(nullptr, *name);
-}
-
-UObject* UScriptHelperClient::LoadObjet(FString name)
+UObject* UScriptHelperClient::LoadRes(FString name)
 {
     return ::LoadObject<UObject>(nullptr, *name);
 }
