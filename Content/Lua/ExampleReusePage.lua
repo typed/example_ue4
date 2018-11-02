@@ -1,7 +1,7 @@
 
 
 
-ExampleReusePage = ClassPanel("ExampleReusePage", '/Game/ExampleReusePage/ExampleReusePageUI.ExampleReusePageUI')
+ExampleReusePage = ClassPanel("ExampleReusePage", '/Game/Example/ExampleReusePage/ExampleReusePageUI.ExampleReusePageUI')
 
 function ExampleReusePage:construct()
     self.Button_Close = self.widget:FindWidget("Button_Close")

@@ -27,6 +27,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static UClass* LoadClass(FString name);
 
+    UFUNCTION(BlueprintCallable)
+    static UObject* LoadObjet(FString name);
+
 	UFUNCTION(BlueprintCallable)
 	static void TraceAllObject();
 

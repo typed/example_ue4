@@ -1,5 +1,5 @@
 
-ExampleMain = ClassPanel("ExampleMain", '/Game/ExampleMain/ExampleMainUI.ExampleMainUI')
+ExampleMain = ClassPanel("ExampleMain", '/Game/Example/ExampleMain/ExampleMainUI.ExampleMainUI')
 
 function ExampleMain:construct()
 

@@ -1,7 +1,7 @@
 
 
 
-ExampleReuseList = ClassPanel("ExampleReuseList", '/Game/ExampleReuseList/ExampleReuseListUI.ExampleReuseListUI')
+ExampleReuseList = ClassPanel("ExampleReuseList", '/Game/Example/ExampleReuseList/ExampleReuseListUI.ExampleReuseListUI')
 
 function ExampleReuseList:construct()
 
@@ -75,7 +75,7 @@ function ExampleReuseList:OnClear()
     --log_tree("debug.getregistry().SLUA_PTR_USERTABLE_MAPPING", debug.getregistry().SLUA_PTR_USERTABLE_MAPPING)
 end
 
-TestReuseListItem = class("TestReuseListItem", "/Game/ExampleReuseList/TestReuseListItem.TestReuseListItem")
+TestReuseListItem = class("TestReuseListItem", "/Game/Example/ExampleReuseList/TestReuseListItem.TestReuseListItem")
 
 function TestReuseListItem:construct(parent)
     self.m_parent = parent
