@@ -1,10 +1,4 @@
-local function clear_userdata(tbl)
-    for k,v in pairs(tbl) do
-        if type(v) == "userdata" then
-            tbl[k] = nil
-        end
-    end
-end
+
 --Create an class.
 function class(classname, url)
     local cls = {}
@@ -15,6 +9,7 @@ function class(classname, url)
         local obj = {}
         setmetatable(obj, cls)
         cls.__index = cls
+        obj.__create_type = "new"
         obj.widget = slua.loadUI(url)
         obj.widget:SetLuaTable(obj)
         obj:construct(...)
@@ -26,13 +21,13 @@ function class(classname, url)
             self.widget:SetLuaTable(nil)
             self.widget:RemoveFromViewport()
             self.widget = nil
-            --clear_userdata(self)
         end
     end
     function cls.bind(wd,...)
         local obj = {}
         setmetatable(obj, cls)
         cls.__index = cls
+        obj.__create_type = "bind"
         obj.widget = wd
         obj.widget:SetLuaTable(obj)
         obj:construct(...)
@@ -44,30 +39,34 @@ function class(classname, url)
             self.widget:SetLuaTable(nil)
             --self.widget:RemoveFromViewport()
             self.widget = nil
-            --clear_userdata(self)
         end
     end
     return cls
 end
 
-local g_PanelOrder = 0
+local g_lastOrder = -1
 local g_lstPanel = {}
+local g_maxPanel = 4
 function ClassPanel(classname, url)
     local cls = class(classname, url)
     function cls:Close()
         self:del()
         for i,v in ipairs(g_lstPanel) do
             if v == self then
+                if self.__order == g_lastOrder then
+                    g_lastOrder = g_lastOrder - 1
+                end
                 table.remove(g_lstPanel, i)
                 return
             end
         end
     end
     function cls:Open()
-        self.widget:AddToViewport(g_PanelOrder)
+        g_lastOrder = g_lastOrder + 1
+        self.__order = g_lastOrder
+        self.widget:AddToViewport(g_lastOrder)
         table.insert(g_lstPanel, self)
-        g_PanelOrder = g_PanelOrder + 1
-        if #g_lstPanel >= 3 then
+        if #g_lstPanel >= g_maxPanel then
             g_lstPanel[1]:Close()
         end
     end

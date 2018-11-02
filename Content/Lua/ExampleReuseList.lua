@@ -17,6 +17,9 @@ function ExampleReuseList:construct()
     self.Button_4 = self.widget:FindWidget("Button_4")
     self.Button_4.OnClicked:Add(function() self:OnClear() end)
 
+    self.Button_0 = self.widget:FindWidget("Button_0")
+    self.Button_0.OnClicked:Add(function() self:OnJumpByIdx() end)
+
     self.ReuseListC = self.widget:FindWidget("ReuseListC")
 
     --[[
@@ -30,6 +33,7 @@ function ExampleReuseList:construct()
 end
 
 function ExampleReuseList:destruct()
+    self.Button_0.OnClicked:Clear()
     self.Button_4.OnClicked:Clear()
     self.Button_Close.OnClicked:Clear()
     self.ButtonItem1.OnClicked:Clear()
@@ -39,6 +43,10 @@ function ExampleReuseList:destruct()
         v:unbind()
     end
     self.Item1WidgetList = {}
+end
+
+function ExampleReuseList:OnJumpByIdx()
+    self.ReuseListC:JumpByIdx(22,0)
 end
 
 function ExampleReuseList:OnClickItem1()
@@ -62,8 +70,9 @@ function ExampleReuseList:OnUpdateItem1(widget,idx)
 end
 
 function ExampleReuseList:OnClear()
+    self.ReuseListC:Clear()
     --DumpSingleObjRef(self)
-    log_tree("debug.getregistry().SLUA_PTR_USERTABLE_MAPPING", debug.getregistry().SLUA_PTR_USERTABLE_MAPPING)
+    --log_tree("debug.getregistry().SLUA_PTR_USERTABLE_MAPPING", debug.getregistry().SLUA_PTR_USERTABLE_MAPPING)
 end
 
 TestReuseListItem = class("TestReuseListItem", "/Game/ExampleReuseList/TestReuseListItem.TestReuseListItem")
