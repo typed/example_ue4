@@ -6,7 +6,7 @@ require("extern")
 require("ExampleMain")
 require("ExampleReuseList")
 require("ExampleReusePage")
-local w = ExampleMain.new() w:Open()
+ExampleMain.new():Open()
 function Tick(dt,actor)
 end
 

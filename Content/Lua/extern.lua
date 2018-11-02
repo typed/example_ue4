@@ -72,3 +72,11 @@ function ClassPanel(classname, url)
     end
     return cls
 end
+
+function CloseAllPanel()
+    for i,v in ipairs(g_lstPanel) do
+        v:Close()
+    end
+    g_lastOrder = -1
+    g_lstPanel = {}
+end

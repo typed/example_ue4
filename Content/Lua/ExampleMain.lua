@@ -33,11 +33,9 @@ function ExampleMain:OnGC()
 end
 
 function ExampleMain:OnClick_Button_ReuseList()
-    local w = ExampleReuseList.new()
-    w:Open()
+    ExampleReuseList.new():Open()
 end
 
 function ExampleMain:OnClick_Button_ReusePage()
-    local w = ExampleReusePage.new()
-    w:Open()
+    ExampleReusePage.new():Open()
 end
