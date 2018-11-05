@@ -55,8 +55,7 @@ end
 
 function ExampleReuseList:OnUpdateItem1(widget,idx)
     local itm_widget = widget:GetLuaTable()
-    itm_widget:SetIdx(idx)
-    itm_widget:UpdateData()
+    itm_widget:UpdateData(idx)
 end
 
 function ExampleReuseList:OnClear()
@@ -76,17 +75,11 @@ end
 function TestReuseListItem:destruct()
     self.widget.Button_BG.OnClicked:Clear()
 end
-function TestReuseListItem:SetIdx(idx)
-    self.m_idx = idx
-end
-function TestReuseListItem:GetIdx()
-    return self.m_idx
-end
 function TestReuseListItem:OnClickItem1BG()
-    local idx = self.m_idx
-    --local itm = self.ItmList[idx]
-    log("ExampleReuseList.OnClickItem1BG idx="..idx)
+    --local itm = self.ItmList[self.m_idx]
+    log("ExampleReuseList.OnClickItem1BG idx="..self.m_idx)
 end
-function TestReuseListItem:UpdateData()
+function TestReuseListItem:UpdateData(idx)
+    self.m_idx = idx
     self.widget.TextBlockName:SetText(self.m_idx)
 end

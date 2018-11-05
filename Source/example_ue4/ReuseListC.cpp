@@ -6,38 +6,33 @@
 
 UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     :Super(ObjectInitializer)
+    ,ScrollBoxList(nullptr)
+    ,CanvasPanelBg(nullptr)
+    ,SizeBoxBg(nullptr)
+    ,CanvasPanelList(nullptr)
+    ,ViewSize(FVector2D::ZeroVector)
+    ,ContentSize(FVector2D::ZeroVector)
+    ,ItemClass(nullptr)
+    ,ItemCacheNum(2)
+    ,PaddingX(0)
+    ,PaddingY(0)
+    ,ItemCount(0)
+    ,ItemHeight(100)
+    ,MaxPos(0)
+    ,Offset(0)
+    ,OffsetEnd(0)
+    ,Style(0)
+    ,ItemWidth(100)
+    ,BIdx(0)
+    ,EIdx(0)
+    ,ColNum(0)
+    ,RowNum(0)
+    ,CurLine(-999)
+    ,JumpIdx(0)
+    ,JumpIdxStyle(0)
+    ,ReloadJumpBegin(true)
+    ,NeedJump(false)
 {
-
-    ScrollBoxList = nullptr;
-    CanvasPanelBg = nullptr;
-    SizeBoxBg = nullptr;
-    CanvasPanelList = nullptr;
-
-    ViewSize = FVector2D::ZeroVector;
-    ContentSize = FVector2D::ZeroVector;
-    ItemClass = nullptr;
-
-    ItemCacheNum = 2;
-    PaddingX = 0;
-    PaddingY = 0;
-    ItemCount = 0;
-    ItemHeight = 100;
-    MaxPos = 0;
-    Offset = 0;
-    OffsetEnd = 0;
-    Style = 0;
-    ItemWidth = 100;
-    BIdx = 0;
-    EIdx = 0;
-    ColNum = 0;
-    RowNum = 0;
-    CurLine = -999;
-    PaddingX = 0;
-    PaddingY = 0;
-    JumpIdx = 0;
-    JumpIdxStyle = 0;
-    ReloadJumpBegin = true;
-    NeedJump = false;
 }
 
 bool UReuseListC::Initialize()
@@ -60,10 +55,7 @@ bool UReuseListC::Initialize()
 
 void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
-    auto dsz = GetDesiredSize();
-    UE_LOG(LogMyUMG, Log, TEXT("UReuseListC::Reload Size:%f,%f"), dsz.X, dsz.Y);
-    FVector2D sz = GetCachedGeometry().GetLocalSize();
-    if (!sz.Equals(ViewSize, 0.0001f))
+    if (!ViewSize.Equals(GetCachedGeometry().GetLocalSize(), 0.0001f))
         DoReload();
     Update();
     DoJump();
@@ -96,9 +88,6 @@ void UReuseListC::Reload(int32 __ItemCount, int32 __ItemHeight, int32 __ItemWidt
         ItemPool.Empty();
         CanvasPanelList->ClearChildren();
     }
-    ForceLayoutPrepass();
-    auto dsz = GetDesiredSize();
-    UE_LOG(LogMyUMG, Log, TEXT("UReuseListC::Reload Size:%f,%f"), dsz.X, dsz.Y);
     DoReload();
 }
 
@@ -218,8 +207,7 @@ void UReuseListC::UpdateContentSize(UWidget* widget)
 
 void UReuseListC::RemoveNotUsed()
 {
-    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter)
-    {
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
         if (!UKismetMathLibrary::InRange_IntInt(iter->Key, BIdx, EIdx)) {
             ReleaseItem(iter->Value.Get());
             iter.RemoveCurrent();
