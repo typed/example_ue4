@@ -60,6 +60,8 @@ bool UReuseListC::Initialize()
 
 void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
+    auto dsz = GetDesiredSize();
+    UE_LOG(LogMyUMG, Log, TEXT("UReuseListC::Reload Size:%f,%f"), dsz.X, dsz.Y);
     FVector2D sz = GetCachedGeometry().GetLocalSize();
     if (!sz.Equals(ViewSize, 0.0001f))
         DoReload();
@@ -95,8 +97,8 @@ void UReuseListC::Reload(int32 __ItemCount, int32 __ItemHeight, int32 __ItemWidt
         CanvasPanelList->ClearChildren();
     }
     ForceLayoutPrepass();
-    FVector2D sz = GetDesiredSize();
-    UE_LOG(LogMyUMG, Log, TEXT("UReuseListC::Reload Size:%f,%f"), sz.X, sz.Y);
+    auto dsz = GetDesiredSize();
+    UE_LOG(LogMyUMG, Log, TEXT("UReuseListC::Reload Size:%f,%f"), dsz.X, dsz.Y);
     DoReload();
 }
 
