@@ -42,6 +42,26 @@ protected:
 
     virtual void NativeOnMouseCaptureLost();
 
+    UUserWidget* NewItem();
+    void ReleaseItem(UUserWidget* widget);
+    void RemoveNotUsed(TMap<int32, int32>& ItemIdxMap);
+    void SetOffset(float __Offset);
+    void StopSlip();
+    FVector2D GetMousePoint();
+    void Drop();
+
+    void OffsetToPage();
+    int32 BlockToPage(int32 __Block);
+    int32 OffsetToBlock(float __Offset);
+    float BlockToOffset(int32 __Block);
+
+    void Update();
+    void UpdateReload();
+    void UpdateDrag();
+    void UpdateOffset();
+    void UpdateSlip();
+    void UpdatePage();
+
 private:
 
     TWeakObjectPtr<UCanvasPanel> CanvasPanelRoot;
