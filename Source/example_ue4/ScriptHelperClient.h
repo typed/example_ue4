@@ -40,5 +40,3 @@ public:
     static void TraceClass(FString name);
 	
 };
-
-DECLARE_LOG_CATEGORY_EXTERN(LogScriptHelper, Verbose, All);

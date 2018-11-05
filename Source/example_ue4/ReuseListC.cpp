@@ -2,6 +2,7 @@
 
 #include "ReuseListC.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
+#include "LogDefine.h"
 
 UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     :Super(ObjectInitializer)
@@ -93,6 +94,9 @@ void UReuseListC::Reload(int32 __ItemCount, int32 __ItemHeight, int32 __ItemWidt
         ItemPool.Empty();
         CanvasPanelList->ClearChildren();
     }
+    ForceLayoutPrepass();
+    FVector2D sz = GetDesiredSize();
+    UE_LOG(LogMyUMG, Log, TEXT("UReuseListC::Reload Size:%f,%f"), sz.X, sz.Y);
     DoReload();
 }
 

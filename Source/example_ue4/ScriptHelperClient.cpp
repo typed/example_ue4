@@ -7,8 +7,8 @@
 #include "UObject/UObjectIterator.h"
 #include "GameHelper.h"
 #include "UMG.h"
+#include "LogDefine.h"
 
-DEFINE_LOG_CATEGORY(LogScriptHelper);
 
 UUserWidget* UScriptHelperClient::CreateUserWidget(FString name)
 {

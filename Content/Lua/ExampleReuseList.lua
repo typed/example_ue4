@@ -18,16 +18,7 @@ function ExampleReuseList:construct()
 
     self.widget.Button_0.OnClicked:Add(function() self:OnJumpByIdx() end)
 
-    --[[
-    self.ReuseListC.OnUpdateItem:Clear()
-    self.ReuseListC.OnUpdateItem:Add(function(...) self:OnUpdateItem1(...) end)
-    self.ReuseListC.OnCreateItem:Clear()
-    self.ReuseListC.OnCreateItem:Add(function(...) self:OnCreateItem1(...) end)
-    local itmClass = SHC.LoadClass("/Game/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
-    self.ReuseListC:Reload(1000, 100, 0, 0, itmClass, 0, 0, true)
-    ]]
-
-    
+    self:OnClickItem1()
 
 end
 
