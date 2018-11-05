@@ -28,6 +28,7 @@ public:
     UFUNCTION(BlueprintCallable)
     virtual void SetPageByIdx(int32 __Idx);
 
+    virtual bool Initialize();
 
 protected:
 

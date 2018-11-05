@@ -4,7 +4,29 @@
 #include "Runtime/UMG/Public/Blueprint/WidgetBlueprintLibrary.h"
 
 UReusePageC::UReusePageC(const FObjectInitializer& ObjectInitializer)
-    :Super(ObjectInitializer)
+    : Super(ObjectInitializer)
+    , CanvasPanelRoot(nullptr)
+    , ViewSize(FVector2D::ZeroVector)
+    , Count(0)
+    , Page(0)
+    , BeginBlock(0)
+    , EndBlock(0)
+    , SelectPage(0)
+    , Offset(0)
+    , ViewLen(0)
+    , DStart(0)
+    , DOffset(0)
+    , DDelta(0)
+    , DChgPageParam(0)
+    , Slip(0)
+    , SlipParam(0)
+    , IsDrag(false)
+    , StyleUpDown(false)
+    , Loop(false)
+    , NeedReload(false)
+    , NeedUpdateOffset(false)
+    , NeedUpdateSlip(false)
+    , NeedUpdatePage(false)
 {
 
 }
@@ -49,4 +71,13 @@ void UReusePageC::MoveNextPage()
 void UReusePageC::SetPageByIdx(int32 __Idx)
 {
 
+}
+
+bool UReusePageC::Initialize()
+{
+    if (!Super::Initialize())
+        return false;
+    CanvasPanelRoot = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelRoot"))));
+    ensure(CanvasPanelRoot.IsValid());
+    return true;
 }
