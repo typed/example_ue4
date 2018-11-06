@@ -16,7 +16,8 @@ class EXAMPLE_UE4_API UMyUserWidget : public UUserWidget
 	
 public:
 
-	UFUNCTION()
-	void Init();
+protected:
+
+    virtual void NativePaint(FPaintContext& InContext) const;
 	
 };

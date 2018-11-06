@@ -39,6 +39,7 @@ bool UReuseListC::Initialize()
 {
     if (!Super::Initialize())
         return false;
+
     ScrollBoxList = Cast<UScrollBox>(GetWidgetFromName(FName(TEXT("ScrollBoxList"))));
     ensure(ScrollBoxList.IsValid());
 
@@ -50,11 +51,13 @@ bool UReuseListC::Initialize()
 
     CanvasPanelList = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelList"))));
     ensure(CanvasPanelList.IsValid());
+    
     return true;
 }
 
 void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
+    Super::NativeTick(MyGeometry, InDeltaTime);
     if (!ViewSize.Equals(GetCachedGeometry().GetLocalSize(), 0.0001f))
         DoReload();
     Update();

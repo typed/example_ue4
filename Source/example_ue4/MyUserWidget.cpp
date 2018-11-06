@@ -2,7 +2,7 @@
 
 #include "MyUserWidget.h"
 
-void UMyUserWidget::Init()
+void UMyUserWidget::NativePaint(FPaintContext& InContext) const
 {
-
+    Super::NativePaint(InContext);
 }
