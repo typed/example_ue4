@@ -44,7 +44,7 @@ function ExampleReuseList:OnClickItem1()
     self.widget.ReuseListC.OnUpdateItem:Add(function(...) self:OnUpdateItem1(...) end)
     self.widget.ReuseListC.OnCreateItem:Clear()
     self.widget.ReuseListC.OnCreateItem:Add(function(...) self:OnCreateItem1(...) end)
-    local itmClass = SHC.LoadBpClass("/Game/Example/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
+    local itmClass = US.LoadBpClass("/Game/Example/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
     self.widget.ReuseListC:Reload(5000, 100, 0, 0, itmClass, 0, 0, true)
 end
 

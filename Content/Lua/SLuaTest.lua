@@ -1,5 +1,5 @@
-SHC = import("ScriptHelperClient")
-UICom = SHC.LoadBpClass("/Game/Common/UICom.UICom_C")
+US = import("UtilScript")
+UICom = US.LoadBpClass("/Game/Common/UICom.UICom_C")
 MRI = require("memory_tool/MemoryReferenceInfo")
 require("log_tree")
 require("extern")

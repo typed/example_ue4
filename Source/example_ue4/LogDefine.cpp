@@ -2,6 +2,6 @@
 
 #include "LogDefine.h"
 
-DEFINE_LOG_CATEGORY(LogScriptHelper);
+DEFINE_LOG_CATEGORY(LogUtil);
 
 DEFINE_LOG_CATEGORY(LogMyUMG);

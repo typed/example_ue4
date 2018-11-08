@@ -4,6 +4,6 @@
 
 #include "CoreMinimal.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogScriptHelper, Verbose, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogUtil, Verbose, All);
 
 DECLARE_LOG_CATEGORY_EXTERN(LogMyUMG, Verbose, All);

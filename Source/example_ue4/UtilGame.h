@@ -7,13 +7,13 @@
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "ExampleGameInstance.h"
-#include "GameHelper.generated.h"
+#include "UtilGame.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class EXAMPLE_UE4_API UGameHelper : public UObject
+class EXAMPLE_UE4_API UUtilGame : public UObject
 {
 	GENERATED_BODY()
 	

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MyTestUIActor.h"
-#include "ScriptHelperClient.h"
+#include "UtilScript.h"
 #include "UMG.h"
 
 
@@ -18,7 +18,7 @@ void AMyTestUIActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UUserWidget* w = UScriptHelperClient::CreateUserWidget("/Game/ExampleMain/ExampleMainUI.ExampleMainUI_C");
+	UUserWidget* w = UUtilScript::CreateUserWidget("/Game/ExampleMain/ExampleMainUI.ExampleMainUI_C");
 	w->AddToViewport(0);
 	auto btn = Cast<UButton>(w->GetWidgetFromName("Button_ReuseList"));
 	FScriptDelegate Delegate;
@@ -34,13 +34,13 @@ void AMyTestUIActor::BeginPlay()
 
 void AMyTestUIActor::OnClickGC()
 {
-	UScriptHelperClient::GC();
-	UScriptHelperClient::TraceAllObject();
+    UUtilScript::GC();
+    UUtilScript::TraceAllObject();
 }
 
 void AMyTestUIActor::OnClickOpenWidget()
 {
-	m_pUserWidget = UScriptHelperClient::CreateUserWidget("/Game/ExampleReuseList/ExampleReuseListUI.ExampleReuseListUI_C");
+	m_pUserWidget = UUtilScript::CreateUserWidget("/Game/ExampleReuseList/ExampleReuseListUI.ExampleReuseListUI_C");
 	m_pUserWidget->AddToViewport(1);
 	auto btn = Cast<UButton>(m_pUserWidget->GetWidgetFromName("Button_Close"));
 	FScriptDelegate Delegate;

@@ -6,13 +6,13 @@
 #include "UObject/NoExportTypes.h"
 #include "UObject/Class.h"
 #include "Blueprint/UserWidget.h"
-#include "ScriptHelperClient.generated.h"
+#include "UtilScript.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class EXAMPLE_UE4_API UScriptHelperClient : public UObject
+class EXAMPLE_UE4_API UUtilScript : public UObject
 {
 	GENERATED_BODY()
 	
