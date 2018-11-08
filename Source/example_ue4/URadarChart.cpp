@@ -7,9 +7,8 @@ URadarChart::URadarChart(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
     SideCount = 3;
-    UseBorder = true;
-    BorderThickness = 2.f;
-    BorderColor = FLinearColor::White;
+    Antialias = 2;
+    MinProgress = 0.1f;
     Visibility = ESlateVisibility::HitTestInvisible;
 }
 
@@ -21,27 +20,11 @@ void URadarChart::SetSideCount(int32 __SideCount)
     }
 }
 
-void URadarChart::SetBorderColor(const FLinearColor& __BorderColor)
+void URadarChart::SetAntialias(float __Antialias)
 {
-    BorderColor = __BorderColor;
+    Antialias = __Antialias;
     if (MyRadarChart.IsValid()) {
-        MyRadarChart->SetBorderColor(BorderColor);
-    }
-}
-
-void URadarChart::SetUseBorder(bool __UseBorder)
-{
-    UseBorder = __UseBorder;
-    if (MyRadarChart.IsValid()) {
-        MyRadarChart->SetUseBorder(UseBorder);
-    }
-}
-
-void URadarChart::SetBorderThickness(float __BorderThickness)
-{
-    BorderThickness = __BorderThickness;
-    if (MyRadarChart.IsValid()) {
-        MyRadarChart->SetBorderThickness(BorderThickness);
+        MyRadarChart->SetAntialias(Antialias);
     }
 }
 
@@ -53,22 +36,46 @@ void URadarChart::SetBrush(const FSlateBrush& __Brush)
     }
 }
 
+void URadarChart::SetMinProgress(float __MinProgress)
+{
+    MinProgress = __MinProgress;
+    if (MyRadarChart.IsValid()) {
+        MyRadarChart->SetMinProgress(MinProgress);
+    }
+}
+
 void URadarChart::SynchronizeProperties()
 {
     Super::SynchronizeProperties();
 
     TAttribute<int32> SideCountBinding = PROPERTY_BINDING(int32, SideCount);
-    TAttribute<bool> UseBorderBinding = PROPERTY_BINDING(bool, UseBorder);
-    TAttribute<float> BorderThicknessBinding = PROPERTY_BINDING(float, BorderThickness);
+    TAttribute<float> AntialiasBinding = PROPERTY_BINDING(float, Antialias);
     TAttribute<FSlateBrush> BrushBinding = PROPERTY_BINDING(FSlateBrush, Brush);
-    TAttribute<FLinearColor> BorderColorBinding = PROPERTY_BINDING(FLinearColor, BorderColor);
+    TAttribute<float> MinProgressBinding = PROPERTY_BINDING(float, MinProgress);
+
+#if WITH_EDITOR
+    TAttribute<int32> TestProgressBinding = PROPERTY_BINDING(int32, TestProgress);
+#endif
 
     if (MyRadarChart.IsValid()) {
         MyRadarChart->SetSideCount(SideCountBinding.Get());
-        MyRadarChart->SetUseBorder(UseBorderBinding.Get());
-        MyRadarChart->SetBorderThickness(BorderThicknessBinding.Get());
+        MyRadarChart->SetAntialias(AntialiasBinding.Get());
         MyRadarChart->SetBrush(BrushBinding.Get());
-        MyRadarChart->SetBorderColor(BorderColorBinding.Get());
+        MyRadarChart->SetMinProgress(MinProgressBinding.Get());
+
+#if WITH_EDITOR
+        MyRadarChart->ResetProgress();
+        int32 n = TestProgressBinding.Get();
+        FString str = FString::FromInt(n);
+        str.ReverseString();
+        n = FCString::Atoi(*str);
+        int32 i = 0;
+        while (n) {
+            MyRadarChart->SetProgress(i++, (n % 10) / 9.f);
+            n /= 10;
+        }
+#endif
+        
     }
 }
 

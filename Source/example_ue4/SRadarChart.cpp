@@ -5,9 +5,8 @@
 SRadarChart::SRadarChart()
 {
     SideCount = 3;
-    UseBorder = true;
-    BorderThickness = 2.f;
-    BorderColor = FLinearColor::White;
+    Antialias = 2.f;
+    MinProgress = 0.1f;
     bCanTick = false;
     bCanSupportFocus = false;
 }
@@ -22,24 +21,29 @@ void SRadarChart::SetSideCount(int32 __SideCount)
     SideCount = __SideCount;
 }
 
-void SRadarChart::SetBorderColor(const FLinearColor& __BorderColor)
+void SRadarChart::SetAntialias(float __Antialias)
 {
-    BorderColor = __BorderColor;
+    Antialias = __Antialias;
 }
 
-void SRadarChart::SetUseBorder(bool __UseBorder)
+void SRadarChart::SetMinProgress(float __MinProgress)
 {
-    UseBorder = __UseBorder;
-}
-
-void SRadarChart::SetBorderThickness(float __BorderThickness)
-{
-    BorderThickness = __BorderThickness;
+    MinProgress = __MinProgress;
 }
 
 void SRadarChart::SetBrush(const FSlateBrush& __Brush)
 {
     Brush = __Brush;
+}
+
+void SRadarChart::SetProgress(int32 i, float prg)
+{
+    Progress.FindOrAdd(i) = FMath::Clamp(prg, MinProgress, 1.f);
+}
+
+void SRadarChart::ResetProgress()
+{
+    Progress.Empty();
 }
 
 int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
@@ -48,12 +52,10 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
 
     TArray<FSlateVertex> av;
     TArray<SlateIndex> ai;
-    TArray<FVector2D> aBorder;
 
     //why add Reserve here. https://www.unrealengine.com/zh-CN/blog/optimizing-tarray-usage-for-performance
-    av.Reserve(SideCount + 2);
-    aBorder.Reserve(SideCount + 1);
-    ai.Reserve(SideCount * 3);
+    av.Reserve(SideCount * 2 + 1);
+    ai.Reserve(SideCount * 3 * 3);
 
     const FSlateRenderTransform& transform = AllottedGeometry.ToPaintGeometry().GetAccumulatedRenderTransform();
     float WedgeAngle = (2.f * PI) / SideCount;
@@ -66,23 +68,59 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
     FVector2D TexCoords(0.5f, 0.5f);
     v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, PtCenter, TexCoords, FColor::White);
     av.Add(v);
-    float Theta;
+    float Theta, tmp;
     FVector2D vec;
     for (int32 i = 0; i < SideCount; i++) {
         Theta = i * WedgeAngle;
-        vec.X = PtCenter.X + radius * FMath::Cos(Theta);
-        vec.Y = PtCenter.Y - radius * FMath::Sin(Theta);
+        auto pf = Progress.Find(i);
+        if (pf)
+            tmp = radius * (*pf);
+        else
+            tmp = radius;
+        vec.X = PtCenter.X + tmp * FMath::Cos(Theta);
+        vec.Y = PtCenter.Y - tmp * FMath::Sin(Theta);
         TexCoords.X = 0.5f + (vec.X - PtCenter.X) / diameter;
         TexCoords.Y = 0.5f + (vec.Y - PtCenter.Y) / diameter;
         v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, vec, TexCoords, FColor::White);
         av.Add(v);
-        aBorder.Add(vec);
     }
     for (int32 i = 1; i <= SideCount; i++) {
+        int32 next = i == SideCount ? 1 : i + 1;
         ai.Add(0);
         ai.Add(i);
-        ai.Add(i == SideCount ? 1 : i + 1);
+        ai.Add(next);
     }
+
+    if (Antialias > 0.f) {
+        FColor BdCol = FColor::White;
+        BdCol.A = 0.f;
+        for (int32 i = 0; i < SideCount; i++) {
+            Theta = i * WedgeAngle;
+            auto pf = Progress.Find(i);
+            if (pf)
+                tmp = radius * (*pf);
+            else
+                tmp = radius;
+            tmp = tmp + Antialias;
+            vec.X = PtCenter.X + tmp * FMath::Cos(Theta);
+            vec.Y = PtCenter.Y - tmp * FMath::Sin(Theta);
+            TexCoords.X = 0.5f + (vec.X - PtCenter.X) / diameter;
+            TexCoords.Y = 0.5f + (vec.Y - PtCenter.Y) / diameter;
+            v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, vec, TexCoords, BdCol);
+            av.Add(v);
+        }
+        for (int32 i = 1; i <= SideCount; i++) {
+            int32 next = i == SideCount ? 1 : i + 1;
+            int32 next_border = i == SideCount ? SideCount + 1 : SideCount + i + 1;
+            ai.Add(i);
+            ai.Add(SideCount + i);
+            ai.Add(next);
+            ai.Add(next);
+            ai.Add(SideCount + i);
+            ai.Add(next_border);
+        }
+    }
+
     FSlateResourceHandle handle = FSlateApplication::Get().GetRenderer()->GetResourceHandle(Brush);
     if (handle.IsValid()) {
         FSlateDrawElement::MakeCustomVerts(
@@ -95,19 +133,6 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
             0,
             0
         );
-    }
-    if (UseBorder && aBorder.Num() > 0) {
-        auto v = aBorder[0];
-        aBorder.Add(v);
-        FSlateDrawElement::MakeLines(
-            OutDrawElements,
-            LayerId,
-            AllottedGeometry.ToPaintGeometry(),
-            aBorder,
-            ESlateDrawEffect::None,
-            BorderColor,
-            true,
-            BorderThickness);
     }
     return LayerId;
 }

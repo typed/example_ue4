@@ -27,45 +27,41 @@ public:
     UPROPERTY()
     FGetInt32 SideCountDelegate;
     PROPERTY_BINDING_IMPLEMENTATION(int32, SideCount);
+    UFUNCTION(BlueprintCallable, Category = Appearance)
+    void SetSideCount(int32 __SideCount);
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Appearance)
-    FLinearColor BorderColor;
+    float Antialias;
     UPROPERTY()
-    FGetLinearColor BorderColorDelegate;
-    PROPERTY_BINDING_IMPLEMENTATION(FLinearColor, BorderColor);
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Appearance)
-    bool UseBorder;
-    UPROPERTY()
-    FGetBool UseBorderDelegate;
-    PROPERTY_BINDING_IMPLEMENTATION(bool, UseBorder);
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Appearance)
-    float BorderThickness;
-    UPROPERTY()
-    FGetFloat BorderThicknessDelegate;
-    PROPERTY_BINDING_IMPLEMENTATION(float, BorderThickness);
+    FGetFloat AntialiasDelegate;
+    PROPERTY_BINDING_IMPLEMENTATION(float, Antialias);
+    UFUNCTION(BlueprintCallable, Category = Appearance)
+    void SetAntialias(float __Antialias);
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Appearance)
     FSlateBrush Brush;
     UPROPERTY()
     FGetSlateBrush BrushDelegate;
     PROPERTY_BINDING_IMPLEMENTATION(FSlateBrush, Brush);
-
-    UFUNCTION(BlueprintCallable, Category = Appearance)
-    void SetSideCount(int32 __SideCount);
-
-    UFUNCTION(BlueprintCallable, Category = Appearance)
-    void SetBorderColor(const FLinearColor& __BorderColor);
-
-    UFUNCTION(BlueprintCallable, Category = Appearance)
-    void SetUseBorder(bool __UseBorder);
-
-    UFUNCTION(BlueprintCallable, Category = Appearance)
-    void SetBorderThickness(float __BorderThickness);
-
     UFUNCTION(BlueprintCallable, Category = Appearance)
     void SetBrush(const FSlateBrush& __Brush);
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Appearance)
+    float MinProgress;
+    UPROPERTY()
+    FGetFloat MinProgressDelegate;
+    PROPERTY_BINDING_IMPLEMENTATION(float, MinProgress);
+    UFUNCTION(BlueprintCallable, Category = Appearance)
+    void SetMinProgress(float __MinProgress);
+
+#if WITH_EDITOR
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Appearance)
+    int32 TestProgress;
+    UPROPERTY()
+    FGetInt32 TestProgressDelegate;
+    PROPERTY_BINDING_IMPLEMENTATION(int32, TestProgress);
+#endif
+    
 
     //~ Begin UWidget Interface
     virtual void SynchronizeProperties() override;
