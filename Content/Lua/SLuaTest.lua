@@ -6,7 +6,7 @@ require("extern")
 require("ExampleMain")
 require("ExampleReuseList")
 require("ExampleReusePage")
-require("ExampleShape")
+require("ExampleRadarChart")
 ExampleMain.new():Open()
 function Tick(dt,actor)
 end

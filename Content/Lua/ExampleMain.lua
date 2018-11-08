@@ -44,5 +44,5 @@ function ExampleMain:OnClick_Button_ReusePage()
 end
 
 function ExampleMain:OnClick_Button_Shape()
-    ExampleShape.new():Open()
+    ExampleRadarChart.new():Open()
 end
