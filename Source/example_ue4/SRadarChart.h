@@ -29,6 +29,7 @@ public:
     void SetBrush(const FSlateBrush& __Brush);
 
     void SetProgress(int32 i, float prg);
+    float GetProgress(int32 i) const;
     void ResetProgress();
 
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const;

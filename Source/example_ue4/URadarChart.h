@@ -56,12 +56,20 @@ public:
 
 #if WITH_EDITOR
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Appearance)
-    int32 TestProgress;
+    FText TestProgress;
     UPROPERTY()
-    FGetInt32 TestProgressDelegate;
-    PROPERTY_BINDING_IMPLEMENTATION(int32, TestProgress);
+    FGetText TestProgressDelegate;
+    PROPERTY_BINDING_IMPLEMENTATION(FText, TestProgress);
 #endif
-    
+
+    UFUNCTION(BlueprintCallable, Category = Appearance)
+    void SetProgress(int32 i, float __Progress);
+
+    UFUNCTION(BlueprintCallable, Category = Appearance)
+    float GetProgress(int32 i) const;
+
+    UFUNCTION(BlueprintCallable, Category = Appearance)
+    void ResetProgress();
 
     //~ Begin UWidget Interface
     virtual void SynchronizeProperties() override;

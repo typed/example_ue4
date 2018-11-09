@@ -10,6 +10,9 @@ URadarChart::URadarChart(const FObjectInitializer& ObjectInitializer)
     Antialias = 2;
     MinProgress = 0.1f;
     Visibility = ESlateVisibility::HitTestInvisible;
+#if WITH_EDITOR
+    TestProgress = FText::FromString("9999999999999999999999");
+#endif
 }
 
 void URadarChart::SetSideCount(int32 __SideCount)
@@ -44,6 +47,30 @@ void URadarChart::SetMinProgress(float __MinProgress)
     }
 }
 
+void URadarChart::SetProgress(int32 i, float __Progress)
+{
+    if (MyRadarChart.IsValid()) {
+        MyRadarChart->SetProgress(i, __Progress);
+    }
+}
+
+float URadarChart::GetProgress(int32 i) const
+{
+    if (MyRadarChart.IsValid()) {
+        return MyRadarChart->GetProgress(i);
+    }
+    else {
+        return MinProgress;
+    }
+}
+
+void URadarChart::ResetProgress()
+{
+    if (MyRadarChart.IsValid()) {
+        MyRadarChart->ResetProgress();
+    }
+}
+
 void URadarChart::SynchronizeProperties()
 {
     Super::SynchronizeProperties();
@@ -54,7 +81,7 @@ void URadarChart::SynchronizeProperties()
     TAttribute<float> MinProgressBinding = PROPERTY_BINDING(float, MinProgress);
 
 #if WITH_EDITOR
-    TAttribute<int32> TestProgressBinding = PROPERTY_BINDING(int32, TestProgress);
+    TAttribute<FText> TestProgressBinding = PROPERTY_BINDING(FText, TestProgress);
 #endif
 
     if (MyRadarChart.IsValid()) {
@@ -65,14 +92,10 @@ void URadarChart::SynchronizeProperties()
 
 #if WITH_EDITOR
         MyRadarChart->ResetProgress();
-        int32 n = TestProgressBinding.Get();
-        FString str = FString::FromInt(n);
+        FString str = TestProgressBinding.Get().ToString();
         str.ReverseString();
-        n = FCString::Atoi(*str);
-        int32 i = 0;
-        while (n) {
-            MyRadarChart->SetProgress(i++, (n % 10) / 9.f);
-            n /= 10;
+        for (int32 i = 0; i < str.Len(); i++) {
+            MyRadarChart->SetProgress(i, (str[i] - 48) / 9.f);
         }
 #endif
         

@@ -38,7 +38,13 @@ void SRadarChart::SetBrush(const FSlateBrush& __Brush)
 
 void SRadarChart::SetProgress(int32 i, float prg)
 {
-    Progress.FindOrAdd(i) = FMath::Clamp(prg, 0.f, 1.f);
+    Progress.FindOrAdd(i) = FMath::Clamp(prg, MinProgress, 1.f);
+}
+
+float SRadarChart::GetProgress(int32 i) const
+{
+    auto pf = Progress.Find(i);
+    return pf ? *pf : MinProgress;
 }
 
 void SRadarChart::ResetProgress()
@@ -49,12 +55,7 @@ void SRadarChart::ResetProgress()
 #define ComputeSlateVertex(ant, col) \
     float tmp; \
     float Theta = i * WedgeAngle; \
-    auto pf = Progress.Find(i); \
-    if (pf) \
-        tmp = radius * (*pf); \
-    else \
-        tmp = radius; \
-    tmp += ant; \
+    tmp = radius * GetProgress(i) + ant; \
     vec.X = PtCenter.X + tmp * FMath::Cos(Theta); \
     vec.Y = PtCenter.Y - tmp * FMath::Sin(Theta); \
     TexCoords.X = 0.5f + (vec.X - PtCenter.X) / diameter; \
