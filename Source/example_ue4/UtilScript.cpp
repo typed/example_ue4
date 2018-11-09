@@ -5,6 +5,8 @@
 #include "Engine/Engine.h"
 #include "UObject/UObject.h"
 #include "UObject/UObjectIterator.h"
+#include "UObject/Class.h"
+#include "Blueprint/UserWidget.h"
 #include "UtilGame.h"
 #include "UMG.h"
 #include "LogDefine.h"

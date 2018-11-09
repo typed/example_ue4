@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Runtime/UMG/Public/UMG.h"
-#include "ReuseListC.generated.h"
+#include "UReuseListC.generated.h"
 
 /**
  * 

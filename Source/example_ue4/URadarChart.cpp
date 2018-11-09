@@ -11,7 +11,7 @@ URadarChart::URadarChart(const FObjectInitializer& ObjectInitializer)
     MinProgress = 0.1f;
     Visibility = ESlateVisibility::HitTestInvisible;
 #if WITH_EDITOR
-    TestProgress = FText::FromString("9999999999999999999999");
+    TestProgress = FText::FromString(TEXT("9999999999999999999999"));
 #endif
 }
 

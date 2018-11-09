@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Runtime/UMG/Public/UMG.h"
-#include "ReusePageC.generated.h"
+#include "UReusePageC.generated.h"
 
 /**
  * 
@@ -17,10 +17,27 @@ class EXAMPLE_UE4_API UReusePageC : public UUserWidget
 	
 public:
 
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEventDropDelegate);
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEventDropStartDelegate);
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEventUpdateItemDelegate, UUserWidget*, widget, int32, idx);
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEventPageChangedDelegate, int32, PageIdx);
+
     UReusePageC(const FObjectInitializer& ObjectInitializer);
 
+    UPROPERTY(BlueprintAssignable)
+    FEventDropDelegate EventDrop;
+
+    UPROPERTY(BlueprintAssignable)
+    FEventDropStartDelegate EventDropStart;
+
+    UPROPERTY(BlueprintAssignable)
+    FEventUpdateItemDelegate EventUpdateItem;
+
+    UPROPERTY(BlueprintAssignable)
+    FEventPageChangedDelegate EventPageChanged;
+
     UFUNCTION(BlueprintCallable)
-    virtual void Reload(UClass* __Class, int32 __ItemCount, bool __Loop = false, bool __StyleUpDown = false, int32 __DefaultPage = 0);
+    virtual void Reload(UClass* __ItemClass, int32 __Count, bool __Loop = false, bool __StyleUpDown = false, int32 __DefaultPage = 0);
 
     UFUNCTION(BlueprintCallable)
     virtual void MoveNextPage();
@@ -64,11 +81,11 @@ protected:
 
 private:
 
-    TWeakObjectPtr<UCanvasPanel> CanvasPanelRoot;
-    TWeakObjectPtr<UClass> ItemClass;
+    UCanvasPanel* CanvasPanelRoot;
+    UClass* ItemClass;
     FVector2D ViewSize;
-    TMap<int32, TWeakObjectPtr<UUserWidget> > ItemMap;
-    TArray< TWeakObjectPtr<UUserWidget> > ItemPool;
+    TMap<int32, UUserWidget* > ItemMap;
+    TArray< UUserWidget* > ItemPool;
     int32 Count;
     int32 Page;
     int32 BeginBlock;

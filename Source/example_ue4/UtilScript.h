@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "UObject/Class.h"
-#include "Blueprint/UserWidget.h"
 #include "UtilScript.generated.h"
 
+class UClass;
+class UUserWidget;
 /**
  * 
  */
