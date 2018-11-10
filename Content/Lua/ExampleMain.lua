@@ -32,7 +32,7 @@ function ExampleMain:OnGC()
     --MRI.m_cMethods.DumpMemorySnapshot("", "All", -1)
     --log_tree("debug.getregistry().SLUA_PTR_USERTABLE_MAPPING", debug.getregistry().SLUA_PTR_USERTABLE_MAPPING)
     --US.TraceClass("/Game/Common/UICom.UICom_C")
-    --US.TraceClass("/Game/Example/ExampleMain/ExampleMainUI.ExampleMainUI_C")
+    US.TraceClass("/Game/Example/ExampleReusePage/ExampleReusePageUI.ExampleReusePageUI_C")
 end
 
 function ExampleMain:OnClick_Button_ReuseList()

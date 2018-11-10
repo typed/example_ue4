@@ -42,6 +42,16 @@ bool UReusePageC::Initialize()
     return true;
 }
 
+void UReusePageC::ClearCache()
+{
+    ItemPool.Empty();
+    for (int32 i = 0; i < CanvasPanelRoot->GetChildrenCount(); ++i) {
+        auto uw = Cast<UUserWidget>(CanvasPanelRoot->GetChildAt(i));
+        EventDestroyItem.Broadcast(uw);
+    }
+    CanvasPanelRoot->ClearChildren();
+}
+
 void UReusePageC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
     if (!ViewSize.Equals(GetCachedGeometry().GetLocalSize(), 0.0001f)) {
@@ -98,8 +108,7 @@ void UReusePageC::Reload(UClass* __ItemClass, int32 __Count, bool __Loop, bool _
     }
     if (ItemClass != __ItemClass) {
         ItemClass = __ItemClass;
-        ItemPool.Empty();
-        CanvasPanelRoot->ClearChildren();
+        ClearCache();
     }
     if (Count <= 0) {
         NeedReload = false;
@@ -151,7 +160,7 @@ void UReusePageC::ReleaseItem(UUserWidget* widget)
 
 void UReusePageC::RemoveNotUsed(TMap<int32, int32>& ItemIdxMap)
 {
-    for (TMap<int32, UUserWidget* >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
+    for (TMap<int32, UUserWidget* >::TIterator iter(ItemMap); iter; ++iter) {
         if (!ItemIdxMap.Contains(iter->Key)) {
             ReleaseItem(iter->Value);
             iter.RemoveCurrent();
@@ -297,7 +306,7 @@ void UReusePageC::UpdateOffset()
         }
     }
     RemoveNotUsed(ItemIdxMap);
-    for (TMap<int32, int32>::TIterator it = ItemIdxMap.CreateIterator(); it; ++it) {
+    for (TMap<int32, int32>::TIterator it(ItemIdxMap); it; ++it) {
         int32 itmIdx = it->Key;
         int32 idx = it->Value;
         UUserWidget* curitem = nullptr;

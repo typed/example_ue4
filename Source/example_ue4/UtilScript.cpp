@@ -72,13 +72,15 @@ void UUtilScript::TraceClass(FString name)
         return;
     }
     UE_LOG(LogUtil, Log, TEXT("UClass %s"), *pClass->GetName());
-    for (TFieldIterator<UProperty> it(pClass); it; ++it) {
-        UProperty* prop = *it;
+    for (TFieldIterator<UObjectProperty> it(pClass); it; ++it) {
+        UObjectProperty* prop = *it;
         if (prop->GetOwnerClass() != pClass) {
             continue;
         }
+        FString name = prop->GetName();
+        FString class_name = prop->PropertyClass->GetName();
         uint64 propflag = prop->GetPropertyFlags();
-        UE_LOG(LogUtil, Log, TEXT("Class Member %s propflag %x"), *prop->GetName(), propflag);
+        UE_LOG(LogUtil, Log, TEXT("Name %s ClassName %s propflag %x"), *name, *class_name, propflag);
     }
     for (TFieldIterator<UFunction> FuncIt(pClass); FuncIt; ++FuncIt) {
         UFunction* func = *FuncIt;
