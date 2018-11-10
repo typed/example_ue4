@@ -6,7 +6,6 @@ ExampleReuseList = ClassPanel("ExampleReuseList", '/Game/Example/ExampleReuseLis
 function ExampleReuseList:construct()
 
     self.ItmList = {}
-    self.Item1WidgetList = {}
 
     UICom.SetImage("/Game/Texture/UMG/wupingicon_baiyingjianzhi.wupingicon_baiyingjianzhi", self.widget.Image1)
 
@@ -23,16 +22,15 @@ function ExampleReuseList:construct()
 end
 
 function ExampleReuseList:destruct()
+    log("ExampleReuseList:destruct")
     self.widget.Button_0.OnClicked:Clear()
     self.widget.Button_4.OnClicked:Clear()
     self.widget.Button_Close.OnClicked:Clear()
     self.widget.ButtonItem1.OnClicked:Clear()
+    self.widget.ReuseListC:ClearCache()
     self.widget.ReuseListC.OnUpdateItem:Clear()
     self.widget.ReuseListC.OnCreateItem:Clear()
-    for i,v in ipairs(self.Item1WidgetList) do
-        v:unbind()
-    end
-    self.Item1WidgetList = {}
+    self.widget.ReuseListC.OnDestroyItem:Clear()
 end
 
 function ExampleReuseList:OnJumpByIdx()
@@ -43,14 +41,11 @@ function ExampleReuseList:OnClickItem1()
     self.widget.ReuseListC.OnUpdateItem:Clear()
     self.widget.ReuseListC.OnUpdateItem:Add(function(...) self:OnUpdateItem1(...) end)
     self.widget.ReuseListC.OnCreateItem:Clear()
-    self.widget.ReuseListC.OnCreateItem:Add(function(...) self:OnCreateItem1(...) end)
+    self.widget.ReuseListC.OnCreateItem:Add(function(widget) TestReuseListItem.bind(widget, self) end)
+    self.widget.ReuseListC.OnDestroyItem:Clear()
+    self.widget.ReuseListC.OnDestroyItem:Add(function(widget) widget:GetLuaTable():unbind() end)
     local itmClass = US.LoadBpClass("/Game/Example/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
     self.widget.ReuseListC:Reload(5000, 100, 0, 0, itmClass, 0, 0, true)
-end
-
-function ExampleReuseList:OnCreateItem1(widget)
-    local itm_widget = TestReuseListItem.bind(widget, self)
-    table.insert(self.Item1WidgetList, itm_widget)
 end
 
 function ExampleReuseList:OnUpdateItem1(widget,idx)
@@ -70,7 +65,6 @@ function TestReuseListItem:construct(parent)
     self.m_parent = parent
     self.m_idx = 0
     self.widget.Button_BG.OnClicked:Add(function() self:OnClickItem1BG() end)
-    --self.ImageIcon = self.widget:FindWidget("ImageIcon")
 end
 function TestReuseListItem:destruct()
     self.widget.Button_BG.OnClicked:Clear()

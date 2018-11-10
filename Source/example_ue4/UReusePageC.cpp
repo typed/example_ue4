@@ -132,12 +132,14 @@ UUserWidget* UReusePageC::NewItem()
     if (ItemPool.IsValidIndex(0)) {
         tmp = ItemPool[0];
         ItemPool.RemoveAt(0);
+        tmp->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
     }
     else {
         tmp = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
         CanvasPanelRoot->AddChild(tmp);
+        tmp->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+        EventCreateItem.Broadcast(tmp);
     }
-    tmp->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
     return tmp;
 }
 

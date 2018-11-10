@@ -21,6 +21,7 @@ public:
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateItemDelegate, UUserWidget*, Widget, int32, Idx);
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnScrollItemDelegate, int32, BeginIdx, int32, EndIdx);
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCreateItemDelegate, UUserWidget*, widget);
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDestroyItemDelegate, UUserWidget*, widget);
 
     UReuseListC(const FObjectInitializer& ObjectInitializer);
 
@@ -32,6 +33,9 @@ public:
 
     UPROPERTY(BlueprintAssignable)
     FOnCreateItemDelegate OnCreateItem;
+
+    UPROPERTY(BlueprintAssignable)
+    FOnDestroyItemDelegate OnDestroyItem;
 
     UFUNCTION(BlueprintCallable)
     virtual void Reload(int32 __ItemCount, int32 __ItemHeight, int32 __ItemWidth, int32 __Style, UClass* __Class, int32 __PaddingX, int32 __PaddingY, bool __ReloadJumpBegin = true);
@@ -56,7 +60,12 @@ public:
 
     virtual bool Initialize();
 
+    UFUNCTION(BlueprintCallable)
+    virtual void ClearCache();
+
 protected:
+
+    virtual void NativeDestruct();
 
     virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 

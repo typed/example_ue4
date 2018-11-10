@@ -55,6 +55,12 @@ bool UReuseListC::Initialize()
     return true;
 }
 
+void UReuseListC::NativeDestruct()
+{
+    Super::NativeDestruct();
+    //ClearCache();
+}
+
 void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
     Super::NativeTick(MyGeometry, InDeltaTime);
@@ -88,8 +94,7 @@ void UReuseListC::Reload(int32 __ItemCount, int32 __ItemHeight, int32 __ItemWidt
         ScrollBoxList->SetOrientation(Orient_Horizontal);
     }
     if (bNeedClearCache) {
-        ItemPool.Empty();
-        CanvasPanelList->ClearChildren();
+        ClearCache();
     }
     DoReload();
 }
@@ -373,4 +378,14 @@ void UReuseListC::Update()
         CurLine = tmpLine;
         ScrollUpdate(tmpOffset);
     }
+}
+
+void UReuseListC::ClearCache()
+{
+    ItemPool.Empty();
+    for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
+        auto uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
+        OnDestroyItem.Broadcast(uw);
+    }
+    CanvasPanelList->ClearChildren();
 }

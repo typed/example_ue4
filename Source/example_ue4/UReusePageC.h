@@ -21,6 +21,7 @@ public:
     DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEventDropStartDelegate);
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEventUpdateItemDelegate, UUserWidget*, widget, int32, idx);
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEventPageChangedDelegate, int32, PageIdx);
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEventCreateItemDelegate, UUserWidget*, widget);
 
     UReusePageC(const FObjectInitializer& ObjectInitializer);
 
@@ -35,6 +36,9 @@ public:
 
     UPROPERTY(BlueprintAssignable)
     FEventPageChangedDelegate EventPageChanged;
+
+    UPROPERTY(BlueprintAssignable)
+    FEventCreateItemDelegate EventCreateItem;
 
     UFUNCTION(BlueprintCallable)
     virtual void Reload(UClass* __ItemClass, int32 __Count, bool __Loop = false, bool __StyleUpDown = false, int32 __DefaultPage = 0);

@@ -25,14 +25,14 @@ function ExampleMain:Trace()
 end
 
 function ExampleMain:OnGC()
-    --collectgarbage("collect")
-    --US.GC()
-    --US.TraceAllObject()
+    collectgarbage("collect")
+    US.GC()
+    US.TraceAllObject()
     --DumpSingleObjRef(self.widget)
     --MRI.m_cMethods.DumpMemorySnapshot("", "All", -1)
     --log_tree("debug.getregistry().SLUA_PTR_USERTABLE_MAPPING", debug.getregistry().SLUA_PTR_USERTABLE_MAPPING)
-    US.TraceClass("/Game/Common/UICom.UICom_C")
-    US.TraceClass("/Game/Example/ExampleMain/ExampleMainUI.ExampleMainUI_C")
+    --US.TraceClass("/Game/Common/UICom.UICom_C")
+    --US.TraceClass("/Game/Example/ExampleMain/ExampleMainUI.ExampleMainUI_C")
 end
 
 function ExampleMain:OnClick_Button_ReuseList()

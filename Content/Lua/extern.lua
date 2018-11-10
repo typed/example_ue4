@@ -17,9 +17,8 @@ function class(classname, url)
     end
     function cls:del()
         if self.widget then
-            self:destruct()
-            self.widget:SetLuaTable(nil)
             self.widget:RemoveFromViewport()
+            self:destruct()
             self.widget = nil
         end
     end
@@ -35,9 +34,8 @@ function class(classname, url)
     end
     function cls:unbind()
         if self.widget then
-            self:destruct()
-            self.widget:SetLuaTable(nil)
             --self.widget:RemoveFromViewport()
+            self:destruct()
             self.widget = nil
         end
     end
