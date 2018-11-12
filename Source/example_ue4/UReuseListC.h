@@ -11,6 +11,22 @@
  * 
  */
 
+UENUM(BlueprintType)
+enum class EReuseListStyle : uint8
+{
+    Vertical,
+    Horizontal,
+    VerticalGrid,
+};
+
+UENUM(BlueprintType)
+enum class EReuseListJumpStyle : uint8
+{
+    Middle,
+    Begin,
+    End,
+};
+
 UCLASS()
 class EXAMPLE_UE4_API UReuseListC : public UUserWidget
 {
@@ -25,6 +41,8 @@ public:
 
     UReuseListC(const FObjectInitializer& ObjectInitializer);
 
+    virtual bool Initialize();
+
     UPROPERTY(BlueprintAssignable)
     FOnUpdateItemDelegate OnUpdateItem;
 
@@ -38,7 +56,7 @@ public:
     FOnDestroyItemDelegate OnDestroyItem;
 
     UFUNCTION(BlueprintCallable)
-    virtual void Reload(int32 __ItemCount, int32 __ItemHeight, int32 __ItemWidth, int32 __Style, UClass* __Class, int32 __PaddingX, int32 __PaddingY, bool __ReloadJumpBegin = true);
+    virtual void Reload(int32 __ItemCount);
 
     UFUNCTION(BlueprintCallable)
     virtual void Refresh();
@@ -47,7 +65,7 @@ public:
     virtual void RefreshOne(int32 __Idx);
 
     UFUNCTION(BlueprintCallable)
-    virtual void JumpByIdx(int32 __Idx, int32 __Style);
+    virtual void JumpByIdx(int32 __Idx, EReuseListJumpStyle __Style);
 
     UFUNCTION(BlueprintCallable)
     virtual void Clear();
@@ -58,14 +76,41 @@ public:
     UFUNCTION(BlueprintCallable)
     virtual int32 GetCurrentEnd();
 
-    virtual bool Initialize();
-
     UFUNCTION(BlueprintCallable)
     virtual void ClearCache();
 
+    //~ Begin UWidget Interface
+    virtual void SynchronizeProperties() override;
+    //~ End UWidget Interface
+
 protected:
 
-    virtual void NativeDestruct();
+    UPROPERTY(EditAnywhere, Category = Property)
+    int32 ItemCacheNum;
+
+    UPROPERTY(EditAnywhere, Category = Property)
+    int32 ItemWidth;
+
+    UPROPERTY(EditAnywhere, Category = Property)
+    int32 ItemHeight;
+
+    UPROPERTY(EditAnywhere, Category = Property)
+    int32 PaddingX;
+
+    UPROPERTY(EditAnywhere, Category = Property)
+    int32 PaddingY;
+
+    UPROPERTY(EditAnywhere, Category = Property)
+    EReuseListStyle Style;
+
+    UPROPERTY(EditAnywhere, Category = Property)
+    UWidgetBlueprintGeneratedClass* ItemClass;
+
+    UPROPERTY(EditAnywhere, Category = Property)
+    int32 TestCount;
+
+    /** Function called after the underlying SWidget is constructed. */
+    virtual void OnWidgetRebuilt();
 
     virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 
@@ -78,36 +123,34 @@ protected:
     virtual void Update();
     virtual void DoJump();
 
+    UFUNCTION()
+    void OnCallReload();
+
 private:
 
-    TWeakObjectPtr<UScrollBox> ScrollBoxList;
-    TWeakObjectPtr<UCanvasPanel> CanvasPanelBg;
-    TWeakObjectPtr<USizeBox> SizeBoxBg;
-    TWeakObjectPtr<UCanvasPanel> CanvasPanelList;
+    bool IsValidClass() const;
+
+    UScrollBox* ScrollBoxList;
+    UCanvasPanel* CanvasPanelBg;
+    USizeBox* SizeBoxBg;
+    UCanvasPanel* CanvasPanelList;
     
     FVector2D ViewSize;
     FVector2D ContentSize;
-    TWeakObjectPtr<UClass> ItemClass;
-    int32 ItemCacheNum;
+    
     int32 ItemCount;
-    int32 ItemHeight;
     int32 MaxPos;
     int32 Offset;
-    TMap<int32, TWeakObjectPtr<UUserWidget> > ItemMap;
+    TMap<int32, UUserWidget*> ItemMap;
     int32 OffsetEnd;
-    TArray< TWeakObjectPtr<UUserWidget> > ItemPool;
-    int32 Style;
-    int32 ItemWidth;
+    TArray<UUserWidget*> ItemPool;
     int32 BIdx;
     int32 EIdx;
     int32 ColNum;
     int32 RowNum;
     int32 CurLine;
-    int32 PaddingX;
-    int32 PaddingY;
     int32 JumpIdx;
-    int32 JumpIdxStyle;
-    bool ReloadJumpBegin;
+    EReuseListJumpStyle JumpStyle;
     bool NeedJump;
 
 };

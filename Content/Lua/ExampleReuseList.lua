@@ -17,7 +17,7 @@ function ExampleReuseList:construct()
 
     self.widget.Button_0.OnClicked:Add(function() self:OnJumpByIdx() end)
 
-    self:OnClickItem1()
+    --self:OnClickItem1()
 
 end
 
@@ -44,8 +44,7 @@ function ExampleReuseList:OnClickItem1()
     self.widget.ReuseListC.OnCreateItem:Add(function(widget) TestReuseListItem.bind(widget, self) end)
     self.widget.ReuseListC.OnDestroyItem:Clear()
     self.widget.ReuseListC.OnDestroyItem:Add(function(widget) widget:GetLuaTable():unbind() end)
-    local itmClass = US.LoadBpClass("/Game/Example/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
-    self.widget.ReuseListC:Reload(5000, 100, 0, 0, itmClass, 0, 0, true)
+    self.widget.ReuseListC:Reload(5000)
 end
 
 function ExampleReuseList:OnUpdateItem1(widget,idx)

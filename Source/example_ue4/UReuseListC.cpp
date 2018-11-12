@@ -21,7 +21,7 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , MaxPos(0)
     , Offset(0)
     , OffsetEnd(0)
-    , Style(0)
+    , Style(EReuseListStyle::Vertical)
     , ItemWidth(100)
     , BIdx(0)
     , EIdx(0)
@@ -29,9 +29,9 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , RowNum(0)
     , CurLine(-999)
     , JumpIdx(0)
-    , JumpIdxStyle(0)
-    , ReloadJumpBegin(true)
+    , JumpStyle(EReuseListJumpStyle::Middle)
     , NeedJump(false)
+    , TestCount(0)
 {
 }
 
@@ -41,67 +41,57 @@ bool UReuseListC::Initialize()
         return false;
 
     ScrollBoxList = Cast<UScrollBox>(GetWidgetFromName(FName(TEXT("ScrollBoxList"))));
-    ensure(ScrollBoxList.IsValid());
+    ensure(ScrollBoxList);
 
     CanvasPanelBg = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelBg"))));
-    ensure(CanvasPanelBg.IsValid());
+    ensure(CanvasPanelBg);
 
     SizeBoxBg = Cast<USizeBox>(GetWidgetFromName(FName(TEXT("SizeBoxBg"))));
-    ensure(SizeBoxBg.IsValid());
+    ensure(SizeBoxBg);
 
     CanvasPanelList = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelList"))));
-    ensure(CanvasPanelList.IsValid());
-    
+    ensure(CanvasPanelList);
+
     return true;
 }
 
-void UReuseListC::NativeDestruct()
+void UReuseListC::SynchronizeProperties()
 {
-    Super::NativeDestruct();
-    //ClearCache();
+    Super::SynchronizeProperties();
+    if (GetWorld()->IsPreviewWorld()) {
+        GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UReuseListC::OnCallReload);
+    }
 }
 
 void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
     Super::NativeTick(MyGeometry, InDeltaTime);
+    if (!IsValidClass())
+        return;
     if (!ViewSize.Equals(GetCachedGeometry().GetLocalSize(), 0.0001f))
         DoReload();
     Update();
     DoJump();
 }
 
-void UReuseListC::Reload(int32 __ItemCount, int32 __ItemHeight, int32 __ItemWidth, int32 __Style, UClass* __Class, int32 __PaddingX, int32 __PaddingY, bool __ReloadJumpBegin)
+void UReuseListC::Reload(int32 __ItemCount)
 {
+    if (!IsValidClass())
+        return;
     ItemCount = __ItemCount;
-    ItemHeight = __ItemHeight;
-    ItemWidth = __ItemWidth;
-    PaddingX = __PaddingX;
-    PaddingY = __PaddingY;
-    ReloadJumpBegin = __ReloadJumpBegin;
-    bool bNeedClearCache = false;
-    if (ItemClass != __Class) {
-        ItemClass = __Class;
-        bNeedClearCache = true;
-    }
-    if (Style != __Style) {
-        Style = __Style;
-        bNeedClearCache = true;
-    }
-    if (Style == 0 || Style == 2) {
+    if (Style == EReuseListStyle::Vertical || Style == EReuseListStyle::VerticalGrid) {
         ScrollBoxList->SetOrientation(Orient_Vertical);
     }
     else {
         ScrollBoxList->SetOrientation(Orient_Horizontal);
     }
-    if (bNeedClearCache) {
-        ClearCache();
-    }
+    ScrollBoxList->SetScrollBarVisibility(ESlateVisibility::Collapsed);
     DoReload();
 }
 
 void UReuseListC::Refresh()
 {
-    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
+    for (TMap<int32, UUserWidget*>::TConstIterator iter(ItemMap); iter; ++iter) {
         RefreshOne(iter->Key);
     }
 }
@@ -110,20 +100,20 @@ void UReuseListC::RefreshOne(int32 __Idx)
 {
     auto v = ItemMap.Find(__Idx);
     if (v) {
-        OnUpdateItem.Broadcast(v->Get(), __Idx);
+        OnUpdateItem.Broadcast(*v, __Idx);
     }
 }
 
-void UReuseListC::JumpByIdx(int32 __Idx, int32 __Style)
+void UReuseListC::JumpByIdx(int32 __Idx, EReuseListJumpStyle __Style)
 {
     JumpIdx = __Idx;
-    JumpIdxStyle = __Style;
+    JumpStyle = __Style;
     NeedJump = true;
 }
 
 void UReuseListC::Clear()
 {
-    Reload(0, ItemHeight, ItemWidth, Style, ItemClass.Get(), PaddingX, PaddingY, ReloadJumpBegin);
+    Reload(0);
 }
 
 int32 UReuseListC::GetCurrentBegin()
@@ -143,7 +133,7 @@ void UReuseListC::ScrollUpdate(float __Offset)
     int32 Offset = __Offset;
     Offset = UKismetMathLibrary::Max(Offset, 0);
     Offset = UKismetMathLibrary::Min(Offset, MaxPos);
-    if (Style == 0) {
+    if (Style == EReuseListStyle::Vertical) {
         OffsetEnd = UKismetMathLibrary::Min((Offset + (int32)ViewSize.Y), MaxPos);
         BIdx = UKismetMathLibrary::Max(Offset / ItemHeightAndPad - ItemCacheNum, 0);
         EIdx = UKismetMathLibrary::Min(OffsetEnd / ItemHeightAndPad + ItemCacheNum, ItemCount-1);
@@ -159,7 +149,7 @@ void UReuseListC::ScrollUpdate(float __Offset)
             }
         }
     }
-    else if (Style == 1) {
+    else if (Style == EReuseListStyle::Horizontal) {
         OffsetEnd = UKismetMathLibrary::Min((Offset + (int32)ViewSize.X), MaxPos);
         BIdx = UKismetMathLibrary::Max(Offset / ItemWidthAndPad - ItemCacheNum, 0);
         EIdx = UKismetMathLibrary::Min(OffsetEnd / ItemWidthAndPad + ItemCacheNum, ItemCount-1);
@@ -180,7 +170,7 @@ void UReuseListC::ScrollUpdate(float __Offset)
             }
         }
     }
-    else if (Style == 2) {
+    else if (Style == EReuseListStyle::VerticalGrid) {
         OffsetEnd = UKismetMathLibrary::Min((Offset + (int32)ViewSize.Y), MaxPos);
         BIdx = UKismetMathLibrary::Max( ( Offset / ItemHeightAndPad ) * ColNum, 0);
         int32 tmp = UKismetMathLibrary::FCeil((float)OffsetEnd / ItemHeightAndPad) + 1;
@@ -203,7 +193,7 @@ void UReuseListC::ScrollUpdate(float __Offset)
 void UReuseListC::UpdateContentSize(UWidget* widget)
 {
     auto cps = Cast<UCanvasPanelSlot>(widget->Slot);
-    if (Style == 0 || Style == 2) {
+    if (Style == EReuseListStyle::Vertical || Style == EReuseListStyle::VerticalGrid) {
         cps->SetAnchors(FAnchors(0, 0, 1, 0));
         cps->SetOffsets(FMargin(0, 0, 0, ContentSize.Y));
     }
@@ -215,11 +205,26 @@ void UReuseListC::UpdateContentSize(UWidget* widget)
 
 void UReuseListC::RemoveNotUsed()
 {
-    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
+    for (TMap<int32, UUserWidget*>::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
         if (!UKismetMathLibrary::InRange_IntInt(iter->Key, BIdx, EIdx)) {
-            ReleaseItem(iter->Value.Get());
+            ReleaseItem(iter->Value);
             iter.RemoveCurrent();
         }
+    }
+}
+
+void UReuseListC::OnWidgetRebuilt()
+{
+    Super::OnWidgetRebuilt();
+    if (GetWorld()->IsPreviewWorld()) {
+        GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UReuseListC::OnCallReload);
+    }
+}
+
+void UReuseListC::OnCallReload()
+{
+    if (GetWorld()->IsPreviewWorld()) {
+        Reload(TestCount);
     }
 }
 
@@ -228,17 +233,17 @@ void UReuseListC::DoReload()
     ViewSize = GetCachedGeometry().GetLocalSize();
     switch (Style)
     {
-    case 0:
+    case EReuseListStyle::Vertical:
         MaxPos = (ItemHeight + PaddingY) * ItemCount - PaddingY;
         ContentSize.X = ViewSize.X;
         ContentSize.Y = MaxPos;
         break;
-    case 1:
+    case EReuseListStyle::Horizontal:
         MaxPos = (ItemWidth + PaddingX) * ItemCount - PaddingX;
         ContentSize.X = MaxPos;
         ContentSize.Y = ViewSize.Y;
         break;
-    case 2:
+    case EReuseListStyle::VerticalGrid:
         ColNum = UKismetMathLibrary::Max((PaddingX + (int32)ViewSize.X) / (ItemWidth + PaddingX), 1);
         RowNum = UKismetMathLibrary::FCeil((float)ItemCount / ColNum);
         MaxPos = (ItemHeight + PaddingY) * RowNum - PaddingY;
@@ -246,31 +251,26 @@ void UReuseListC::DoReload()
         ContentSize.Y = MaxPos;
         break;
     }
-    UpdateContentSize(SizeBoxBg.Get());
-    UpdateContentSize(CanvasPanelList.Get());
+    UpdateContentSize(SizeBoxBg);
+    UpdateContentSize(CanvasPanelList);
     for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
         auto uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
         ReleaseItem(uw);
     }
     ItemMap.Empty();
-    if (ReloadJumpBegin) {
-        ScrollBoxList->ScrollToStart();
+    float TmpMaxOffset = 0.f;
+    if (Style == EReuseListStyle::Vertical || Style == EReuseListStyle::VerticalGrid) {
+        TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - ViewSize.Y, 0.f);
     }
     else {
-        float TmpMaxOffset = 0.f;
-        if (Style == 0 || Style == 2) {
-            TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - ViewSize.Y, 0.f);
-        }
-        else {
-            TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - ViewSize.X, 0.f);
-        }
-        float cur = ScrollBoxList->GetScrollOffset();
-        if (cur <= 0.f) {
-            ScrollBoxList->ScrollToStart();
-        }
-        if (cur >= TmpMaxOffset) {
-            ScrollBoxList->ScrollToEnd();
-        }
+        TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - ViewSize.X, 0.f);
+    }
+    float cur = ScrollBoxList->GetScrollOffset();
+    if (cur <= 0.f) {
+        ScrollBoxList->ScrollToStart();
+    }
+    if (cur >= TmpMaxOffset) {
+        ScrollBoxList->ScrollToEnd();
     }
     ScrollUpdate(ScrollBoxList->GetScrollOffset());
 }
@@ -284,11 +284,12 @@ void UReuseListC::DoJump()
     int32 ItemWidthAndPad = ItemWidth + PaddingX;
     int32 ItemHeightAndPad = ItemHeight + PaddingY;
     int32 tmpItemOffset = 0;
-    if (Style == 0 || Style == 2) {
-        if (JumpIdxStyle == 1) {
+
+    if (Style == EReuseListStyle::Vertical || Style == EReuseListStyle::VerticalGrid) {
+        if (JumpStyle == EReuseListJumpStyle::Begin) {
             tmpItemOffset = 0;
         }
-        else if (JumpIdxStyle == 2) {
+        else if (JumpStyle == EReuseListJumpStyle::End) {
             tmpItemOffset = (int32)ViewSize.Y - ItemHeightAndPad;
         }
         else {
@@ -296,17 +297,18 @@ void UReuseListC::DoJump()
         }
     }
     else {
-        if (JumpIdxStyle == 1) {
+        if (JumpStyle == EReuseListJumpStyle::Begin) {
             tmpItemOffset = 0;
         }
-        else if (JumpIdxStyle == 2) {
+        else if (JumpStyle == EReuseListJumpStyle::End) {
             tmpItemOffset = (int32)ViewSize.X - ItemWidthAndPad;
         }
         else {
             tmpItemOffset = ((int32)ViewSize.X - ItemWidthAndPad) / 2;
         }
     }
-    if (Style == 0) {
+
+    if (Style == EReuseListStyle::Vertical) {
         if (ContentSize.Y < ViewSize.Y) {
             return;
         }
@@ -317,19 +319,20 @@ void UReuseListC::DoJump()
             tmpScroll = ItemHeightAndPad * JumpIdx - tmpItemOffset;
         }
     }
-    else if (Style == 1) {
+    else if (Style == EReuseListStyle::Horizontal) {
         if (ContentSize.X < ViewSize.X) {
             return;
         }
         tmpScroll = ItemWidthAndPad * JumpIdx - tmpItemOffset;
     }
-    else if (Style == 2) {
+    else if (Style == EReuseListStyle::VerticalGrid) {
         if (ContentSize.Y < ViewSize.Y) {
             return;
         }
         tmpScroll = ItemHeightAndPad * (JumpIdx / ColNum) - tmpItemOffset;
     }
-    if (Style == 0 || Style == 2) {
+
+    if (Style == EReuseListStyle::Vertical || Style == EReuseListStyle::VerticalGrid) {
         tmpScroll = UKismetMathLibrary::FMax(tmpScroll, 0);
         tmpScroll = UKismetMathLibrary::FMin(tmpScroll, ContentSize.Y - ViewSize.Y);
     }
@@ -347,10 +350,10 @@ UUserWidget* UReuseListC::NewItem()
         auto tmp = ItemPool[0];
         ItemPool.RemoveAt(0);
         tmp->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-        return tmp.Get();
+        return tmp;
     }
     else {
-        UUserWidget* widget = CreateWidget<UUserWidget>(GetWorld(), ItemClass.Get());
+        UUserWidget* widget = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
         CanvasPanelList->AddChild(widget);
         widget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
         OnCreateItem.Broadcast(widget);
@@ -368,7 +371,7 @@ void UReuseListC::Update()
 {
     int32 tmpLine = 0;
     float tmpOffset = ScrollBoxList->GetScrollOffset();
-    if (Style == 0 || Style == 2) {
+    if (Style == EReuseListStyle::Vertical || Style == EReuseListStyle::VerticalGrid) {
         tmpLine = (int32)tmpOffset / (ItemHeight + PaddingY);
     }
     else {
@@ -388,4 +391,9 @@ void UReuseListC::ClearCache()
         OnDestroyItem.Broadcast(uw);
     }
     CanvasPanelList->ClearChildren();
+}
+
+bool UReuseListC::IsValidClass() const
+{
+    return ItemClass != nullptr;
 }

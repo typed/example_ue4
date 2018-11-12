@@ -22,53 +22,38 @@ public:
 
     URadarChart(const FObjectInitializer& ObjectInitializer);
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Appearance)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Property)
     int32 SideCount;
-    UPROPERTY()
-    FGetInt32 SideCountDelegate;
-    PROPERTY_BINDING_IMPLEMENTATION(int32, SideCount);
     UFUNCTION(BlueprintCallable, Category = Appearance)
     void SetSideCount(int32 __SideCount);
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Appearance)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Property)
     float Antialias;
-    UPROPERTY()
-    FGetFloat AntialiasDelegate;
-    PROPERTY_BINDING_IMPLEMENTATION(float, Antialias);
     UFUNCTION(BlueprintCallable, Category = Appearance)
     void SetAntialias(float __Antialias);
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Appearance)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Property)
     FSlateBrush Brush;
-    UPROPERTY()
-    FGetSlateBrush BrushDelegate;
-    PROPERTY_BINDING_IMPLEMENTATION(FSlateBrush, Brush);
     UFUNCTION(BlueprintCallable, Category = Appearance)
     void SetBrush(const FSlateBrush& __Brush);
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Appearance)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Property)
     float MinProgress;
-    UPROPERTY()
-    FGetFloat MinProgressDelegate;
-    PROPERTY_BINDING_IMPLEMENTATION(float, MinProgress);
     UFUNCTION(BlueprintCallable, Category = Appearance)
     void SetMinProgress(float __MinProgress);
 
 #if WITH_EDITOR
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Appearance)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Property)
     FText TestProgress;
-    UPROPERTY()
-    FGetText TestProgressDelegate;
-    PROPERTY_BINDING_IMPLEMENTATION(FText, TestProgress);
 #endif
 
-    UFUNCTION(BlueprintCallable, Category = Appearance)
+    UFUNCTION(BlueprintCallable, Category = Property)
     void SetProgress(int32 i, float __Progress);
 
-    UFUNCTION(BlueprintCallable, Category = Appearance)
+    UFUNCTION(BlueprintCallable, Category = Property)
     float GetProgress(int32 i) const;
 
-    UFUNCTION(BlueprintCallable, Category = Appearance)
+    UFUNCTION(BlueprintCallable, Category = Property)
     void ResetProgress();
 
     //~ Begin UWidget Interface
