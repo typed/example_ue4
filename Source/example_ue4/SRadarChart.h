@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
 #include "Runtime/SlateCore/Public/Styling/SlateBrush.h"
 #include "Runtime/SlateCore/Public/Rendering/RenderingCommon.h"
 #include "Runtime/Engine/Classes/Slate/SlateBrushAsset.h"

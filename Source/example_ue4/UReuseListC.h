@@ -85,29 +85,29 @@ public:
 
 protected:
 
-    UPROPERTY(EditAnywhere, Category = Property)
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 ItemCacheNum;
 
-    UPROPERTY(EditAnywhere, Category = Property)
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 ItemWidth;
 
-    UPROPERTY(EditAnywhere, Category = Property)
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 ItemHeight;
 
-    UPROPERTY(EditAnywhere, Category = Property)
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PaddingX;
 
-    UPROPERTY(EditAnywhere, Category = Property)
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PaddingY;
 
     UPROPERTY(EditAnywhere, Category = Property)
     EReuseListStyle Style;
 
-    UPROPERTY(EditAnywhere, Category = Property)
-    UWidgetBlueprintGeneratedClass* ItemClass;
+    UPROPERTY(EditAnywhere, Category = Property, meta = (BlueprintBaseOnly = ""))
+    UClass* ItemClass;
 
-    UPROPERTY(EditAnywhere, Category = Property)
-    int32 TestCount;
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
+    int32 PreviewCount;
 
     /** Function called after the underlying SWidget is constructed. */
     virtual void OnWidgetRebuilt();

@@ -31,7 +31,7 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , JumpIdx(0)
     , JumpStyle(EReuseListJumpStyle::Middle)
     , NeedJump(false)
-    , TestCount(0)
+    , PreviewCount(0)
 {
 }
 
@@ -58,7 +58,7 @@ bool UReuseListC::Initialize()
 void UReuseListC::SynchronizeProperties()
 {
     Super::SynchronizeProperties();
-    if (GetWorld()->IsPreviewWorld()) {
+    if (!GetWorld()->IsGameWorld()) {
         GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UReuseListC::OnCallReload);
     }
 }
@@ -216,15 +216,15 @@ void UReuseListC::RemoveNotUsed()
 void UReuseListC::OnWidgetRebuilt()
 {
     Super::OnWidgetRebuilt();
-    if (GetWorld()->IsPreviewWorld()) {
+    if (!GetWorld()->IsGameWorld()) {
         GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UReuseListC::OnCallReload);
     }
 }
 
 void UReuseListC::OnCallReload()
 {
-    if (GetWorld()->IsPreviewWorld()) {
-        Reload(TestCount);
+    if (!GetWorld()->IsGameWorld()) {
+        Reload(PreviewCount);
     }
 }
 
