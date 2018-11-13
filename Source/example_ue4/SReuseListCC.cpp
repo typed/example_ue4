@@ -14,19 +14,25 @@ void SReuseListCC::Construct(const FArguments& InArgs)
         SNew(SScrollBox)
         + SScrollBox::Slot()
         [
-            SNew(STextBlock)
-            .Text(FText::FromString(TEXT("aaaaaa")))
+            SNew(SGridPanel)
+            .FillColumn(0, 0.5f)
+            .FillColumn(1, 0.5f)
+            // SBorder
+            + SGridPanel::Slot(0, 0)
+            [
+                SNew(STextBlock)
+                .Text(FText::FromString(TEXT("aaaaaa")))
+            ]
+            + SGridPanel::Slot(0, 1)
+            [
+                SNew(STextBlock)
+                .Text(FText::FromString(TEXT("bbbbbb")))
+            ]
         ]
     ];
 }
 
-int32 SReuseListCC::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+void SReuseListCC::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
-    return LayerId;
-}
 
-FVector2D SReuseListCC::ComputeDesiredSize(float) const
-{
-    FVector2D sz;
-    return sz;
 }
