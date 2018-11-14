@@ -120,6 +120,7 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PreviewCount;
+    FTimerHandle tmhOnPreviewTick;
 
     virtual void NativeConstruct();
     virtual void NativeDestruct();
@@ -161,7 +162,5 @@ protected:
     int32 JumpIdx;
     EReuseListJumpStyle JumpStyle;
     bool NeedJump;
-
-    FTimerHandle tmhOnPreviewTick;
 
 };
