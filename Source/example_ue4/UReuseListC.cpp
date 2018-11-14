@@ -257,9 +257,7 @@ void UReuseListC::RemoveNotUsed()
 
 void UReuseListC::OnPreviewTick()
 {
-    if (!GetWorld()->IsGameWorld()) {
-        Reload(PreviewCount);
-    }
+    Reload(PreviewCount);
 }
 
 void UReuseListC::DoReload()
