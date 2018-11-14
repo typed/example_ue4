@@ -75,12 +75,6 @@ public:
     virtual void Clear();
 
     UFUNCTION(BlueprintCallable)
-    virtual int32 GetCurrentBegin();
-
-    UFUNCTION(BlueprintCallable)
-    virtual int32 GetCurrentEnd();
-
-    UFUNCTION(BlueprintCallable)
     virtual void ClearCache();
 
     //~ Begin UWidget Interface
@@ -88,6 +82,18 @@ public:
     //~ End UWidget Interface
 
 protected:
+
+    //UPROPERTY(EditAnywhere, Category = Property)
+    //FScrollBoxStyle ScrollBoxStyle;
+
+    //UPROPERTY(EditAnywhere, Category = Property)
+    //FScrollBarStyle ScrollBarStyle;
+
+	UPROPERTY(EditAnywhere, Category = Property)
+	ESlateVisibility ScrollBarVisibility;
+
+	UPROPERTY(EditAnywhere, Category = Property)
+	FVector2D ScrollBarThickness;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 ItemCacheNum;
@@ -116,6 +122,9 @@ protected:
     /** Function called after the underlying SWidget is constructed. */
     virtual void OnWidgetRebuilt();
 
+    virtual void NativeConstruct();
+    virtual void NativeDestruct();
+
     virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 
     virtual void ScrollUpdate(float __Offset);
@@ -127,10 +136,9 @@ protected:
     virtual void Update();
     virtual void DoJump();
 
-private:
-
-    UFUNCTION()
     void OnCallReload();
+
+    void OnPreviewCheck();
 
     bool IsValidClass() const;
 
@@ -156,7 +164,5 @@ private:
     int32 JumpIdx;
     EReuseListJumpStyle JumpStyle;
     bool NeedJump;
-
-    FTimerHandle TickHandle;
 
 };

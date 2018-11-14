@@ -32,7 +32,9 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , JumpStyle(EReuseListJumpStyle::Middle)
     , NeedJump(false)
     , PreviewCount(0)
+    , ScrollBarVisibility(ESlateVisibility::Collapsed)
 {
+    
 }
 
 UReuseListC::~UReuseListC()
@@ -43,10 +45,6 @@ UReuseListC::~UReuseListC()
 void UReuseListC::BeginDestroy()
 {
     Super::BeginDestroy();
-    if (TickHandle.IsValid()) {
-        GetWorld()->GetTimerManager().ClearTimer(TickHandle);
-        TickHandle.Invalidate();
-    }
 }
 
 bool UReuseListC::Initialize()
@@ -72,9 +70,23 @@ bool UReuseListC::Initialize()
 void UReuseListC::SynchronizeProperties()
 {
     Super::SynchronizeProperties();
+
+    ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
+    ScrollBoxList->SetScrollbarThickness(ScrollBarThickness);
+
     if (!GetWorld()->IsGameWorld()) {
         OnCallReload();
     }
+}
+
+void UReuseListC::NativeConstruct()
+{
+    Super::NativeConstruct();
+}
+
+void UReuseListC::NativeDestruct()
+{
+    Super::NativeDestruct();
 }
 
 void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -99,7 +111,7 @@ void UReuseListC::Reload(int32 __ItemCount)
     else {
         ScrollBoxList->SetOrientation(Orient_Horizontal);
     }
-    ScrollBoxList->SetScrollBarVisibility(ESlateVisibility::Collapsed);
+    ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
     DoReload();
 }
 
@@ -128,16 +140,6 @@ void UReuseListC::JumpByIdx(int32 __Idx, EReuseListJumpStyle __Style)
 void UReuseListC::Clear()
 {
     Reload(0);
-}
-
-int32 UReuseListC::GetCurrentBegin()
-{
-    return BIdx;
-}
-
-int32 UReuseListC::GetCurrentEnd()
-{
-    return EIdx;
 }
 
 void UReuseListC::ScrollUpdate(float __Offset)
@@ -230,11 +232,8 @@ void UReuseListC::RemoveNotUsed()
 void UReuseListC::OnWidgetRebuilt()
 {
     Super::OnWidgetRebuilt();
-    //if (!GetWorld()->IsGameWorld()) {
-    //    GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UReuseListC::OnCallReload);
-    //}
-    if (!GetWorld()->IsGameWorld() && !TickHandle.IsValid()) {
-        GetWorld()->GetTimerManager().SetTimer(TickHandle, this, &UReuseListC::OnCallReload, 1, true);
+    if (!GetWorld()->IsGameWorld()) {
+        GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UReuseListC::OnCallReload);
     }
 }
 
