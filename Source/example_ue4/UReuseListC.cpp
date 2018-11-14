@@ -35,6 +35,20 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
 {
 }
 
+UReuseListC::~UReuseListC()
+{
+    
+}
+
+void UReuseListC::BeginDestroy()
+{
+    Super::BeginDestroy();
+    if (TickHandle.IsValid()) {
+        GetWorld()->GetTimerManager().ClearTimer(TickHandle);
+        TickHandle.Invalidate();
+    }
+}
+
 bool UReuseListC::Initialize()
 {
     if (!Super::Initialize())
@@ -59,7 +73,7 @@ void UReuseListC::SynchronizeProperties()
 {
     Super::SynchronizeProperties();
     if (!GetWorld()->IsGameWorld()) {
-        GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UReuseListC::OnCallReload);
+        OnCallReload();
     }
 }
 
@@ -216,8 +230,11 @@ void UReuseListC::RemoveNotUsed()
 void UReuseListC::OnWidgetRebuilt()
 {
     Super::OnWidgetRebuilt();
-    if (!GetWorld()->IsGameWorld()) {
-        GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UReuseListC::OnCallReload);
+    //if (!GetWorld()->IsGameWorld()) {
+    //    GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UReuseListC::OnCallReload);
+    //}
+    if (!GetWorld()->IsGameWorld() && !TickHandle.IsValid()) {
+        GetWorld()->GetTimerManager().SetTimer(TickHandle, this, &UReuseListC::OnCallReload, 1, true);
     }
 }
 
@@ -354,6 +371,7 @@ UUserWidget* UReuseListC::NewItem()
     }
     else {
         UUserWidget* widget = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
+        ensure(widget);
         CanvasPanelList->AddChild(widget);
         widget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
         OnCreateItem.Broadcast(widget);

@@ -41,6 +41,10 @@ public:
 
     UReuseListC(const FObjectInitializer& ObjectInitializer);
 
+    ~UReuseListC();
+
+    virtual void BeginDestroy();
+
     virtual bool Initialize();
 
     UPROPERTY(BlueprintAssignable)
@@ -104,7 +108,7 @@ protected:
     EReuseListStyle Style;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (BlueprintBaseOnly = ""))
-    UClass* ItemClass;
+    UWidgetBlueprintGeneratedClass* ItemClass;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PreviewCount;
@@ -123,10 +127,10 @@ protected:
     virtual void Update();
     virtual void DoJump();
 
+private:
+
     UFUNCTION()
     void OnCallReload();
-
-private:
 
     bool IsValidClass() const;
 
@@ -152,5 +156,7 @@ private:
     int32 JumpIdx;
     EReuseListJumpStyle JumpStyle;
     bool NeedJump;
+
+    FTimerHandle TickHandle;
 
 };
