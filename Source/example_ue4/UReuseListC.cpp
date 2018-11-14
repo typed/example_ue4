@@ -31,20 +31,19 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , JumpIdx(0)
     , JumpStyle(EReuseListJumpStyle::Middle)
     , NeedJump(false)
-    , PreviewCount(0)
+    , PreviewCount(5)
     , ScrollBarVisibility(ESlateVisibility::Collapsed)
 {
-    
+    ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
+    ScrollBoxStyle.TopShadowBrush = FSlateNoResource();
+    ScrollBoxStyle.RightShadowBrush = FSlateNoResource();
+    ScrollBoxStyle.BottomShadowBrush = FSlateNoResource();
+    tmhOnPreviewTick.Invalidate();
 }
 
 UReuseListC::~UReuseListC()
 {
     
-}
-
-void UReuseListC::BeginDestroy()
-{
-    Super::BeginDestroy();
 }
 
 bool UReuseListC::Initialize()
@@ -64,7 +63,20 @@ bool UReuseListC::Initialize()
     CanvasPanelList = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelList"))));
     ensure(CanvasPanelList);
 
+    if (!GetWorld()->IsGameWorld() && !tmhOnPreviewTick.IsValid()) {
+        GetWorld()->GetTimerManager().SetTimer(tmhOnPreviewTick, this, &UReuseListC::OnPreviewTick, 0.5f, true);
+    }
+
     return true;
+}
+
+void UReuseListC::ReleaseSlateResources(bool bReleaseChildren)
+{
+    Super::ReleaseSlateResources(bReleaseChildren);
+    if (tmhOnPreviewTick.IsValid()) {
+        GetWorld()->GetTimerManager().ClearTimer(tmhOnPreviewTick);
+        tmhOnPreviewTick.Invalidate();
+    }
 }
 
 void UReuseListC::SynchronizeProperties()
@@ -73,9 +85,23 @@ void UReuseListC::SynchronizeProperties()
 
     ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
     ScrollBoxList->SetScrollbarThickness(ScrollBarThickness);
+    ScrollBoxList->WidgetBarStyle = ScrollBarStyle;
+    ScrollBoxList->WidgetStyle = ScrollBoxStyle;
 
     if (!GetWorld()->IsGameWorld()) {
-        OnCallReload();
+        bool bClearCache = false;
+        if (CanvasPanelList->GetChildrenCount() == 0) {
+            if (ItemPool.IsValidIndex(0)) {
+                bClearCache = ItemPool[0]->GetClass() != ItemClass;
+            }
+        }
+        else {
+            bClearCache = CanvasPanelList->GetChildAt(0)->GetClass() != ItemClass;
+        }
+        if (bClearCache) {
+            ClearCache();
+        }
+        Reload(PreviewCount);
     }
 }
 
@@ -229,15 +255,7 @@ void UReuseListC::RemoveNotUsed()
     }
 }
 
-void UReuseListC::OnWidgetRebuilt()
-{
-    Super::OnWidgetRebuilt();
-    if (!GetWorld()->IsGameWorld()) {
-        GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UReuseListC::OnCallReload);
-    }
-}
-
-void UReuseListC::OnCallReload()
+void UReuseListC::OnPreviewTick()
 {
     if (!GetWorld()->IsGameWorld()) {
         Reload(PreviewCount);

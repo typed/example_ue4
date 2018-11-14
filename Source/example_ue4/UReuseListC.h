@@ -43,8 +43,6 @@ public:
 
     ~UReuseListC();
 
-    virtual void BeginDestroy();
-
     virtual bool Initialize();
 
     UPROPERTY(BlueprintAssignable)
@@ -77,17 +75,21 @@ public:
     UFUNCTION(BlueprintCallable)
     virtual void ClearCache();
 
+    //UVisual interface
+    virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+    //~ End UVisual Interface
+
     //~ Begin UWidget Interface
     virtual void SynchronizeProperties() override;
     //~ End UWidget Interface
 
 protected:
 
-    //UPROPERTY(EditAnywhere, Category = Property)
-    //FScrollBoxStyle ScrollBoxStyle;
+    UPROPERTY(EditAnywhere, Category = Property)
+    FScrollBoxStyle ScrollBoxStyle;
 
-    //UPROPERTY(EditAnywhere, Category = Property)
-    //FScrollBarStyle ScrollBarStyle;
+    UPROPERTY(EditAnywhere, Category = Property)
+    FScrollBarStyle ScrollBarStyle;
 
 	UPROPERTY(EditAnywhere, Category = Property)
 	ESlateVisibility ScrollBarVisibility;
@@ -119,9 +121,6 @@ protected:
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PreviewCount;
 
-    /** Function called after the underlying SWidget is constructed. */
-    virtual void OnWidgetRebuilt();
-
     virtual void NativeConstruct();
     virtual void NativeDestruct();
 
@@ -136,9 +135,7 @@ protected:
     virtual void Update();
     virtual void DoJump();
 
-    void OnCallReload();
-
-    void OnPreviewCheck();
+    void OnPreviewTick();
 
     bool IsValidClass() const;
 
@@ -164,5 +161,7 @@ protected:
     int32 JumpIdx;
     EReuseListJumpStyle JumpStyle;
     bool NeedJump;
+
+    FTimerHandle tmhOnPreviewTick;
 
 };
