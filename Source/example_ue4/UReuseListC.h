@@ -11,12 +11,16 @@ Source: https://github.com/typed/example_ue4
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Runtime/UMG/Public/UMG.h"
 #include "UReuseListC.generated.h"
 
 /**
  * 
  */
+
+class UScrollBox;
+class UCanvasPanel;
+class USizeBox;
+class UWidgetBlueprintGeneratedClass;
 
 UENUM(BlueprintType)
 enum class EReuseListStyle : uint8

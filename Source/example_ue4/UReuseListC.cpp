@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UReuseListC.h"
+#include "Runtime/UMG/Public/UMG.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 #include "LogDefine.h"
 
