@@ -11,12 +11,14 @@ Source: https://github.com/typed/example_ue4
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Runtime/UMG/Public/UMG.h"
 #include "UReusePageC.generated.h"
 
 /**
  * 
  */
+
+class UCanvasPanel;
+
 UCLASS()
 class EXAMPLE_UE4_API UReusePageC : public UUserWidget
 {

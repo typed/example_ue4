@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UReusePageC.h"
+#include "Runtime/UMG/Public/Components/CanvasPanel.h"
+#include "Runtime/UMG/Public/Components/CanvasPanelSlot.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetBlueprintLibrary.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 #include "LogDefine.h"

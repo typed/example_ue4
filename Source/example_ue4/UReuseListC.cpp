@@ -1,7 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UReuseListC.h"
-#include "Runtime/UMG/Public/UMG.h"
+#include "Runtime/UMG/Public/Components/SizeBox.h"
+#include "Runtime/UMG/Public/Components/CanvasPanel.h"
+#include "Runtime/UMG/Public/Components/CanvasPanelSlot.h"
+#include "Runtime/UMG/Public/Components/ScrollBox.h"
+#include "Runtime/UMG/Public/Blueprint/WidgetBlueprintGeneratedClass.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 #include "LogDefine.h"
 
