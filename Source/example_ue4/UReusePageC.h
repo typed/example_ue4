@@ -1,5 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+/**************************************************************************
+Author: levingong
+Date: 2018-11-15
+Description: ÷ÿ”√“≥«©
+Source: https://github.com/typed/example_ue4
+**************************************************************************/
+
 #pragma once
 
 #include "CoreMinimal.h"

@@ -1,3 +1,4 @@
+math.randomseed(os.time())
 US = import("UtilScript")
 UICom = US.LoadBpClass("/Game/Common/UICom.UICom_C")
 MRI = require("memory_tool/MemoryReferenceInfo")

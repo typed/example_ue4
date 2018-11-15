@@ -2,7 +2,6 @@
 
 
 ExampleReuseList = ClassPanel("ExampleReuseList", '/Game/Example/ExampleReuseList/ExampleReuseListUI.ExampleReuseListUI')
-
 function ExampleReuseList:construct()
 
     self.ItmList = {}
@@ -44,6 +43,7 @@ function ExampleReuseList:OnClickItem1()
     self.widget.ReuseListC.OnCreateItem:Add(function(widget) TestReuseListItem.bind(widget, self) end)
     self.widget.ReuseListC.OnDestroyItem:Clear()
     self.widget.ReuseListC.OnDestroyItem:Add(function(widget) widget:GetLuaTable():unbind() end)
+    --self.widget.ReuseListC:ChangeItemClass("/Game/Example/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
     self.widget.ReuseListC:Reload(5000)
 end
 
@@ -59,20 +59,51 @@ function ExampleReuseList:OnClear()
 end
 
 TestReuseListItem = class("TestReuseListItem", "/Game/Example/ExampleReuseList/TestReuseListItem.TestReuseListItem")
-
 function TestReuseListItem:construct(parent)
     self.m_parent = parent
     self.m_idx = 0
     self.widget.Button_BG.OnClicked:Add(function() self:OnClickItem1BG() end)
+    self.widget.ReuseListCBP.OnUpdateItem:Clear()
+    self.widget.ReuseListCBP.OnUpdateItem:Add(function(...) self:OnUpdateItem(...) end)
+    self.widget.ReuseListCBP.OnCreateItem:Clear()
+    self.widget.ReuseListCBP.OnCreateItem:Add(function(widget) TestReuseListItem3.bind(widget, self) end)
+    self.widget.ReuseListCBP.OnDestroyItem:Clear()
+    self.widget.ReuseListCBP.OnDestroyItem:Add(function(widget) widget:GetLuaTable():unbind() end)
+    self.widget.ReuseListCBP:Reload(math.random(10))
 end
 function TestReuseListItem:destruct()
     self.widget.Button_BG.OnClicked:Clear()
+    self.widget.ReuseListCBP:ClearCache()
+    self.widget.ReuseListCBP.OnUpdateItem:Clear()
+    self.widget.ReuseListCBP.OnCreateItem:Clear()
+    self.widget.ReuseListCBP.OnDestroyItem:Clear()
 end
 function TestReuseListItem:OnClickItem1BG()
     --local itm = self.ItmList[self.m_idx]
-    log("ExampleReuseList.OnClickItem1BG idx="..self.m_idx)
+    log("TestReuseListItem idx="..self.m_idx)
 end
 function TestReuseListItem:UpdateData(idx)
     self.m_idx = idx
-    self.widget.TextBlockName:SetText(self.m_idx)
+    self.widget:SetData(self.m_idx)
+end
+function TestReuseListItem:OnUpdateItem(widget,idx)
+    widget:GetLuaTable():UpdateData(idx)
+end
+
+TestReuseListItem3 = class("TestReuseListItem3", "/Game/Example/ExampleReuseList/TestReuseListItem3.TestReuseListItem3")
+function TestReuseListItem3:construct(parent)
+    self.m_parent = parent
+    self.m_idx = 0
+    self.widget.Button_103.OnClicked:Add(function() self:OnClick() end)
+end
+function TestReuseListItem3:destruct()
+    self.widget.Button_103.OnClicked:Clear()
+end
+function TestReuseListItem3:UpdateData(idx)
+    self.m_idx = idx
+    self.widget:SetData(self.m_idx)
+end
+function TestReuseListItem3:OnClick()
+    --local itm = self.ItmList[self.m_idx]
+    log("TestReuseListItem idx="..self.m_parent.m_idx.." TestReuseListItem3 idx="..self.m_idx)
 end

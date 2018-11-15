@@ -63,10 +63,6 @@ bool UReuseListC::Initialize()
     CanvasPanelList = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelList"))));
     ensure(CanvasPanelList);
 
-    if (!GetWorld()->IsGameWorld() && !tmhOnPreviewTick.IsValid()) {
-        GetWorld()->GetTimerManager().SetTimer(tmhOnPreviewTick, this, &UReuseListC::OnPreviewTick, 0.5f, true);
-    }
-
     return true;
 }
 
@@ -88,7 +84,7 @@ void UReuseListC::SynchronizeProperties()
     ScrollBoxList->WidgetBarStyle = ScrollBarStyle;
     ScrollBoxList->WidgetStyle = ScrollBoxStyle;
 
-    if (!GetWorld()->IsGameWorld()) {
+    if (GetWorld() && !GetWorld()->IsGameWorld()) {
         bool bClearCache = false;
         if (CanvasPanelList->GetChildrenCount() == 0) {
             if (ItemPool.IsValidIndex(0)) {
@@ -102,6 +98,11 @@ void UReuseListC::SynchronizeProperties()
             ClearCache();
         }
         Reload(PreviewCount);
+
+        if (!tmhOnPreviewTick.IsValid()) {
+            GetWorld()->GetTimerManager().SetTimer(tmhOnPreviewTick, this, &UReuseListC::OnPreviewTick, 0.5f, true);
+        }
+
     }
 }
 
@@ -202,10 +203,10 @@ void UReuseListC::ScrollUpdate(float __Offset)
                 auto cps = Cast<UCanvasPanelSlot>(w->Slot);
                 cps->SetAnchors(FAnchors(0, 0, 0, 0));
                 if (ItemHeight <= 0) {
-                    cps->SetOffsets(FMargin(i * ItemWidthAndPad, 0, ItemWidth, ViewSize.X));
+                    cps->SetOffsets(FMargin(i * ItemWidthAndPad, 0, ItemWidth, ViewSize.Y));
                 }
                 else {
-                    cps->SetOffsets(FMargin(i * ItemWidthAndPad, (ViewSize.X - ItemHeight) / 2.f, ItemWidth, ItemHeight));
+                    cps->SetOffsets(FMargin(i * ItemWidthAndPad, (ViewSize.Y - ItemHeight) / 2.f, ItemWidth, ItemHeight));
                 }
                 ItemMap.Add(i, w);
                 OnUpdateItem.Broadcast(w, i);
@@ -429,4 +430,15 @@ void UReuseListC::ClearCache()
 bool UReuseListC::IsValidClass() const
 {
     return ItemClass != nullptr;
+}
+
+bool UReuseListC::ChangeItemClass(const FString& StrItemClass)
+{
+    UWidgetBlueprintGeneratedClass* _WidgetClass = ::LoadObject<UWidgetBlueprintGeneratedClass>(nullptr, *StrItemClass);
+    if (_WidgetClass == nullptr)
+        return false;
+    Clear();
+    ClearCache();
+    ItemClass = _WidgetClass;
+    return true;
 }
