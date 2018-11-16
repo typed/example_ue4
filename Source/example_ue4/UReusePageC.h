@@ -26,48 +26,70 @@ class EXAMPLE_UE4_API UReusePageC : public UUserWidget
 	
 public:
 
-    DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEventDropDelegate);
-    DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEventDropStartDelegate);
-    DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEventUpdateItemDelegate, UUserWidget*, widget, int32, idx);
-    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEventPageChangedDelegate, int32, PageIdx);
-    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEventCreateItemDelegate, UUserWidget*, widget);
-    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEventDestroyItemDelegate, UUserWidget*, widget);
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateItemDelegate, UUserWidget*, widget, int32, idx);
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPageChangedDelegate, int32, PageIdx);
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCreateItemDelegate, UUserWidget*, widget);
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDestroyItemDelegate, UUserWidget*, widget);
 
     UReusePageC(const FObjectInitializer& ObjectInitializer);
 
     UPROPERTY(BlueprintAssignable)
-    FEventDropDelegate EventDrop;
+    FOnUpdateItemDelegate OnUpdateItem;
 
     UPROPERTY(BlueprintAssignable)
-    FEventDropStartDelegate EventDropStart;
+    FOnPageChangedDelegate OnPageChanged;
 
     UPROPERTY(BlueprintAssignable)
-    FEventUpdateItemDelegate EventUpdateItem;
+    FOnCreateItemDelegate OnCreateItem;
 
     UPROPERTY(BlueprintAssignable)
-    FEventPageChangedDelegate EventPageChanged;
-
-    UPROPERTY(BlueprintAssignable)
-    FEventCreateItemDelegate EventCreateItem;
-
-    UPROPERTY(BlueprintAssignable)
-    FEventDestroyItemDelegate EventDestroyItem;
+    FOnDestroyItemDelegate OnDestroyItem;
 
     UFUNCTION(BlueprintCallable)
-    virtual void Reload(UClass* __ItemClass, int32 __Count, bool __Loop = false, bool __StyleUpDown = false, int32 __DefaultPage = 0);
+    virtual bool Reload(int32 __Count);
 
     UFUNCTION(BlueprintCallable)
     virtual void MoveNextPage();
 
     UFUNCTION(BlueprintCallable)
-    virtual void SetPageByIdx(int32 __Idx);
+    virtual void SetPage(int32 __Idx);
+
+    UFUNCTION(BlueprintCallable)
+    virtual int32 GetPage() const { return Page; }
 
     virtual bool Initialize();
 
     UFUNCTION(BlueprintCallable)
     virtual void ClearCache();
 
+    //UVisual interface
+    virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+    //~ End UVisual Interface
+
+    //~ Begin UWidget Interface
+    virtual void SynchronizeProperties() override;
+    //~ End UWidget Interface
+
 protected:
+
+    UPROPERTY(EditAnywhere, Category = Property, meta = (BlueprintBaseOnly = ""))
+    UWidgetBlueprintGeneratedClass* ItemClass;
+
+    UPROPERTY(EditAnywhere, Category = Property)
+    bool Loop;
+
+    UPROPERTY(EditAnywhere, Category = Property)
+    bool StyleUpDown;
+
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
+    int32 PreviewCount;
+    FTimerHandle tmhOnPreviewTick;
+
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "1"))
+    float DChgPageParam;
+
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "1"))
+    float SlipParam;
 
     virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 
@@ -99,10 +121,11 @@ protected:
     void UpdateSlip();
     void UpdatePage();
 
-private:
+    void OnPreviewTick();
+
+    bool IsValidClass() const;
 
     UCanvasPanel* CanvasPanelRoot;
-    UClass* ItemClass;
     FVector2D ViewSize;
     TMap<int32, UUserWidget* > ItemMap;
     TArray< UUserWidget* > ItemPool;
@@ -116,12 +139,8 @@ private:
     float DStart;
     float DOffset;
     float DDelta;
-    float DChgPageParam;
     float Slip;
-    float SlipParam;
     bool IsDrag;
-    bool StyleUpDown;
-    bool Loop;
     bool NeedReload;
     bool NeedUpdateOffset;
     bool NeedUpdateSlip;
@@ -129,3 +148,5 @@ private:
 
 	
 };
+
+DECLARE_LOG_CATEGORY_EXTERN(LogUReusePageC, Verbose, All);

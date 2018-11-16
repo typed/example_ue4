@@ -7,7 +7,8 @@
 #include "Runtime/UMG/Public/Components/ScrollBox.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetBlueprintGeneratedClass.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
-#include "LogDefine.h"
+
+DEFINE_LOG_CATEGORY(LogUReuseListC);
 
 UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)

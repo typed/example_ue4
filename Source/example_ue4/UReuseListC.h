@@ -178,3 +178,5 @@ protected:
     bool NeedJump;
 
 };
+
+DECLARE_LOG_CATEGORY_EXTERN(LogUReuseListC, Verbose, All);

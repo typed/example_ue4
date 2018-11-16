@@ -5,7 +5,8 @@
 #include "Runtime/UMG/Public/Components/CanvasPanelSlot.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetBlueprintLibrary.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
-#include "LogDefine.h"
+
+DEFINE_LOG_CATEGORY(LogUReusePageC);
 
 UReusePageC::UReusePageC(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
@@ -21,9 +22,9 @@ UReusePageC::UReusePageC(const FObjectInitializer& ObjectInitializer)
     , DStart(0)
     , DOffset(0)
     , DDelta(0)
-    , DChgPageParam(0)
+    , DChgPageParam(4.f)
     , Slip(0)
-    , SlipParam(0)
+    , SlipParam(3.f)
     , IsDrag(false)
     , StyleUpDown(false)
     , Loop(false)
@@ -31,6 +32,7 @@ UReusePageC::UReusePageC(const FObjectInitializer& ObjectInitializer)
     , NeedUpdateOffset(false)
     , NeedUpdateSlip(false)
     , NeedUpdatePage(false)
+    , PreviewCount(3)
 {
 
 }
@@ -44,23 +46,50 @@ bool UReusePageC::Initialize()
     return true;
 }
 
+void UReusePageC::ReleaseSlateResources(bool bReleaseChildren)
+{
+    Super::ReleaseSlateResources(bReleaseChildren);
+    if (tmhOnPreviewTick.IsValid()) {
+        GetWorld()->GetTimerManager().ClearTimer(tmhOnPreviewTick);
+        tmhOnPreviewTick.Invalidate();
+    }
+}
+
+void UReusePageC::SynchronizeProperties()
+{
+    Super::SynchronizeProperties();
+
+    if (GetWorld() && !GetWorld()->IsGameWorld()) {
+
+        Reload(PreviewCount);
+
+        if (!tmhOnPreviewTick.IsValid()) {
+            GetWorld()->GetTimerManager().SetTimer(tmhOnPreviewTick, this, &UReusePageC::OnPreviewTick, 0.25f, true);
+        }
+        //GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UReusePageC::OnPreviewTick);
+
+    }
+}
+
 void UReusePageC::ClearCache()
 {
     ItemPool.Empty();
     for (int32 i = 0; i < CanvasPanelRoot->GetChildrenCount(); ++i) {
         auto uw = Cast<UUserWidget>(CanvasPanelRoot->GetChildAt(i));
-        EventDestroyItem.Broadcast(uw);
+        OnDestroyItem.Broadcast(uw);
     }
     CanvasPanelRoot->ClearChildren();
 }
 
 void UReusePageC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
+    if (!IsValidClass())
+        return;
     if (!ViewSize.Equals(GetCachedGeometry().GetLocalSize(), 0.0001f)) {
         NeedReload = true;
         IsDrag = false;
         StopSlip();
-        SetPageByIdx(Page);
+        SetPage(Page);
     }
     Update();
 }
@@ -69,7 +98,7 @@ FReply UReusePageC::NativeOnMouseButtonDown(const FGeometry& InGeometry, const F
 {
     Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
     FEventReply reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
-    //UE_LOG(LogMyUMG, Log, TEXT("UReusePageC::NativeOnMouseButtonDown"));
+    //UE_LOG(LogUReusePageC, Log, TEXT("UReusePageC::NativeOnMouseButtonDown"));
     return reply.NativeReply;
 }
 
@@ -79,38 +108,39 @@ void UReusePageC::NativeOnDragDetected(const FGeometry& InGeometry, const FPoint
     if (Count <= 0)
         return;
     OutOperation = UWidgetBlueprintLibrary::CreateDragDropOperation(nullptr);
-    //UE_LOG(LogMyUMG, Log, TEXT("UReusePageC::NativeOnDragDetected"));
+    //UE_LOG(LogUReusePageC, Log, TEXT("UReusePageC::NativeOnDragDetected"));
+    IsDrag = true;
+    DOffset = Offset;
+    FVector2D pt = GetMousePoint();
+    DStart = StyleUpDown ? pt.Y : pt.X;
+    StopSlip();
 }
 
 void UReusePageC::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
     Super::NativeOnDragCancelled(InDragDropEvent, InOperation);
-    //UE_LOG(LogMyUMG, Log, TEXT("UReusePageC::NativeOnDragCancelled"));
+    //UE_LOG(LogUReusePageC, Log, TEXT("UReusePageC::NativeOnDragCancelled"));
     Drop();
 }
 
 void UReusePageC::NativeOnMouseCaptureLost()
 {
     Super::NativeOnMouseCaptureLost();
-    //UE_LOG(LogMyUMG, Log, TEXT("UReusePageC::NativeOnMouseCaptureLost"));
+    //UE_LOG(LogUReusePageC, Log, TEXT("UReusePageC::NativeOnMouseCaptureLost"));
     Drop();
 }
 
-void UReusePageC::Reload(UClass* __ItemClass, int32 __Count, bool __Loop, bool __StyleUpDown, int32 __DefaultPage)
+bool UReusePageC::Reload(int32 __Count)
 {
+    if (__Count < 0)
+        return false;
     Count = __Count;
-    Loop = __Loop;
-    StyleUpDown = __StyleUpDown;
     NeedReload = true;
     IsDrag = false;
+    NeedUpdateOffset = true;
     StopSlip();
-    SetPageByIdx(__DefaultPage);
     if (Count == 1 && Loop) {
         Loop = false;
-    }
-    if (ItemClass != __ItemClass) {
-        ItemClass = __ItemClass;
-        ClearCache();
     }
     if (Count <= 0) {
         NeedReload = false;
@@ -118,17 +148,21 @@ void UReusePageC::Reload(UClass* __ItemClass, int32 __Count, bool __Loop, bool _
         NeedUpdateOffset = false;
         NeedUpdatePage = false;
     }
+    return true;
 }
 
 void UReusePageC::MoveNextPage()
 {
     if (Count > 0) {
         Slip = ViewLen;
+        if (!Loop) {
+            Slip = FMath::Min(Offset + Slip, (ViewLen * (Count - 1))) - Offset;
+        }
         NeedUpdateSlip = true;
     }
 }
 
-void UReusePageC::SetPageByIdx(int32 __Idx)
+void UReusePageC::SetPage(int32 __Idx)
 {
     if (Count > 0) {
         SelectPage = __Idx;
@@ -147,9 +181,10 @@ UUserWidget* UReusePageC::NewItem()
     }
     else {
         tmp = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
+        ensure(tmp);
         CanvasPanelRoot->AddChild(tmp);
         tmp->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-        EventCreateItem.Broadcast(tmp);
+        OnCreateItem.Broadcast(tmp);
     }
     return tmp;
 }
@@ -210,6 +245,9 @@ void UReusePageC::Drop()
     }
     DStart = 0.f;
     DOffset = 0.f;
+    int32 blk = (Offset + Tmp) / ViewLen;
+    Slip = BlockToOffset(blk) - Offset;
+    NeedUpdateSlip = true;
 }
 
 void UReusePageC::OffsetToPage()
@@ -218,7 +256,7 @@ void UReusePageC::OffsetToPage()
     int32 pg = BlockToPage(blk);
     if (Page != pg) {
         Page = pg;
-        EventPageChanged.Broadcast(Page);
+        OnPageChanged.Broadcast(Page);
     }
 }
 
@@ -316,7 +354,7 @@ void UReusePageC::UpdateOffset()
         if (ptr == nullptr) {
             curitem = NewItem();
             ItemMap.Add(itmIdx, curitem);
-            EventUpdateItem.Broadcast(curitem, itmIdx);
+            OnUpdateItem.Broadcast(curitem, itmIdx);
         }
         else {
             curitem = *ptr;
@@ -349,7 +387,9 @@ void UReusePageC::UpdateSlip()
         NeedUpdateSlip = false;
     }
     Slip -= tmp;
-    SetOffset(tmp + Offset);
+    float to = tmp + Offset;
+    //UE_LOG(LogUReusePageC, Log, TEXT("UpdateSlip %f"), to);
+    SetOffset(to);
 }
 
 void UReusePageC::UpdatePage()
@@ -359,4 +399,15 @@ void UReusePageC::UpdatePage()
     NeedUpdatePage = false;
     float tmp = BlockToOffset(SelectPage);
     SetOffset(tmp);
+}
+
+void UReusePageC::OnPreviewTick()
+{
+    NativeTick(GetCachedGeometry(), 0.25f);
+    //Reload(PreviewCount);
+}
+
+bool UReusePageC::IsValidClass() const
+{
+    return ItemClass != nullptr;
 }
