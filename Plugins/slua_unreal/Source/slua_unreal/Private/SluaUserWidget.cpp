@@ -11,12 +11,13 @@ using namespace slua;
 void USluaUserWidget::RemoveFromParent()
 {
     Super::RemoveFromParent();
-    RemoveLuaTable();
+    //RemoveLuaTable();
 }
 
 void USluaUserWidget::NativeDestruct()
 {
     Super::NativeDestruct();
+    OnNativeDestruct.Broadcast(this);
     RemoveLuaTable();
     //UE_LOG(LogSluaUserWidget, Log, TEXT("USluaUserWidget::NativeDestruct World:%x Name: %s"), this, *GetName());
 }

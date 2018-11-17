@@ -2,22 +2,17 @@
 ExampleMain = ClassPanel("ExampleMain", '/Game/Example/ExampleMain/ExampleMainUI.ExampleMainUI')
 
 function ExampleMain:construct()
-
     self.widget.Button_GC.OnClicked:Add(function() self:OnGC() end)
-
     self.widget.Button_ReuseList.OnClicked:Add(function() self:OnClick_Button_ReuseList() end)
-
     self.widget.Button_ReusePage.OnClicked:Add(function() self:OnClick_Button_ReusePage() end)
-
     self.widget.Button_Shape.OnClicked:Add(function() self:OnClick_Button_Shape() end)
-
 end
 
 function ExampleMain:destruct()
     self.widget.Button_GC.OnClicked:Clear()
     self.widget.Button_ReuseList.OnClicked:Clear()
     self.widget.Button_ReusePage.OnClicked:Clear()
-    self.widget.Button_ShapeWidget.OnClicked:Clear()
+    self.widget.Button_Shape.OnClicked:Clear()
 end
 
 function ExampleMain:Trace()

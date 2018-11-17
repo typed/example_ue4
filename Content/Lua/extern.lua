@@ -12,14 +12,18 @@ function class(classname, url)
         obj.__create_type = "new"
         obj.widget = slua.loadUI(url)
         obj.widget:SetLuaTable(obj)
+        obj.widget.OnNativeDestruct:Add(function(w)
+            local mobj = w:GetLuaTable()
+            mobj:destruct()
+            mobj.widget = nil
+            w.OnNativeDestruct:Clear()
+        end)
         obj:construct(...)
         return obj
     end
     function cls:del()
         if self.widget then
             self.widget:RemoveFromViewport()
-            self:destruct()
-            self.widget = nil
         end
     end
     function cls.bind(wd,...)
@@ -29,15 +33,14 @@ function class(classname, url)
         obj.__create_type = "bind"
         obj.widget = wd
         obj.widget:SetLuaTable(obj)
+        obj.widget.OnNativeDestruct:Add(function(w)
+            local mobj = w:GetLuaTable()
+            mobj:destruct()
+            mobj.widget = nil
+            w.OnNativeDestruct:Clear()
+        end)
         obj:construct(...)
         return obj
-    end
-    function cls:unbind()
-        if self.widget then
-            --self.widget:RemoveFromViewport()
-            self:destruct()
-            self.widget = nil
-        end
     end
     return cls
 end

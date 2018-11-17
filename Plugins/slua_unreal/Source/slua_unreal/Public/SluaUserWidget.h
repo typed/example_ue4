@@ -15,6 +15,12 @@ class SLUA_UNREAL_API USluaUserWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
+
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNativeDestructDelegate, UUserWidget*, widget);
+
+    UPROPERTY(BlueprintAssignable)
+    FOnNativeDestructDelegate OnNativeDestruct;
+
     virtual void RemoveFromParent();
 
 protected:
