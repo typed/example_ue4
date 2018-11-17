@@ -42,7 +42,6 @@ public:
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateItemDelegate, UUserWidget*, Widget, int32, Idx);
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnScrollItemDelegate, int32, BeginIdx, int32, EndIdx);
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCreateItemDelegate, UUserWidget*, widget);
-    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDestroyItemDelegate, UUserWidget*, widget);
 
     UReuseListC(const FObjectInitializer& ObjectInitializer);
 
@@ -59,9 +58,6 @@ public:
     UPROPERTY(BlueprintAssignable)
     FOnCreateItemDelegate OnCreateItem;
 
-    UPROPERTY(BlueprintAssignable)
-    FOnDestroyItemDelegate OnDestroyItem;
-
     UFUNCTION(BlueprintCallable)
     virtual void Reload(int32 __ItemCount);
 
@@ -76,9 +72,6 @@ public:
 
     UFUNCTION(BlueprintCallable)
     virtual void Clear();
-
-    UFUNCTION(BlueprintCallable)
-    virtual void ClearCache();
 
     UFUNCTION(BlueprintCallable)
     virtual bool ChangeItemClass(const FString& StrItemClass);
@@ -148,6 +141,8 @@ private:
 
     bool IsVertical() const;
     bool IsInvalidParam() const;
+
+    void ClearCache();
 
     class UScrollBox* ScrollBoxList;
     class UCanvasPanel* CanvasPanelBg;

@@ -136,12 +136,7 @@ void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 void UReuseListC::Reload(int32 __ItemCount)
 {
     ItemCount = __ItemCount;
-    if (IsVertical()) {
-        ScrollBoxList->SetOrientation(Orient_Vertical);
-    }
-    else {
-        ScrollBoxList->SetOrientation(Orient_Horizontal);
-    }
+    ScrollBoxList->SetOrientation(IsVertical() ? Orient_Vertical : Orient_Horizontal);
     ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
     DoReload();
 }
@@ -298,12 +293,7 @@ void UReuseListC::DoReload()
     }
     ItemMap.Empty();
     float TmpMaxOffset = 0.f;
-    if (IsVertical()) {
-        TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - ViewSize.Y, 0.f);
-    }
-    else {
-        TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - ViewSize.X, 0.f);
-    }
+    TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
     float cur = ScrollBoxList->GetScrollOffset();
     if (cur <= 0.f) {
         ScrollBoxList->ScrollToStart();
@@ -427,7 +417,6 @@ void UReuseListC::ClearCache()
     ItemPool.Empty();
     for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
         auto uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
-        OnDestroyItem.Broadcast(uw);
     }
     CanvasPanelList->ClearChildren();
 }

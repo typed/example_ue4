@@ -26,7 +26,6 @@ public:
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateItemDelegate, UUserWidget*, widget, int32, idx);
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPageChangedDelegate, int32, PageIdx);
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCreateItemDelegate, UUserWidget*, widget);
-    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDestroyItemDelegate, UUserWidget*, widget);
 
     UReusePageC(const FObjectInitializer& ObjectInitializer);
 
@@ -38,9 +37,6 @@ public:
 
     UPROPERTY(BlueprintAssignable)
     FOnCreateItemDelegate OnCreateItem;
-
-    UPROPERTY(BlueprintAssignable)
-    FOnDestroyItemDelegate OnDestroyItem;
 
     UFUNCTION(BlueprintCallable)
     virtual bool Reload(int32 __Count);

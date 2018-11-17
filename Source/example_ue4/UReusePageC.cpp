@@ -76,7 +76,6 @@ void UReusePageC::ClearCache()
     ItemPool.Empty();
     for (int32 i = 0; i < CanvasPanelRoot->GetChildrenCount(); ++i) {
         auto uw = Cast<UUserWidget>(CanvasPanelRoot->GetChildAt(i));
-        OnDestroyItem.Broadcast(uw);
     }
     CanvasPanelRoot->ClearChildren();
 }

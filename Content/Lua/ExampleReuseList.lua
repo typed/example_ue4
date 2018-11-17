@@ -3,21 +3,13 @@
 
 ExampleReuseList = ClassPanel("ExampleReuseList", '/Game/Example/ExampleReuseList/ExampleReuseListUI.ExampleReuseListUI')
 function ExampleReuseList:construct()
-
     self.ItmList = {}
-
     UICom.SetImage("/Game/Texture/UMG/wupingicon_baiyingjianzhi.wupingicon_baiyingjianzhi", self.widget.Image1)
-
     self.widget.Button_Close.OnClicked:Add(function() self:Close() end)
-
     self.widget.ButtonItem1.OnClicked:Add(function() self:OnClickItem1() end)
-
     self.widget.Button_4.OnClicked:Add(function() self:OnClear() end)
-
     self.widget.Button_0.OnClicked:Add(function() self:OnJumpByIdx() end)
-
     --self:OnClickItem1()
-
 end
 
 function ExampleReuseList:destruct()
@@ -54,6 +46,7 @@ function ExampleReuseList:OnClear()
     --log_tree("debug.getregistry().SLUA_PTR_USERTABLE_MAPPING", debug.getregistry().SLUA_PTR_USERTABLE_MAPPING)
 end
 
+--ExampleReuseList的子控件
 TestReuseListItem = class("TestReuseListItem", "/Game/Example/ExampleReuseList/TestReuseListItem.TestReuseListItem")
 function TestReuseListItem:construct(parent)
     self.m_parent = parent
@@ -82,6 +75,7 @@ function TestReuseListItem:OnUpdateItem(widget,idx)
     widget:GetLuaTable():UpdateData(idx)
 end
 
+--TestReuseListItem的子控件
 TestReuseListItem3 = class("TestReuseListItem3", "/Game/Example/ExampleReuseList/TestReuseListItem3.TestReuseListItem3")
 function TestReuseListItem3:construct(parent)
     self.m_parent = parent
