@@ -97,7 +97,7 @@ public:
     virtual void SynchronizeProperties() override;
     //~ End UWidget Interface
 
-protected:
+private:
 
     UPROPERTY(EditAnywhere, Category = Property)
     FScrollBoxStyle ScrollBoxStyle;
@@ -136,23 +136,24 @@ protected:
     int32 PreviewCount;
     FTimerHandle tmhOnPreviewTick;
 
-    virtual void NativeConstruct();
-    virtual void NativeDestruct();
+    void NativeConstruct();
+    void NativeDestruct();
 
-    virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
+    void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 
-    virtual void ScrollUpdate(float __Offset);
-    virtual void UpdateContentSize(UWidget* widget);
-    virtual void RemoveNotUsed();
-    virtual void DoReload();
-    virtual UUserWidget* NewItem();
-    virtual void ReleaseItem(UUserWidget* __Item);
-    virtual void Update();
-    virtual void DoJump();
+    void ScrollUpdate(float __Offset);
+    void UpdateContentSize(UWidget* widget);
+    void RemoveNotUsed();
+    void DoReload();
+    UUserWidget* NewItem();
+    void ReleaseItem(UUserWidget* __Item);
+    void Update();
+    void DoJump();
 
     void OnPreviewTick();
 
-    bool IsValidClass() const;
+    bool IsVertical() const;
+    bool IsInvalidParam() const;
 
     UScrollBox* ScrollBoxList;
     UCanvasPanel* CanvasPanelBg;
