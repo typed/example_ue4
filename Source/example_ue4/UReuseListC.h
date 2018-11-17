@@ -4,7 +4,6 @@
 Author: levingong
 Date: 2018-11-15
 Description: 重用列表
-Source: https://github.com/typed/example_ue4
 **************************************************************************/
 
 #pragma once
@@ -16,11 +15,6 @@ Source: https://github.com/typed/example_ue4
 /**
  * 
  */
-
-class UScrollBox;
-class UCanvasPanel;
-class USizeBox;
-class UWidgetBlueprintGeneratedClass;
 
 UENUM(BlueprintType)
 enum class EReuseListStyle : uint8
@@ -130,7 +124,7 @@ private:
     EReuseListStyle Style;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (BlueprintBaseOnly = ""))
-    UWidgetBlueprintGeneratedClass* ItemClass;
+    class UWidgetBlueprintGeneratedClass* ItemClass;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PreviewCount;
@@ -155,10 +149,10 @@ private:
     bool IsVertical() const;
     bool IsInvalidParam() const;
 
-    UScrollBox* ScrollBoxList;
-    UCanvasPanel* CanvasPanelBg;
-    USizeBox* SizeBoxBg;
-    UCanvasPanel* CanvasPanelList;
+    class UScrollBox* ScrollBoxList;
+    class UCanvasPanel* CanvasPanelBg;
+    class USizeBox* SizeBoxBg;
+    class UCanvasPanel* CanvasPanelList;
     
     FVector2D ViewSize;
     FVector2D ContentSize;

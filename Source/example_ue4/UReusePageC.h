@@ -4,7 +4,6 @@
 Author: levingong
 Date: 2018-11-15
 Description: ÷ÿ”√“≥«©
-Source: https://github.com/typed/example_ue4
 **************************************************************************/
 
 #pragma once
@@ -16,8 +15,6 @@ Source: https://github.com/typed/example_ue4
 /**
  * 
  */
-
-class UCanvasPanel;
 
 UCLASS()
 class EXAMPLE_UE4_API UReusePageC : public UUserWidget
@@ -73,7 +70,7 @@ public:
 protected:
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (BlueprintBaseOnly = ""))
-    UWidgetBlueprintGeneratedClass* ItemClass;
+    class UWidgetBlueprintGeneratedClass* ItemClass;
 
     UPROPERTY(EditAnywhere, Category = Property)
     bool Loop;
@@ -125,7 +122,7 @@ protected:
 
     bool IsValidClass() const;
 
-    UCanvasPanel* CanvasPanelRoot;
+    class UCanvasPanel* CanvasPanelRoot;
     FVector2D ViewSize;
     TMap<int32, UUserWidget* > ItemMap;
     TArray< UUserWidget* > ItemPool;

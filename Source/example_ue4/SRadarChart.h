@@ -4,7 +4,6 @@
 Author: levingong
 Date: 2018-11-15
 Description: ∂‡Œ¨ÕºSlate
-Source: https://github.com/typed/example_ue4
 **************************************************************************/
 
 #pragma once

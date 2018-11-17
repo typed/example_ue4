@@ -4,7 +4,6 @@
 Author: levingong
 Date: 2018-11-15
 Description: ∂‡Œ¨ÕºUMG
-Source: https://github.com/typed/example_ue4
 **************************************************************************/
 
 #pragma once
@@ -16,7 +15,6 @@ Source: https://github.com/typed/example_ue4
 #include "Runtime/Engine/Classes/Slate/SlateBrushAsset.h"
 #include "URadarChart.generated.h"
 
-class SRadarChart;
 /**
  * 
  */
@@ -77,6 +75,6 @@ protected:
     virtual TSharedRef<SWidget> RebuildWidget() override;
     //~ End UWidget Interface
 
-    TSharedPtr<SRadarChart> MyRadarChart;
+    TSharedPtr<class SRadarChart> MyRadarChart;
 	
 };
