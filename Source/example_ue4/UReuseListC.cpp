@@ -415,9 +415,6 @@ void UReuseListC::Update()
 void UReuseListC::ClearCache()
 {
     ItemPool.Empty();
-    for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
-        auto uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
-    }
     CanvasPanelList->ClearChildren();
 }
 
