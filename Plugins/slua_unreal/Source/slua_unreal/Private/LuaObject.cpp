@@ -469,23 +469,25 @@ namespace slua {
     }
 
     // find ufunction from cache
-    UFunction* LuaObject::findCacheFunction(lua_State* L,const FString& cname,const char* fname) {
+    UFunction* LuaObject::findCacheFunction(lua_State* L, const FString& cname, const char* fname) {
         auto state = LuaState::get(L);
         auto clsmap = state->classMap.Find(cname);
-        if(!clsmap) return nullptr;
+        if (!clsmap) return nullptr;
         auto it = (*clsmap)->Find(UTF8_TO_TCHAR(fname));
-        if(it!=nullptr) return * it;
+        if (it != nullptr && (*it)->IsValidLowLevelFast()) {
+            return *it;
+        }
         return nullptr;
     }
 
     // cache ufunction for reuse
-    void LuaObject::cacheFunction(lua_State* L,const FString& cname,const char* fname,UFunction* func) {
+    void LuaObject::cacheFunction(lua_State* L, const FString& cname, const char* fname, UFunction* func) {
         auto state = LuaState::get(L);
         auto clsmap = state->classMap.Find(cname);
-        TMap<FString,UFunction*>* clsmapPtr = nullptr;
-        if(!clsmap) clsmapPtr = state->classMap.Add(cname,new TMap<FString,UFunction*>());
+        TMap<FString, UFunction*>* clsmapPtr = nullptr;
+        if (!clsmap) clsmapPtr = state->classMap.Add(cname, new TMap<FString, UFunction*>());
         else clsmapPtr = *clsmap;
-        clsmapPtr->Add(UTF8_TO_TCHAR(fname),func);
+        clsmapPtr->Add(UTF8_TO_TCHAR(fname), func);
     }
 
     
@@ -493,23 +495,25 @@ namespace slua {
         UObject* obj = LuaObject::checkValue<UObject*>(L, 1);
         const char* name = LuaObject::checkValue<const char*>(L, 2);
 
-        UFunction* func = LuaObject::findCacheFunction(L,obj->GetClass()->GetName(),name);
-        if(func) return LuaObject::push(L,func);
+        UClass* cls = obj->GetClass();
+
+        UFunction* func = LuaObject::findCacheFunction(L, cls->GetName(), name);
+        if (func != nullptr)
+            return LuaObject::push(L,func);
 
         // get blueprint member
-        UClass* cls = obj->GetClass();
 		FName wname(UTF8_TO_TCHAR(name));
         func = cls->FindFunctionByName(wname);
-        if(!func) {
+        if (func == nullptr) {
             UProperty* up = cls->FindPropertyByName(wname);
-            if(!up) {
+            if (up == nullptr) {
                 // search extension method
                 return searchExtensionMethod(L,obj,name);
             }
             return LuaObject::push(L,up,up->ContainerPtrToValuePtr<uint8>(obj));
         }
-        else {   
-            LuaObject::cacheFunction(L,obj->GetClass()->GetName(),name,func);
+        else {
+            LuaObject::cacheFunction(L, cls->GetName(), name, func);
             return LuaObject::push(L,func);
         }
     }

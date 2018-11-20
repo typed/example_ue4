@@ -9,12 +9,12 @@ function ExampleMain:construct()
 end
 
 function ExampleMain:destruct()
-    --[[
+    
     self.widget.Button_GC.OnClicked:Clear()
     self.widget.Button_ReuseList.OnClicked:Clear()
     self.widget.Button_ReusePage.OnClicked:Clear()
     self.widget.Button_Shape.OnClicked:Clear()
-    ]]
+    
 end
 
 function ExampleMain:Trace()

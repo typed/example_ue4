@@ -19,7 +19,7 @@ function ExampleReuseList:destruct()
     self.widget.Button_4.OnClicked:Clear()
     self.widget.Button_Close.OnClicked:Clear()
     self.widget.ButtonItem1.OnClicked:Clear()
-    self.widget.ReuseListC.OnUpdateItem:Clear()
+    self.widget.ReuseListC.OnUpdateItem:Clear() 
     self.widget.ReuseListC.OnCreateItem:Clear()
     ]]
 end
@@ -33,11 +33,12 @@ function ExampleReuseList:OnClickItem1()
     self.widget.ReuseListC.OnUpdateItem:Add(function(...) self:OnUpdateItem1(...) end)
     self.widget.ReuseListC.OnCreateItem:Clear()
     self.widget.ReuseListC.OnCreateItem:Add(function(widget) TestReuseListItem.bind(widget, self) end)
-    --self.widget.ReuseListC:ChangeItemClass("/Game/Example/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
+    self.widget.ReuseListC:ChangeItemClass("/Game/Example/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
     self.widget.ReuseListC:Reload(5000)
 end
 
 function ExampleReuseList:OnUpdateItem1(widget,idx)
+    --log("TestReuseListItem idx="..idx.." widget="..tostring(widget))
     local itm_widget = widget:GetLuaTable()
     itm_widget:UpdateData(idx)
 end
@@ -54,18 +55,19 @@ function TestReuseListItem:construct(parent)
     self.m_parent = parent
     self.m_idx = 0
     self.widget.Button_BG.OnClicked:Add(function() self:OnClickItem1BG() end)
+    --[[
     self.widget.ReuseListCBP.OnUpdateItem:Clear()
     self.widget.ReuseListCBP.OnUpdateItem:Add(function(...) self:OnUpdateItem(...) end)
     self.widget.ReuseListCBP.OnCreateItem:Clear()
     self.widget.ReuseListCBP.OnCreateItem:Add(function(widget) TestReuseListItem3.bind(widget, self) end)
+    self.widget.ReuseListCBP:ChangeItemClass("/Game/Example/ExampleReuseList/TestReuseListItem3.TestReuseListItem3_C")
     self.widget.ReuseListCBP:Reload(math.random(10))
+    ]]
 end
 function TestReuseListItem:destruct()
-    --[[
     self.widget.Button_BG.OnClicked:Clear()
     self.widget.ReuseListCBP.OnUpdateItem:Clear()
     self.widget.ReuseListCBP.OnCreateItem:Clear()
-    ]]
 end
 function TestReuseListItem:OnClickItem1BG()
     --local itm = self.ItmList[self.m_idx]
@@ -87,9 +89,7 @@ function TestReuseListItem3:construct(parent)
     self.widget.Button_103.OnClicked:Add(function() self:OnClick() end)
 end
 function TestReuseListItem3:destruct()
-    --[[
     self.widget.Button_103.OnClicked:Clear()
-    ]]
 end
 function TestReuseListItem3:UpdateData(idx)
     self.m_idx = idx
