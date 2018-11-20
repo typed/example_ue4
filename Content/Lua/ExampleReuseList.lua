@@ -14,14 +14,12 @@ end
 
 function ExampleReuseList:destruct()
     log("ExampleReuseList:destruct")
-    --[[
     self.widget.Button_0.OnClicked:Clear()
     self.widget.Button_4.OnClicked:Clear()
     self.widget.Button_Close.OnClicked:Clear()
     self.widget.ButtonItem1.OnClicked:Clear()
     self.widget.ReuseListC.OnUpdateItem:Clear() 
     self.widget.ReuseListC.OnCreateItem:Clear()
-    ]]
 end
 
 function ExampleReuseList:OnJumpByIdx()
@@ -55,14 +53,12 @@ function TestReuseListItem:construct(parent)
     self.m_parent = parent
     self.m_idx = 0
     self.widget.Button_BG.OnClicked:Add(function() self:OnClickItem1BG() end)
-    --[[
     self.widget.ReuseListCBP.OnUpdateItem:Clear()
     self.widget.ReuseListCBP.OnUpdateItem:Add(function(...) self:OnUpdateItem(...) end)
     self.widget.ReuseListCBP.OnCreateItem:Clear()
     self.widget.ReuseListCBP.OnCreateItem:Add(function(widget) TestReuseListItem3.bind(widget, self) end)
     self.widget.ReuseListCBP:ChangeItemClass("/Game/Example/ExampleReuseList/TestReuseListItem3.TestReuseListItem3_C")
     self.widget.ReuseListCBP:Reload(math.random(10))
-    ]]
 end
 function TestReuseListItem:destruct()
     self.widget.Button_BG.OnClicked:Clear()
