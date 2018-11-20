@@ -27,30 +27,17 @@ public:
 
     URadarChart(const FObjectInitializer& ObjectInitializer);
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Property)
-    int32 SideCount;
-    UFUNCTION(BlueprintCallable, Category = Appearance)
+    UFUNCTION(BlueprintCallable, Category = Property)
     void SetSideCount(int32 __SideCount);
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Property)
-    float Antialias;
-    UFUNCTION(BlueprintCallable, Category = Appearance)
+    
+    UFUNCTION(BlueprintCallable, Category = Property)
     void SetAntialias(float __Antialias);
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Property)
-    FSlateBrush Brush;
-    UFUNCTION(BlueprintCallable, Category = Appearance)
+    
+    UFUNCTION(BlueprintCallable, Category = Property)
     void SetBrush(const FSlateBrush& __Brush);
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Property)
-    float MinProgress;
-    UFUNCTION(BlueprintCallable, Category = Appearance)
+    UFUNCTION(BlueprintCallable, Category = Property)
     void SetMinProgress(float __MinProgress);
-
-#if WITH_EDITOR
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Property)
-    FText TestProgress;
-#endif
 
     UFUNCTION(BlueprintCallable, Category = Property)
     void SetProgress(int32 i, float __Progress);
@@ -61,6 +48,23 @@ public:
     UFUNCTION(BlueprintCallable, Category = Property)
     void ResetProgress();
 
+protected:
+
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "3"))
+    int32 SideCount;
+
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
+    float Antialias;
+
+    UPROPERTY(EditAnywhere, Category = Property)
+    FSlateBrush Brush;
+
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
+    float MinProgress;
+
+    UPROPERTY(EditAnywhere, Category = Property)
+    FText TestProgress;
+
     //~ Begin UWidget Interface
     virtual void SynchronizeProperties() override;
     //~ End UWidget Interface
@@ -68,8 +72,6 @@ public:
     //~ Begin UVisual Interface
     virtual void ReleaseSlateResources(bool bReleaseChildren) override;
     //~ End UVisual Interface
-
-protected:
 
     //~ Begin UWidget Interface
     virtual TSharedRef<SWidget> RebuildWidget() override;

@@ -45,10 +45,6 @@ public:
 
     UReuseListC(const FObjectInitializer& ObjectInitializer);
 
-    ~UReuseListC();
-
-    virtual bool Initialize();
-
     UPROPERTY(BlueprintAssignable)
     FOnUpdateItemDelegate OnUpdateItem;
 
@@ -59,32 +55,34 @@ public:
     FOnCreateItemDelegate OnCreateItem;
 
     UFUNCTION(BlueprintCallable)
-    virtual void Reload(int32 __ItemCount);
+    void Reload(int32 __ItemCount);
 
     UFUNCTION(BlueprintCallable)
-    virtual void Refresh();
+    void Refresh();
 
     UFUNCTION(BlueprintCallable)
-    virtual void RefreshOne(int32 __Idx);
+    void RefreshOne(int32 __Idx);
 
     UFUNCTION(BlueprintCallable)
-    virtual void JumpByIdx(int32 __Idx, EReuseListJumpStyle __Style);
+    void JumpByIdx(int32 __Idx, EReuseListJumpStyle __Style);
 
     UFUNCTION(BlueprintCallable)
-    virtual void Clear();
+    void Clear();
 
     UFUNCTION(BlueprintCallable)
-    virtual bool ChangeItemClass(const FString& StrItemClass);
+    bool ChangeItemClass(const FString& StrItemClass);
+
+protected:
+
+    virtual bool Initialize();
 
     //UVisual interface
-    virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+    virtual void ReleaseSlateResources(bool bReleaseChildren);
     //~ End UVisual Interface
 
     //~ Begin UWidget Interface
-    virtual void SynchronizeProperties() override;
+    virtual void SynchronizeProperties();
     //~ End UWidget Interface
-
-private:
 
     UPROPERTY(EditAnywhere, Category = Property)
     FScrollBoxStyle ScrollBoxStyle;
@@ -98,7 +96,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = Property)
 	FVector2D ScrollBarThickness;
 
-    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
+    //UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 ItemCacheNum;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
@@ -124,10 +122,9 @@ private:
     FTimerHandle tmhOnPreviewTick;
 
     void NativeConstruct();
-    void NativeDestruct();
-
     void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 
+    void InitWidgetPtr();
     void ScrollUpdate(float __Offset);
     void UpdateContentSize(UWidget* widget);
     void RemoveNotUsed();

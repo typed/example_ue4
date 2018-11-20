@@ -14,11 +14,9 @@ UCLASS()
 class EXAMPLE_UE4_API UExampleGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
-	
 public:
-
-	void Init();
-
+	virtual void Init();
+    virtual void Shutdown();
+    slua::LuaState* State();
 private:
-
 };

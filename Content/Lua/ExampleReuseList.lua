@@ -4,7 +4,7 @@
 ExampleReuseList = ClassPanel("ExampleReuseList", '/Game/Example/ExampleReuseList/ExampleReuseListUI.ExampleReuseListUI')
 function ExampleReuseList:construct()
     self.ItmList = {}
-    UICom.SetImage("/Game/Texture/UMG/wupingicon_baiyingjianzhi.wupingicon_baiyingjianzhi", self.widget.Image1)
+    --UICom.SetImage("/Game/Texture/UMG/wupingicon_baiyingjianzhi.wupingicon_baiyingjianzhi", self.widget.Image1)
     self.widget.Button_Close.OnClicked:Add(function() self:Close() end)
     self.widget.ButtonItem1.OnClicked:Add(function() self:OnClickItem1() end)
     self.widget.Button_4.OnClicked:Add(function() self:OnClear() end)
@@ -14,12 +14,14 @@ end
 
 function ExampleReuseList:destruct()
     log("ExampleReuseList:destruct")
+    --[[
     self.widget.Button_0.OnClicked:Clear()
     self.widget.Button_4.OnClicked:Clear()
     self.widget.Button_Close.OnClicked:Clear()
     self.widget.ButtonItem1.OnClicked:Clear()
     self.widget.ReuseListC.OnUpdateItem:Clear()
     self.widget.ReuseListC.OnCreateItem:Clear()
+    ]]
 end
 
 function ExampleReuseList:OnJumpByIdx()
@@ -59,9 +61,11 @@ function TestReuseListItem:construct(parent)
     self.widget.ReuseListCBP:Reload(math.random(10))
 end
 function TestReuseListItem:destruct()
+    --[[
     self.widget.Button_BG.OnClicked:Clear()
     self.widget.ReuseListCBP.OnUpdateItem:Clear()
     self.widget.ReuseListCBP.OnCreateItem:Clear()
+    ]]
 end
 function TestReuseListItem:OnClickItem1BG()
     --local itm = self.ItmList[self.m_idx]
@@ -83,7 +87,9 @@ function TestReuseListItem3:construct(parent)
     self.widget.Button_103.OnClicked:Add(function() self:OnClick() end)
 end
 function TestReuseListItem3:destruct()
+    --[[
     self.widget.Button_103.OnClicked:Clear()
+    ]]
 end
 function TestReuseListItem3:UpdateData(idx)
     self.m_idx = idx

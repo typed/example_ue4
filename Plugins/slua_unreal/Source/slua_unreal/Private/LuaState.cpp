@@ -117,7 +117,8 @@ namespace slua {
     }
     
     uint8* LuaState::loadFile(const char* fn,uint32& len,FString& filepath) {
-        if(loadFileDelegate) return loadFileDelegate(fn,len,filepath);
+        if (loadFileDelegate)
+            return loadFileDelegate(fn,len,filepath);
         return nullptr;
     }
 
@@ -132,6 +133,7 @@ namespace slua {
         ,root(nullptr)
         ,stackCount(0)
         ,si(0)
+        , gameInst(nullptr)
     {
         
     }
@@ -164,7 +166,7 @@ namespace slua {
             L=nullptr;
         }
 
-        sluaComponent=nullptr;
+        gameInst = nullptr;
         if(root) {
             root->RemoveFromRoot();
             root = nullptr;
@@ -172,12 +174,12 @@ namespace slua {
     }
 
 
-    bool LuaState::init(USceneComponent* comp) {
+    bool LuaState::init(UGameInstance* __gameInst) {
 
-        if(!comp || root)
+        if (root)
             return false;
 
-        if(!mainState) 
+        if (!mainState) 
             mainState = this;
 
         stackCount = 0;
@@ -185,7 +187,7 @@ namespace slua {
         root = NewObject<ULuaObject>();
 		root->AddToRoot();
 
-        sluaComponent = comp;
+        gameInst = __gameInst;
 
         // use custom memory alloc func to profile memory footprint
         L = lua_newstate(LuaMemoryProfile::alloc,this);

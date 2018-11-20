@@ -49,7 +49,7 @@ namespace slua {
         if(uclass==nullptr) luaL_error(L,"Can't find ui named %s",ui);
         
         auto ls = LuaState::get(L);
-        UWorld* wld = ls->sluaComponent?ls->sluaComponent->GetWorld():nullptr;
+        UWorld* wld = ls->gameInst ? ls->gameInst->GetWorld() : nullptr;
         if(!wld) luaL_error(L,"World missed");
         UGameInstance* instance = wld->GetGameInstance();
         UUserWidget* widget = CreateWidget<UUserWidget>(instance,uclass);

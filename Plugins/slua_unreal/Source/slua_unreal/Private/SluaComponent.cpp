@@ -25,7 +25,7 @@ USluaComponent::USluaComponent()
 
 void USluaComponent::EndPlay(const EEndPlayReason::Type reason) {
     Super::EndPlay(reason);
-    state.close();
+    //state.close();
 }
 
 
@@ -34,7 +34,7 @@ void USluaComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-    state.init(this);
+    //state.init(this);
 }
 
 
@@ -43,6 +43,6 @@ void USluaComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	state.tick(DeltaTime);
+	//state.tick(DeltaTime);
 }
 

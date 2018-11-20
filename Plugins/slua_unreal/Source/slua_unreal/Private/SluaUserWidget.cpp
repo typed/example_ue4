@@ -17,14 +17,8 @@ void USluaUserWidget::RemoveFromParent()
 void USluaUserWidget::NativeDestruct()
 {
     Super::NativeDestruct();
-    OnNativeDestruct.Broadcast(this);
-    RemoveLuaTable();
-    //UE_LOG(LogSluaUserWidget, Log, TEXT("USluaUserWidget::NativeDestruct World:%x Name: %s"), this, *GetName());
 }
 
 void USluaUserWidget::RemoveLuaTable()
 {
-    if (LuaState::get() && LuaState::get()->getLuaState()) {
-        SluaFix::remove_usertable_by_ptr(LuaState::get()->getLuaState(), this);
-    }
 }

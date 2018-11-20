@@ -50,7 +50,7 @@ namespace slua {
 
         int stateIndex() const { return si; }
         
-        virtual bool init(USceneComponent* wld);
+        virtual bool init(UGameInstance* __gameInst);
         virtual void tick(float dtime);
         virtual void close();
 
@@ -100,7 +100,7 @@ namespace slua {
         friend class LuaObject;
         friend class SluaUtil;
         lua_State* L;
-        USceneComponent* sluaComponent;
+        UGameInstance* gameInst;
         int cacheObjRef;
         int _pushErrorHandler(lua_State* L);
         static int _atPanic(lua_State* L);

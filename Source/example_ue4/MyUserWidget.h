@@ -15,9 +15,18 @@ class EXAMPLE_UE4_API UMyUserWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+    UMyUserWidget(const FObjectInitializer& ObjectInitializer);
+
+    int m_luaId;
+
+    static void bindLuaFunc();
 
 protected:
 
-    virtual void NativePaint(FPaintContext& InContext) const;
+    static int s_luaId;
+
+    virtual void NativeDestruct();
+
+    void RemoveLuaTable();
 	
 };

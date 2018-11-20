@@ -47,37 +47,22 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     tmhOnPreviewTick.Invalidate();
 }
 
-UReuseListC::~UReuseListC()
-{
-    
-}
-
 bool UReuseListC::Initialize()
 {
     if (!Super::Initialize())
         return false;
-
-    ScrollBoxList = Cast<UScrollBox>(GetWidgetFromName(FName(TEXT("ScrollBoxList"))));
-    ensure(ScrollBoxList);
-
-    CanvasPanelBg = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelBg"))));
-    ensure(CanvasPanelBg);
-
-    SizeBoxBg = Cast<USizeBox>(GetWidgetFromName(FName(TEXT("SizeBoxBg"))));
-    ensure(SizeBoxBg);
-
-    CanvasPanelList = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelList"))));
-    ensure(CanvasPanelList);
-
+    InitWidgetPtr();
     return true;
 }
 
 void UReuseListC::ReleaseSlateResources(bool bReleaseChildren)
 {
     Super::ReleaseSlateResources(bReleaseChildren);
-    if (tmhOnPreviewTick.IsValid()) {
-        GetWorld()->GetTimerManager().ClearTimer(tmhOnPreviewTick);
-        tmhOnPreviewTick.Invalidate();
+    if (GetWorld() && !GetWorld()->IsGameWorld()) {
+        if (tmhOnPreviewTick.IsValid()) {
+            GetWorld()->GetTimerManager().ClearTimer(tmhOnPreviewTick);
+            tmhOnPreviewTick.Invalidate();
+        }
     }
 }
 
@@ -115,11 +100,7 @@ void UReuseListC::SynchronizeProperties()
 void UReuseListC::NativeConstruct()
 {
     Super::NativeConstruct();
-}
-
-void UReuseListC::NativeDestruct()
-{
-    Super::NativeDestruct();
+    InitWidgetPtr();
 }
 
 void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -166,6 +147,21 @@ void UReuseListC::JumpByIdx(int32 __Idx, EReuseListJumpStyle __Style)
 void UReuseListC::Clear()
 {
     Reload(0);
+}
+
+void UReuseListC::InitWidgetPtr()
+{
+    ScrollBoxList = Cast<UScrollBox>(GetWidgetFromName(FName(TEXT("ScrollBoxList"))));
+    ensure(ScrollBoxList);
+
+    CanvasPanelBg = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelBg"))));
+    ensure(CanvasPanelBg);
+
+    SizeBoxBg = Cast<USizeBox>(GetWidgetFromName(FName(TEXT("SizeBoxBg"))));
+    ensure(SizeBoxBg);
+
+    CanvasPanelList = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelList"))));
+    ensure(CanvasPanelList);
 }
 
 void UReuseListC::ScrollUpdate(float __Offset)

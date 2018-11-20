@@ -36,9 +36,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	slua::LuaState* State() { return &state; }
+	//slua::LuaState* State() { return &state; }
 
 private:
-    slua::LuaState state;
+    //slua::LuaState state;
 	
 };

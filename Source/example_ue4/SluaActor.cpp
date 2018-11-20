@@ -6,6 +6,8 @@
 #include "HAL/PlatformFileManager.h"
 #include "Misc/Paths.h"
 #include "GenericPlatformFile.h"
+#include "UtilGame.h"
+#include "SluaFix.h"
 
 
 ASluaActor* ASluaActor::instance=nullptr;
@@ -18,61 +20,23 @@ ASluaActor::ASluaActor()
 	instance = this;
 }
 
-// read file content
-static uint8* ReadFile(IPlatformFile& PlatformFile, FString path, uint32& len) {
-	IFileHandle* FileHandle = PlatformFile.OpenRead(*path);
-	if (FileHandle) {
-		len = (uint32)FileHandle->Size();
-		uint8* buf = new uint8[len];
-
-		FileHandle->Read(buf, len);
-
-		// Close the file again
-		delete FileHandle;
-
-		return buf;
-	}
-
-	return nullptr;
-}
-
 // Called when the game starts or when spawned
 void ASluaActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	auto slua = FindComponentByClass<USluaComponent>();
-	if(!slua) return;
-
-	auto state = slua->State();
-	state->setLoadFileDelegate([](const char* fn,uint32& len,FString& filepath)->uint8* {
-
-		IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-		FString path = FPaths::ProjectContentDir();
-		path+="/Lua/";
-		path+=UTF8_TO_TCHAR(fn);
-		TArray<FString> luaExts = { UTF8_TO_TCHAR(".lua"), UTF8_TO_TCHAR(".luac") };
-		for (auto ptr = luaExts.CreateConstIterator(); ptr; ++ptr) {
-			auto fullPath = path + *ptr;
-			auto buf = ReadFile(PlatformFile, fullPath, len);
-			if (buf) {
-				filepath = fullPath;
-				return buf;
-			}
-		}
-
-		return nullptr;
-	});
-	state->doFile("SLuaTest");
+	auto state = UUtilGame::GetGameInstance()->State();
+    state->doFile("SLuaTest");
 }
 
 // Called every frame
 void ASluaActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	auto slua = FindComponentByClass<USluaComponent>();
-	if(!slua) return;
-	slua->State()->call("Tick", DeltaTime, this);
+	//auto state = UUtilGame::GetGameInstance()->State();
+	//if (state == nullptr)
+    //    return;
+	//state->call("Tick", DeltaTime, this);
 	//GEngine->ForceGarbageCollection(true);
 }
 

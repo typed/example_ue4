@@ -5,6 +5,11 @@ function class(classname, url)
     cls.__classname = classname
     cls.construct   = function() end
     cls.destruct    = function() end
+    cls.__destruct  = function(obj)
+        --log("__destruct!!!!!!!!!"..tostring(obj))
+        obj:destruct()
+        obj.widget = nil
+    end
     function cls.new(...)
         local obj = {}
         setmetatable(obj, cls)
@@ -12,12 +17,6 @@ function class(classname, url)
         obj.__create_type = "new"
         obj.widget = slua.loadUI(url)
         obj.widget:SetLuaTable(obj)
-        obj.widget.OnNativeDestruct:Add(function(w)
-            local mobj = w:GetLuaTable()
-            mobj:destruct()
-            mobj.widget = nil
-            w.OnNativeDestruct:Clear()
-        end)
         obj:construct(...)
         return obj
     end
@@ -33,12 +32,6 @@ function class(classname, url)
         obj.__create_type = "bind"
         obj.widget = wd
         obj.widget:SetLuaTable(obj)
-        obj.widget.OnNativeDestruct:Add(function(w)
-            local mobj = w:GetLuaTable()
-            mobj:destruct()
-            mobj.widget = nil
-            w.OnNativeDestruct:Clear()
-        end)
         obj:construct(...)
         return obj
     end
