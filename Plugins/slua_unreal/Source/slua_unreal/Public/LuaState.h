@@ -108,7 +108,7 @@ namespace slua {
         int stackCount;
         int si;
 
-        TMap<FString, TMap<FString, UFunction*>*> classMap;
+        TMap<FString, TMap<FString, UFunction*> > classMap;
         TMap<FString, UFunction*> instanceFuncMap;
         
 
