@@ -64,7 +64,10 @@ public:
     void RefreshOne(int32 __Idx);
 
     UFUNCTION(BlueprintCallable)
-    void JumpByIdx(int32 __Idx, EReuseListJumpStyle __Style);
+    void JumpByIdx(int32 __Idx) { JumpByIdxStyle(__Idx, EReuseListJumpStyle::Middle); }
+
+    UFUNCTION(BlueprintCallable)
+    void JumpByIdxStyle(int32 __Idx, EReuseListJumpStyle __Style);
 
     UFUNCTION(BlueprintCallable)
     void Clear();

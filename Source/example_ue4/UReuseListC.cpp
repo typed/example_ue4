@@ -137,7 +137,7 @@ void UReuseListC::RefreshOne(int32 __Idx)
     }
 }
 
-void UReuseListC::JumpByIdx(int32 __Idx, EReuseListJumpStyle __Style)
+void UReuseListC::JumpByIdxStyle(int32 __Idx, EReuseListJumpStyle __Style)
 {
     JumpIdx = __Idx;
     JumpStyle = __Style;
