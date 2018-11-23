@@ -10,7 +10,8 @@ URadarChart::URadarChart(const FObjectInitializer& ObjectInitializer)
     Antialias = 2;
     MinProgress = 0.1f;
     Visibility = ESlateVisibility::HitTestInvisible;
-    if (GetWorld() && !GetWorld()->IsGameWorld()) {
+    auto wld = GetWorld();
+    if (wld && !wld->IsGameWorld()) {
         TestProgress = FText::FromString(TEXT("99999999"));
     }
 }
@@ -82,7 +83,8 @@ void URadarChart::SynchronizeProperties()
         MyRadarChart->SetMinProgress(MinProgress);
 
 
-        if (GetWorld() && !GetWorld()->IsGameWorld()) {
+        auto wld = GetWorld();
+        if (wld && !wld->IsGameWorld()) {
             MyRadarChart->ResetProgress();
             FString str = TestProgress.ToString();
             str.ReverseString();

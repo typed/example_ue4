@@ -59,7 +59,8 @@ void UReusePageC::SynchronizeProperties()
 {
     Super::SynchronizeProperties();
 
-    if (GetWorld() && !GetWorld()->IsGameWorld()) {
+    auto wld = GetWorld();
+    if (wld && !wld->IsGameWorld()) {
 
         Reload(PreviewCount);
 

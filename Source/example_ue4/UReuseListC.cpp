@@ -58,7 +58,8 @@ bool UReuseListC::Initialize()
 void UReuseListC::ReleaseSlateResources(bool bReleaseChildren)
 {
     Super::ReleaseSlateResources(bReleaseChildren);
-    if (GetWorld() && !GetWorld()->IsGameWorld()) {
+    auto wld = GetWorld();
+    if (wld && !wld->IsGameWorld()) {
         if (tmhOnPreviewTick.IsValid()) {
             GetWorld()->GetTimerManager().ClearTimer(tmhOnPreviewTick);
             tmhOnPreviewTick.Invalidate();
@@ -75,7 +76,8 @@ void UReuseListC::SynchronizeProperties()
     ScrollBoxList->WidgetBarStyle = ScrollBarStyle;
     ScrollBoxList->WidgetStyle = ScrollBoxStyle;
 
-    if (GetWorld() && !GetWorld()->IsGameWorld()) {
+    auto wld = GetWorld();
+    if (wld && !wld->IsGameWorld()) {
         bool bClearCache = false;
         if (CanvasPanelList->GetChildrenCount() == 0) {
             if (ItemPool.IsValidIndex(0)) {
@@ -179,11 +181,13 @@ void UReuseListC::ScrollUpdate(float __Offset)
         for (int32 i = BIdx; i <= EIdx; i++) {
             if (!ItemMap.Contains(i)) {
                 auto w = NewItem();
-                auto cps = Cast<UCanvasPanelSlot>(w->Slot);
-                cps->SetAnchors(FAnchors(0,0,0,0));
-                cps->SetOffsets(FMargin(0, i * ItemHeightAndPad, ViewSize.X, ItemHeight));
-                ItemMap.Add(i,w);
-                OnUpdateItem.Broadcast(w, i);
+                if (w) {
+                    auto cps = Cast<UCanvasPanelSlot>(w->Slot);
+                    cps->SetAnchors(FAnchors(0, 0, 0, 0));
+                    cps->SetOffsets(FMargin(0, i * ItemHeightAndPad, ViewSize.X, ItemHeight));
+                    ItemMap.Add(i, w);
+                    OnUpdateItem.Broadcast(w, i);
+                }
             }
         }
     }
@@ -195,16 +199,18 @@ void UReuseListC::ScrollUpdate(float __Offset)
         for (int32 i = BIdx; i <= EIdx; i++) {
             if (!ItemMap.Contains(i)) {
                 auto w = NewItem();
-                auto cps = Cast<UCanvasPanelSlot>(w->Slot);
-                cps->SetAnchors(FAnchors(0, 0, 0, 0));
-                if (ItemHeight <= 0) {
-                    cps->SetOffsets(FMargin(i * ItemWidthAndPad, 0, ItemWidth, ViewSize.Y));
+                if (w) {
+                    auto cps = Cast<UCanvasPanelSlot>(w->Slot);
+                    cps->SetAnchors(FAnchors(0, 0, 0, 0));
+                    if (ItemHeight <= 0) {
+                        cps->SetOffsets(FMargin(i * ItemWidthAndPad, 0, ItemWidth, ViewSize.Y));
+                    }
+                    else {
+                        cps->SetOffsets(FMargin(i * ItemWidthAndPad, (ViewSize.Y - ItemHeight) / 2.f, ItemWidth, ItemHeight));
+                    }
+                    ItemMap.Add(i, w);
+                    OnUpdateItem.Broadcast(w, i);
                 }
-                else {
-                    cps->SetOffsets(FMargin(i * ItemWidthAndPad, (ViewSize.Y - ItemHeight) / 2.f, ItemWidth, ItemHeight));
-                }
-                ItemMap.Add(i, w);
-                OnUpdateItem.Broadcast(w, i);
             }
         }
     }
@@ -217,11 +223,13 @@ void UReuseListC::ScrollUpdate(float __Offset)
         for (int32 i = BIdx; i <= EIdx; i++) {
             if (!ItemMap.Contains(i)) {
                 auto w = NewItem();
-                auto cps = Cast<UCanvasPanelSlot>(w->Slot);
-                cps->SetAnchors(FAnchors(0, 0, 0, 0));
-                cps->SetOffsets(FMargin((i%ColNum)*ItemWidthAndPad, (i/ColNum)*ItemHeightAndPad, ItemWidth, ItemHeight));
-                ItemMap.Add(i, w);
-                OnUpdateItem.Broadcast(w, i);
+                if (w) {
+                    auto cps = Cast<UCanvasPanelSlot>(w->Slot);
+                    cps->SetAnchors(FAnchors(0, 0, 0, 0));
+                    cps->SetOffsets(FMargin((i%ColNum)*ItemWidthAndPad, (i / ColNum)*ItemHeightAndPad, ItemWidth, ItemHeight));
+                    ItemMap.Add(i, w);
+                    OnUpdateItem.Broadcast(w, i);
+                }
             }
         }
     }
@@ -290,12 +298,17 @@ void UReuseListC::DoReload()
     ItemMap.Empty();
     float TmpMaxOffset = 0.f;
     TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
-    float cur = ScrollBoxList->GetScrollOffset();
-    if (cur <= 0.f) {
+    if (TmpMaxOffset <= 0.f) {
         ScrollBoxList->ScrollToStart();
     }
-    if (cur >= TmpMaxOffset) {
-        ScrollBoxList->ScrollToEnd();
+    else {
+        float cur = ScrollBoxList->GetScrollOffset();
+        if (cur <= 0.f) {
+            ScrollBoxList->ScrollToStart();
+        }
+        if (cur >= TmpMaxOffset) {
+            ScrollBoxList->ScrollToEnd();
+        }
     }
     ScrollUpdate(ScrollBoxList->GetScrollOffset());
 }
@@ -378,7 +391,9 @@ UUserWidget* UReuseListC::NewItem()
     }
     else {
         UUserWidget* widget = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
-        ensure(widget);
+        if (widget == nullptr) {
+            return nullptr;
+        }
         CanvasPanelList->AddChild(widget);
         widget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
         OnCreateItem.Broadcast(widget);
