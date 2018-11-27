@@ -16,6 +16,11 @@ Description: 重用列表
  * 
  */
 
+class UWidgetBlueprintGeneratedClass;
+class UScrollBox;
+class USizeBox;
+class UCanvasPanel;
+
 UENUM(BlueprintType)
 enum class EReuseListStyle : uint8
 {
@@ -73,7 +78,7 @@ public:
     void Clear();
 
     UFUNCTION(BlueprintCallable)
-    bool ChangeItemClass(const FString& StrItemClass);
+    void Reset(UClass* __ItemClass, EReuseListStyle __Style, int32 __ItemWidth, int32 __ItemHeight, int32 __PaddingX, int32 __PaddingY);
 
 protected:
 
@@ -118,7 +123,7 @@ protected:
     EReuseListStyle Style;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (BlueprintBaseOnly = ""))
-    class UWidgetBlueprintGeneratedClass* ItemClass;
+    UClass* ItemClass;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PreviewCount;
@@ -144,10 +149,10 @@ protected:
 
     void ClearCache();
 
-    class UScrollBox* ScrollBoxList;
-    class UCanvasPanel* CanvasPanelBg;
-    class USizeBox* SizeBoxBg;
-    class UCanvasPanel* CanvasPanelList;
+    UScrollBox* ScrollBoxList;
+    UCanvasPanel* CanvasPanelBg;
+    USizeBox* SizeBoxBg;
+    UCanvasPanel* CanvasPanelList;
     
     FVector2D ViewSize;
     FVector2D ContentSize;

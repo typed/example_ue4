@@ -31,7 +31,8 @@ function ExampleReuseList:OnClickItem1()
     self.widget.ReuseListC.OnUpdateItem:Add(function(...) self:OnUpdateItem1(...) end)
     self.widget.ReuseListC.OnCreateItem:Clear()
     self.widget.ReuseListC.OnCreateItem:Add(function(widget) TestReuseListItem.bind(widget, self) end)
-    --self.widget.ReuseListC:ChangeItemClass("/Game/Example/ExampleReuseList/TestReuseListItem.TestReuseListItem_C")
+    --local cls = US.LoadBpClass("/Game/Example/ExampleReuseList/TestReuseListItem3.TestReuseListItem3_C")
+    --self.widget.ReuseListC:Reset(cls, 2, 100, 100, 5, 5)
     self.widget.ReuseListC:Reload(5000)
 end
 
@@ -57,7 +58,6 @@ function TestReuseListItem:construct(parent)
     self.widget.ReuseListCBP.OnUpdateItem:Add(function(...) self:OnUpdateItem(...) end)
     self.widget.ReuseListCBP.OnCreateItem:Clear()
     self.widget.ReuseListCBP.OnCreateItem:Add(function(widget) TestReuseListItem3.bind(widget, self) end)
-    --self.widget.ReuseListCBP:ChangeItemClass("/Game/Example/ExampleReuseList/TestReuseListItem3.TestReuseListItem3_C")
     self.widget.ReuseListCBP:Reload(math.random(10))
 end
 function TestReuseListItem:destruct()

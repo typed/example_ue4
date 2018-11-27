@@ -444,13 +444,14 @@ bool UReuseListC::IsInvalidParam() const
         return ItemWidth <= 0;
 }
 
-bool UReuseListC::ChangeItemClass(const FString& StrItemClass)
+void UReuseListC::Reset(UClass* __ItemClass, EReuseListStyle __Style, int32 __ItemWidth, int32 __ItemHeight, int32 __PaddingX, int32 __PaddingY)
 {
-    UWidgetBlueprintGeneratedClass* _WidgetClass = ::LoadObject<UWidgetBlueprintGeneratedClass>(nullptr, *StrItemClass);
-    if (_WidgetClass == nullptr)
-        return false;
     Clear();
     ClearCache();
-    ItemClass = _WidgetClass;
-    return true;
+    ItemClass = __ItemClass;
+    Style = __Style;
+    ItemWidth = __ItemWidth;
+    ItemHeight = __ItemHeight;
+    PaddingX = __PaddingX;
+    PaddingY = __PaddingY;
 }
