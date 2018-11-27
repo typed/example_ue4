@@ -16,7 +16,6 @@ Description: 重用列表
  * 
  */
 
-class UWidgetBlueprintGeneratedClass;
 class UScrollBox;
 class USizeBox;
 class UCanvasPanel;
