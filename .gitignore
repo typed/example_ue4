@@ -31,6 +31,10 @@
 *.out
 *.app
 
+# mac
+*.xcworkspace
+.DS_Store
+
 .vs
 Intermediate
 DerivedDataCache
