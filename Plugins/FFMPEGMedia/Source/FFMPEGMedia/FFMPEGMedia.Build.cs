@@ -71,7 +71,13 @@ public class FFMPEGMedia : ModuleRules
 			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libswresample.a"));
 			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libswscale.a"));
 
-		}
+            PublicAdditionalFrameworks.Add(new UEBuildFramework("libz"));
+            PublicAdditionalFrameworks.Add(new UEBuildFramework("libbz2"));
+            PublicAdditionalFrameworks.Add(new UEBuildFramework("libiconv"));
+            PublicAdditionalFrameworks.Add(new UEBuildFramework("AudioToolbox"));
+            PublicAdditionalFrameworks.Add(new UEBuildFramework("VideoToolbox"));
+
+        }
 
 		if (isLibrarySupported)
 		{
