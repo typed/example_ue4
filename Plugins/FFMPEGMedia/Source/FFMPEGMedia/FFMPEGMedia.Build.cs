@@ -37,7 +37,7 @@ public class FFMPEGMedia : ModuleRules
             PlatformString = "mac";
         }
         
-        string LibrariesPath = Path.Combine(ThirdPartyPath, "ffmpeg", PlatformString, "lib");
+        string LibrariesPath = Path.Combine(ThirdPartyPath, "ffmpeg", "lib", PlatformString);
 
 		if ((Target.Platform == UnrealTargetPlatform.Win64) || (Target.Platform == UnrealTargetPlatform.Win32))
 		{
@@ -76,7 +76,7 @@ public class FFMPEGMedia : ModuleRules
 		if (isLibrarySupported)
 		{
 			// Include path
-			PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "ffmpeg", PlatformString, "include"));
+			PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "ffmpeg", "include"));
 		}
 
 
