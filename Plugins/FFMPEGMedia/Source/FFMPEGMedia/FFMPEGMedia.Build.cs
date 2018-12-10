@@ -36,7 +36,13 @@ public class FFMPEGMedia : ModuleRules
         else if (Target.Platform == UnrealTargetPlatform.Mac) {
             PlatformString = "mac";
         }
-        
+        else if (Target.Platform == UnrealTargetPlatform.Android) {
+            PlatformString = "android";
+        }
+        else if (Target.Platform == UnrealTargetPlatform.IOS) {
+            PlatformString = "ios";
+        }
+
         string LibrariesPath = Path.Combine(ThirdPartyPath, "ffmpeg", "lib", PlatformString);
 
 		if ((Target.Platform == UnrealTargetPlatform.Win64) || (Target.Platform == UnrealTargetPlatform.Win32))
