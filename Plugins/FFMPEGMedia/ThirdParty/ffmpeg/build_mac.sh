@@ -7,7 +7,7 @@
 # http://macappstore.org/pkg-config/
 
 ./configure \
-    --target-os=mac \
+    --target-os=darwin \
     --extra-cxxflags="-mmacosx-version-min=10.10"
 
 make clean
