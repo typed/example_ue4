@@ -14,7 +14,11 @@ rem 重命名C:\msys64\usr\bin\link.exe 为C: \msys64\usr\bin\link.bak, 避免�
 rem 查看cl和link工具是不是VS2015中的
 rem 3.编译FFMPEG
 rem 在上一步打开的msys2的shell中进入到ffmpeg源码目录，编译ffmpeg
-./configure --toolchain=msvc
+PREFIX=$(pwd)/build_result/
+./configure \
+    --toolchain=msvc \
+    --prefix=${PREFIX}
+    
 make clean
 make -j4
 make install

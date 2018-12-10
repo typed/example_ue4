@@ -12,4 +12,5 @@ UFFMPEGMediaSettings::UFFMPEGMediaSettings()
     , AudioThreads(0)
     , VideoThreads(0)
     , SyncType  (ESynchronizationType::AudioMaster)
-{ }
+{
+}

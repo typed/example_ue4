@@ -6,8 +6,11 @@
 # install pkg-config
 # http://macappstore.org/pkg-config/
 
+PREFIX=$(pwd)/build_result/
+
 ./configure \
     --target-os=darwin \
+    --prefix=${PREFIX} \ 
     --extra-cxxflags="-mmacosx-version-min=10.11"
 
 make clean

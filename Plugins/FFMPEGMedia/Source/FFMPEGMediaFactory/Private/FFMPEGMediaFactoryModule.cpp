@@ -152,6 +152,8 @@ public:
 		// supported platforms
 		SupportedPlatforms.Add(TEXT("Windows"));
 		SupportedPlatforms.Add(TEXT("Mac"));
+        SupportedPlatforms.Add(TEXT("IOS"));
+        SupportedPlatforms.Add(TEXT("Android"));
 
 	
 
