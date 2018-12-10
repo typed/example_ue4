@@ -8,7 +8,7 @@
 
 ./configure \
     --target-os=darwin \
-    --extra-cxxflags="-mmacosx-version-min=10.10"
+    --extra-cxxflags="-mmacosx-version-min=10.11"
 
 make clean
 make -j4
