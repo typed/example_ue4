@@ -23,8 +23,7 @@ public class FFMPEGMedia : ModuleRules
 
 	public bool LoadFFmpeg(ReadOnlyTargetRules Target)
 	{
-        bool isLibrarySupported = false;
-        
+
 		string PlatformString = "win64";
         
         if (Target.Platform == UnrealTargetPlatform.Win64) {
@@ -44,10 +43,10 @@ public class FFMPEGMedia : ModuleRules
         }
 
         string LibrariesPath = Path.Combine(ThirdPartyPath, "ffmpeg", "lib", PlatformString);
+        PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "ffmpeg", "include"));
 
-		if ((Target.Platform == UnrealTargetPlatform.Win64) || (Target.Platform == UnrealTargetPlatform.Win32))
+        if ((Target.Platform == UnrealTargetPlatform.Win64) || (Target.Platform == UnrealTargetPlatform.Win32))
 		{
-			isLibrarySupported = true;
 
 			System.Console.WriteLine("... LibrariesPath -> " + LibrariesPath);
 
@@ -65,7 +64,6 @@ public class FFMPEGMedia : ModuleRules
         }
         else if (Target.Platform == UnrealTargetPlatform.Mac)
 		{
-			isLibrarySupported = true;
 			
             System.Console.WriteLine("... LibrariesPath -> " + LibrariesPath);
             
@@ -84,15 +82,24 @@ public class FFMPEGMedia : ModuleRules
             PublicAdditionalFrameworks.Add(new UEBuildFramework("VideoToolbox"));
 
         }
+        else if (Target.Platform == UnrealTargetPlatform.Android)
+        {
 
-		if (isLibrarySupported)
-		{
-			// Include path
-			PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "ffmpeg", "include"));
-		}
+            System.Console.WriteLine("... LibrariesPath -> " + LibrariesPath);
 
+            LibrariesPath = Path.Combine(LibrariesPath, "armeabi-v7a");
 
-		return isLibrarySupported;
+            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavcodec.a"));
+            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavdevice.a"));
+            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavfilter.a"));
+            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavformat.a"));
+            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavutil.a"));
+            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libswresample.a"));
+            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libswscale.a"));
+
+        }
+
+		return true;
 	}
 
 	public FFMPEGMedia(ReadOnlyTargetRules Target) : base(Target)
