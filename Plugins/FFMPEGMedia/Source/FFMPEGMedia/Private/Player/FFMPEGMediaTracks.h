@@ -16,22 +16,28 @@
 #include "IMediaSamples.h"
 #include "IMediaTracks.h"
 #include "IMediaControls.h"
+#include "IMediaEventSink.h"
 #include "Math/IntPoint.h"
 #include "MediaSampleQueue.h"
 #include "Templates/SharedPointer.h"
 
 #include "RunnableThread.h"
 
+extern  "C" {
+#include "libavformat/avformat.h"
+#include "libavcodec/avcodec.h"
+#include "libavutil/imgutils.h"
+#include "libavutil/hwcontext.h"
+#include "libavutil/time.h"
+#include "libswscale/swscale.h"
+#include "libswresample/swresample.h"
+}
+
 
 class FFFMPEGMediaAudioSamplePool;
 class FFFMPEGMediaTextureSamplePool;
 
-struct AVFormatContext;
-struct AVCodec;
-struct AVBufferRef;
-struct AVCodecContext;
 class FFMPEGDecoder;
-
 
 /**
  * Track collection for Windows Media Foundation based media players.
@@ -44,8 +50,8 @@ class FFFMPEGMediaTracks
 	/** Track format. */
 	struct FFormat
 	{
-        enum AVMediaType MediaType;
-        enum AVCodecID CodecID;
+        AVMediaType MediaType;
+        AVCodecID CodecID;
 		FString TypeName;
 
 		struct AudioFormat
