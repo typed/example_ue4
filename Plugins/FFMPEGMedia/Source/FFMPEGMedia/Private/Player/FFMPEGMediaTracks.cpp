@@ -25,17 +25,6 @@
 #include "FFMPEGMediaAudioSample.h"
 #include "FFMPEGMediaTextureSample.h"
 
-extern  "C" {
-#include "libavformat/avformat.h"
-#include "libavcodec/avcodec.h"
-#include "libavutil/imgutils.h"
-#include "libavutil/hwcontext.h"
-#include "libavutil/time.h"
-#include "libswscale/swscale.h"
-#include "libswresample/swresample.h"
-
-}
-
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 
 #define MIN_FRAMES 30
@@ -295,7 +284,7 @@ void FFFMPEGMediaTracks::Initialize(AVFormatContext* ic, const FString& Url)
         if ( streamAdded) {
             totalStreams++;
         }
-        enum AVMediaType type = st->codecpar->codec_type;
+        //enum AVMediaType type = st->codecpar->codec_type;
         st->discard = AVDISCARD_ALL;
     }
 

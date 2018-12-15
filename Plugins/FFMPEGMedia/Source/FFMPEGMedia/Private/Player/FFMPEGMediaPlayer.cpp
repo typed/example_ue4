@@ -222,7 +222,7 @@ void FFFMPEGMediaPlayer::TickInput(FTimespan DeltaTime, FTimespan Timecode)
 
 bool FFFMPEGMediaPlayer::InitializePlayer(const TSharedPtr<FArchive, ESPMode::ThreadSafe>& Archive, const FString& Url, bool Precache)
 {
-	UE_LOG(LogFFMPEGMedia, Verbose, TEXT("Player %llx: Initializing %s (archive = %s, precache = %s)"), this, *Url, Archive.IsValid() ? TEXT("yes") : TEXT("no"), Precache ? TEXT("yes") : TEXT("no"));
+	UE_LOG(LogFFMPEGMedia, Display, TEXT("Player %llx: Initializing %s (archive = %s, precache = %s)"), this, *Url, Archive.IsValid() ? TEXT("yes") : TEXT("no"), Precache ? TEXT("yes") : TEXT("no"));
 
 	const auto Settings = GetDefault<UFFMPEGMediaSettings>();
 	check(Settings != nullptr);

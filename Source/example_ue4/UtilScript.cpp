@@ -3,8 +3,8 @@
 #include "UtilScript.h"
 #include "SluaActor.h"
 #include "Engine/Engine.h"
-#include "UObject/UObject.h"
-#include "UObject/UObjectIterator.h"
+#include "UObject/Object.h"
+//#include "UObject/ObjectIterator.h"
 #include "UObject/Class.h"
 #include "Blueprint/UserWidget.h"
 #include "UtilGame.h"
@@ -77,10 +77,10 @@ void UUtilScript::TraceClass(FString name)
         if (prop->GetOwnerClass() != pClass) {
             continue;
         }
-        FString name = prop->GetName();
+        FString prop_name = prop->GetName();
         FString class_name = prop->PropertyClass->GetName();
         uint64 propflag = prop->GetPropertyFlags();
-        UE_LOG(LogUtil, Log, TEXT("Name %s ClassName %s propflag %x"), *name, *class_name, propflag);
+        UE_LOG(LogUtil, Log, TEXT("Name %s ClassName %s propflag %x"), *prop_name, *class_name, propflag);
     }
     for (TFieldIterator<UFunction> FuncIt(pClass); FuncIt; ++FuncIt) {
         UFunction* func = *FuncIt;
