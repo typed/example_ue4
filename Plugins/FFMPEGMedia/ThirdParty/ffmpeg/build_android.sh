@@ -10,7 +10,7 @@ NDK_PATH=/Users/levingong/Documents/android-ndk-r16b
 # BUILD_PLATFORM=linux-x86_64
 BUILD_PLATFORM=darwin-x86_64
 TOOLCHAIN_VERSION=4.9
-ANDROID_VERSION=19
+ANDROID_VERSION=24
 
 ANDROID_ARMV5_CFLAGS="-march=armv5te"
 ANDROID_ARMV7_CFLAGS="-march=armv7-a -mfloat-abi=softfp -mfpu=neon"  #-mfloat-abi=hard -mfpu=vfpv3-d16 #-mfloat-abi=hard -mfpu=vfp
@@ -69,13 +69,13 @@ build_bin() {
     sh ../../configure \
         --prefix=${PREFIX} \
         --target-os=android \
-        --arch=${ARCH} \
+        --arch=$ARCH \
+        --enable-cross-compile \
         --sysroot=$SYSROOT \
         --cross-prefix=${CROSS_PREFIX} \
         --disable-network \
-        --extra-cflags="-I$ASM -isysroot $ISYSROOT $CFALGS -D__ANDROID_API__=$ANDROID_VERSION -U_FILE_OFFSET_BITS -Os -fPIC -DANDROID -D__thumb__ -mthumb -Wfatal-errors -Wno-deprecated -mfloat-abi=softfp -marm" \
-        --extra-ldflags="-marm" \
-        $ADDITIONAL_CONFIGURE_FLAG
+        --extra-cflags="-I$ASM -isysroot $ISYSROOT $CFALGS -D__ANDROID_API__=$ANDROID_VERSION -Os -fPIC -DANDROID -Wfatal-errors -Wno-deprecated" \
+        --extra-cxxflags="-D__thumb__ -fexceptions -frtti"
 
     make clean
     make -j4
