@@ -87,24 +87,6 @@ public class FFMPEGMedia : ModuleRules
 
             System.Console.WriteLine("... LibrariesPath -> " + LibrariesPath);
 
-            //LibrariesPath = Path.Combine(LibrariesPath, "armeabi-v7a");
-
-            //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "armeabi-v7a/libavcodec.a"));
-            //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "armeabi-v7a/libavdevice.a"));
-            //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "armeabi-v7a/libavfilter.a"));
-            //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "armeabi-v7a/libavformat.a"));
-            //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "armeabi-v7a/libavutil.a"));
-            //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "armeabi-v7a/libswresample.a"));
-            //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "armeabi-v7a/libswscale.a"));
-
-            //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "arm64-v8a/libavcodec.a"));
-            //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "arm64-v8a/libavdevice.a"));
-            //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "arm64-v8a/libavfilter.a"));
-            //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "arm64-v8a/libavformat.a"));
-            //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "arm64-v8a/libavutil.a"));
-            //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "arm64-v8a/libswresample.a"));
-            //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "arm64-v8a/libswscale.a"));
-
             PublicLibraryPaths.Add(LibrariesPath + "/armeabi-v7a");
             PublicLibraryPaths.Add(LibrariesPath + "/arm64-v8a");
 
