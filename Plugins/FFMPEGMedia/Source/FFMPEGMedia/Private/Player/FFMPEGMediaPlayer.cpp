@@ -8,6 +8,11 @@
 #include "IMediaOptions.h"
 #include "Misc/Optional.h"
 #include "UObject/Class.h"
+#include "HAL/PlatformFilemanager.h"
+#include "FileHelper.h"
+#if PLATFORM_ANDROID
+#   include "AndroidFile.h"
+#endif
 
 #include "FFMPEGMediaTracks.h"
 #include "FFMPEGMediaSettings.h"
@@ -155,13 +160,13 @@ bool FFFMPEGMediaPlayer::Open(const TSharedRef<FArchive, ESPMode::ThreadSafe>& A
 
     if (Archive->TotalSize() == 0)
     {
-        UE_LOG(LogFFMPEGMedia, Verbose, TEXT("Player %p: Cannot open media from archive (archive is empty)"), this);
+        UE_LOG(LogFFMPEGMedia, Error, TEXT("Player %p: Cannot open media from archive (archive is empty)"), this);
         return false;
     }
 
     if (OriginalUrl.IsEmpty())
     {
-        UE_LOG(LogFFMPEGMedia, Verbose, TEXT("Player %p: Cannot open media from archive (no original URL provided)"), this);
+        UE_LOG(LogFFMPEGMedia, Error, TEXT("Player %p: Cannot open media from archive (no original URL provided)"), this);
         return false;
     }
 
@@ -222,7 +227,8 @@ void FFFMPEGMediaPlayer::TickInput(FTimespan DeltaTime, FTimespan Timecode)
 
 bool FFFMPEGMediaPlayer::InitializePlayer(const TSharedPtr<FArchive, ESPMode::ThreadSafe>& Archive, const FString& Url, bool Precache)
 {
-	UE_LOG(LogFFMPEGMedia, Display, TEXT("Player %llx: Initializing %s (archive = %s, precache = %s)"), this, *Url, Archive.IsValid() ? TEXT("yes") : TEXT("no"), Precache ? TEXT("yes") : TEXT("no"));
+	//UE_LOG(LogFFMPEGMedia, Display, TEXT("Player %llx: Initializing %s (archive = %s, precache = %s)"), this, *Url, Archive.IsValid() ? TEXT("yes") : TEXT("no"), Precache ? TEXT("yes") : TEXT("no"));
+    UE_LOG(LogFFMPEGMedia, Display, TEXT("FFFMPEGMediaPlayer::InitializePlayer %s"), *Url);
 
 	const auto Settings = GetDefault<UFFMPEGMediaSettings>();
 	check(Settings != nullptr);
@@ -310,8 +316,24 @@ AVFormatContext* FFFMPEGMediaPlayer::ReadContext(const TSharedPtr<FArchive, ESPM
     if (!Archive.IsValid()) {
         if (Url.StartsWith(TEXT("file://")))
         {
-            const TCHAR* FilePath = &Url[7];
-            err = avformat_open_input(&FormatContext, TCHAR_TO_UTF8(FilePath), NULL, &format_opts);
+            FString FilePath = Url.RightChop(7);
+            FPaths::NormalizeFilename(FilePath);
+
+            //FilePath.ReplaceInline(TEXT("../"), TEXT(""));
+            //FilePath.ReplaceInline(TEXT(".."), TEXT(""));
+            //const TCHAR* strBaseDir = FPlatformProcess::BaseDir();
+            //FilePath.ReplaceInline(strBaseDir, TEXT(""));
+
+            FString strProjectDir = FPaths::ProjectDir();
+            FString strProjectContentDir = FPaths::ProjectContentDir();
+#if PLATFORM_ANDROID
+            FilePath = IAndroidPlatformFile::GetPlatformPhysical().FileRootPath(*FilePath);
+#endif
+            FilePath = strProjectContentDir + TEXT("");
+
+            UE_LOG(LogFFMPEGMedia, Display, TEXT("avformat_open_input FilePath=%s ProjectDir=%s"), *FilePath, *strProjectDir);
+
+            err = avformat_open_input(&FormatContext, TCHAR_TO_UTF8(*FilePath), NULL, &format_opts);
         } else {
             err = avformat_open_input(&FormatContext, TCHAR_TO_UTF8(*Url), NULL, &format_opts);
         }
@@ -334,6 +356,8 @@ AVFormatContext* FFFMPEGMediaPlayer::ReadContext(const TSharedPtr<FArchive, ESPM
         if (av_strerror(err, errbuf, sizeof(errbuf)) < 0)
             errbuf_ptr = strerror(AVUNERROR(err));
 #endif
+        UE_LOG(LogFFMPEGMedia, Error, TEXT("avformat_open_input error %s."), UTF8_TO_TCHAR(errbuf));
+
         PlayerTasks.Enqueue([=]() {
             EventSink.ReceiveMediaEvent(EMediaEvent::MediaOpenFailed);
         });
