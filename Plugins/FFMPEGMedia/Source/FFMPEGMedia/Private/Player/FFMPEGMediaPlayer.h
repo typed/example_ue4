@@ -14,6 +14,7 @@
 #include "Misc/Timespan.h"
 
 
+class IFileHandle;
 class FFFMPEGMediaTracks;
 class IMediaEventSink;
 
@@ -103,6 +104,9 @@ private:
     /** This is called when it's reading an Archive instead of an url*/
     static int64_t SeekStreamCallback(void *opaque, int64_t offset, int whence);
 
+    static int ReadFileCallback(void* ptr, uint8_t* buf, int buf_size);
+    static int64_t SeekFileCallback(void *opaque, int64_t offset, int whence);
+
     /** FFMPEG Functions */
 
     AVFormatContext*  ReadContext(const TSharedPtr<FArchive, ESPMode::ThreadSafe>& Archive, const FString& Url, bool Precache);
@@ -114,6 +118,7 @@ private:
 
     TSharedPtr<FArchive, ESPMode::ThreadSafe> CurrentArchive;
     
+    IFileHandle*        FileHandle;
 
 };
 

@@ -17,7 +17,9 @@ rem 在上一步打开的msys2的shell中进入到ffmpeg源码目录，编译ffm
 PREFIX=$(pwd)/build_result/
 ./configure \
     --toolchain=msvc \
-    --prefix=${PREFIX}
+    --prefix=${PREFIX} \
+    --disable-doc \
+    --disable-programs
     
 make clean
 make -j4

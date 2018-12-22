@@ -36,6 +36,7 @@ FFFMPEGMediaPlayer::FFFMPEGMediaPlayer(IMediaEventSink& InEventSink)
     
     IOContext = nullptr;
     FormatContext = nullptr;
+    FileHandle = nullptr;
     stopped = true;
 }
 
@@ -73,6 +74,11 @@ void FFFMPEGMediaPlayer::Close()
         av_free(IOContext->buffer);
         av_free(IOContext);
         IOContext = nullptr;
+    }
+
+    if (FileHandle) {
+        delete FileHandle;
+        FileHandle = nullptr;
     }
 
 	// notify listeners
@@ -295,6 +301,66 @@ int64_t FFFMPEGMediaPlayer::SeekStreamCallback(void *opaque, int64_t offset, int
 
 }
 
+int FFFMPEGMediaPlayer::ReadFileCallback(void* opaque, uint8_t* buf, int buf_size)
+{
+    FFFMPEGMediaPlayer* player = static_cast<FFFMPEGMediaPlayer*>(opaque);
+    if (player->FileHandle == nullptr) {
+        return 0;
+    }
+    int64 Size = player->FileHandle->Size();
+    int64 Position = player->FileHandle->Tell();
+    int64 BytesToRead = buf_size;
+    if (BytesToRead > Size) {
+        BytesToRead = Size;
+    }
+    if ((Position + BytesToRead) > Size) {
+        BytesToRead = Size - Position;
+    }
+    if (BytesToRead <= 0) {
+        return AVERROR_EOF;
+    }
+    if (player->FileHandle->Read(buf, BytesToRead)) {
+        Position = player->FileHandle->Tell();
+        return BytesToRead;
+    }
+    return AVERROR_EOF;
+}
+
+int64_t FFFMPEGMediaPlayer::SeekFileCallback(void *opaque, int64_t offset, int whence)
+{
+    FFFMPEGMediaPlayer* player = static_cast<FFFMPEGMediaPlayer*>(opaque);
+    if (player->FileHandle == nullptr) {
+        return -1;
+    }
+    int64 Size = player->FileHandle->Size();
+    if (whence == AVSEEK_SIZE) {
+        return Size;
+    }
+    else if (whence == SEEK_SET) {
+        if (offset <= Size) {
+            if (player->FileHandle->Seek(offset)) {
+                int64 pos = player->FileHandle->Tell();
+                return pos;
+            }
+        }
+        return -1;
+    }
+    else if (whence == SEEK_CUR) {
+        int64 pos = player->FileHandle->Tell();
+        int64 to_pos = pos + offset;
+        if (to_pos <= Size) {
+            if (player->FileHandle->Seek(to_pos)) {
+                int64 pos1 = player->FileHandle->Tell();
+                return pos1;
+            }
+        }
+    }
+    else if (whence == SEEK_END) {
+        return -1;
+    }
+    return -1;
+}
+
 AVFormatContext* FFFMPEGMediaPlayer::ReadContext(const TSharedPtr<FArchive, ESPMode::ThreadSafe>& Archive, const FString& Url, bool Precache) {
     AVDictionary *format_opts = NULL;
     int scan_all_pmts_set = 0;
@@ -317,23 +383,24 @@ AVFormatContext* FFFMPEGMediaPlayer::ReadContext(const TSharedPtr<FArchive, ESPM
         if (Url.StartsWith(TEXT("file://")))
         {
             FString FilePath = Url.RightChop(7);
-            FPaths::NormalizeFilename(FilePath);
-
-            //FilePath.ReplaceInline(TEXT("../"), TEXT(""));
-            //FilePath.ReplaceInline(TEXT(".."), TEXT(""));
-            //const TCHAR* strBaseDir = FPlatformProcess::BaseDir();
-            //FilePath.ReplaceInline(strBaseDir, TEXT(""));
-
-            FString strProjectDir = FPaths::ProjectDir();
-            FString strProjectContentDir = FPaths::ProjectContentDir();
-#if PLATFORM_ANDROID
-            FilePath = IAndroidPlatformFile::GetPlatformPhysical().FileRootPath(*FilePath);
-#endif
-            FilePath = strProjectContentDir + TEXT("");
-
-            UE_LOG(LogFFMPEGMedia, Display, TEXT("avformat_open_input FilePath=%s ProjectDir=%s"), *FilePath, *strProjectDir);
-
-            err = avformat_open_input(&FormatContext, TCHAR_TO_UTF8(*FilePath), NULL, &format_opts);
+            IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+            if (FileHandle) {
+                delete FileHandle;
+                FileHandle = nullptr;
+            }
+            FileHandle = PlatformFile.OpenRead(*FilePath);
+            if (FileHandle) {
+                UE_LOG(LogFFMPEGMedia, Display, TEXT("PlatformFile.OpenRead ok FilePath=%s FileSize=%d"), *FilePath, (uint32)FileHandle->Size());
+            }
+            else {
+                UE_LOG(LogFFMPEGMedia, Display, TEXT("PlatformFile.OpenRead error FilePath=%s"), *FilePath);
+            }
+            const int ioBufferSize = 32768;
+            unsigned char * ioBuffer = (unsigned char *)av_malloc(ioBufferSize + FF_INPUT_BUFFER_PADDING_SIZE);
+            IOContext = avio_alloc_context(ioBuffer, ioBufferSize, 0, this, ReadFileCallback, NULL, SeekFileCallback);
+            FormatContext->pb = IOContext;
+            FormatContext->flags = AVFMT_FLAG_CUSTOM_IO;
+            err = avformat_open_input(&FormatContext, "", NULL, &format_opts);
         } else {
             err = avformat_open_input(&FormatContext, TCHAR_TO_UTF8(*Url), NULL, &format_opts);
         }

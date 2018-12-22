@@ -69,9 +69,6 @@
 #define LOCTEXT_NAMESPACE "FFMPEGMediaTracks"
 
 
-
-
-
 /* FFFMPEGMediaTracks structors
  *****************************************************************************/
 
@@ -1830,8 +1827,12 @@ double FFFMPEGMediaTracks::GetMasterClock() {
     return val;
 }
 
-int FFFMPEGMediaTracks::UploadTexture(FFMPEGFrame* vp, AVFrame *frame, struct SwsContext **img_convert_ctx) {
-    int size = av_image_get_buffer_size(AV_PIX_FMT_RGBA, frame->width, frame->height, 1);
+int FFFMPEGMediaTracks::UploadTexture(FFMPEGFrame* vp, AVFrame *frame, struct SwsContext **img_convert_ctx)
+{
+
+    AVPixelFormat fmt = AV_PIX_FMT_BGRA;
+
+    int size = av_image_get_buffer_size(fmt, frame->width, frame->height, 1);
 
     int bufSize = size + 1;
 
@@ -1840,28 +1841,37 @@ int FFFMPEGMediaTracks::UploadTexture(FFMPEGFrame* vp, AVFrame *frame, struct Sw
         dataBuffer.AddUninitialized(bufSize);
         check(dataBuffer.Num() == bufSize);
     }
+
     int ret = 0;
     int pitch[4] = { 0, 0, 0, 0 };
-    ret = av_image_fill_linesizes(pitch, AV_PIX_FMT_BGRA, frame->width);
+    ret = av_image_fill_linesizes(pitch, fmt, frame->width);
+    //UE_LOG(LogFFMPEGMedia, Display, TEXT("av_image_fill_linesizes ret=%d"), ret);
 
     uint8_t* data[4] = { 0 };
-    av_image_fill_pointers(data, AV_PIX_FMT_BGRA, frame->height, dataBuffer.GetData(), pitch);
+    ret = av_image_fill_pointers(data, fmt, frame->height, dataBuffer.GetData(), pitch);
+    //UE_LOG(LogFFMPEGMedia, Display, TEXT("av_image_fill_pointers ret=%d"), ret);
 
-   
-
+    
     *img_convert_ctx = sws_getCachedContext(*img_convert_ctx,
-        frame->width, frame->height, (AVPixelFormat)frame->format, frame->width, frame->height, AV_PIX_FMT_BGRA, SWS_BICUBIC, NULL, NULL, NULL);
+        frame->width, frame->height, (AVPixelFormat)frame->format,
+        frame->width, frame->height, fmt,
+        SWS_BICUBIC, NULL, NULL, NULL);
 
+    //*img_convert_ctx = sws_getContext(
+    //    frame->width, frame->height, (AVPixelFormat)frame->format,
+    //    frame->width, frame->height, fmt,
+    //    SWS_BICUBIC, NULL, NULL, NULL);
 
     if (*img_convert_ctx != NULL) {
-        sws_scale(*img_convert_ctx, frame->data, frame->linesize, 0, frame->height, data, pitch);
+        ret = sws_scale(*img_convert_ctx, frame->data, frame->linesize, 0, frame->height, data, pitch);
+        //UE_LOG(LogFFMPEGMedia, Display, TEXT("sws_scale ret=%d"), ret);
+        //memset(dataBuffer.GetData(), 255, dataBuffer.Num());
     }
     else {
         UE_LOG(LogFFMPEGMedia, Error, TEXT("Cannot initialize the conversion context"));
         ret = -1;
         return ret;
     }
-
 
     FScopeLock Lock(&CriticalSection);
     const TSharedRef<FFFMPEGMediaTextureSample, ESPMode::ThreadSafe> TextureSample = VideoSamplePool->AcquireShared();

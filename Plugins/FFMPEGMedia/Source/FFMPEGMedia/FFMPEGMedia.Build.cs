@@ -50,13 +50,13 @@ public class FFMPEGMedia : ModuleRules
 
 			System.Console.WriteLine("... LibrariesPath -> " + LibrariesPath);
 
-			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavcodec.lib"));
-			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavdevice.lib"));
-			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavfilter.lib"));
-			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavformat.lib"));
-			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavutil.lib"));
-			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libswresample.lib"));
-			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libswscale.lib"));
+			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavcodec.a"));
+			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavdevice.a"));
+			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavfilter.a"));
+			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavformat.a"));
+			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libavutil.a"));
+			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libswresample.a"));
+			PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "libswscale.a"));
 
             PublicAdditionalLibraries.Add("Secur32.lib");
             PublicAdditionalLibraries.Add("Bcrypt.lib");
