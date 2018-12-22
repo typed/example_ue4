@@ -96,3 +96,11 @@ void UUtilScript::TraceClass(FString name)
         }
     }
 }
+
+void UUtilScript::DoFile(FString name)
+{
+    auto state = UUtilGame::GetGameInstance()->State();
+    if (state) {
+        state->doFile(TCHAR_TO_UTF8(*name));
+    }
+}

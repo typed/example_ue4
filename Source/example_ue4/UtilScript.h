@@ -38,5 +38,8 @@ public:
 
     UFUNCTION(BlueprintCallable)
     static void TraceClass(FString name);
+
+    UFUNCTION(BlueprintCallable)
+    static void DoFile(FString name);
 	
 };
