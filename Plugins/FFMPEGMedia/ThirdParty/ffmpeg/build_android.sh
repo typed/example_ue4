@@ -6,9 +6,8 @@ MY_LIBS_NAME=build_libs
 MY_BUILD_DIR=build_tmp
 
 
-NDK_PATH=/Users/levingong/Documents/android-ndk-r16b
-# BUILD_PLATFORM=linux-x86_64
-BUILD_PLATFORM=darwin-x86_64
+NDK_PATH=D:/NVPACK/android-ndk-r12b
+BUILD_PLATFORM=windows-x86_64
 TOOLCHAIN_VERSION=4.9
 ANDROID_VERSION=24
 
@@ -51,7 +50,6 @@ build_bin() {
     echo "PREFIX==${PREFIX}"
     echo "HOST==${HOST}"
     echo "SYSROOT=${SYSROOT}"
-    echo "CFALGS=$5"
     echo "CFALGS=${CFALGS}"
     echo "TOOLCHAIN==${TOOLCHAIN}"
     echo "CROSS_PREFIX=${CROSS_PREFIX}"
@@ -74,11 +72,13 @@ build_bin() {
         --sysroot=$SYSROOT \
         --cross-prefix=${CROSS_PREFIX} \
         --disable-network \
-        --extra-cflags="-I$ASM -isysroot $ISYSROOT $CFALGS -D__ANDROID_API__=$ANDROID_VERSION -Os -fPIC -DANDROID -Wfatal-errors -Wno-deprecated" \
+        --disable-doc \
+        --disable-programs \
+        --extra-cflags="-Os -fPIC -DANDROID -Wfatal-errors -Wno-deprecated" \
         --extra-cxxflags="-D__thumb__ -fexceptions -frtti"
 
     make clean
-    make -j4
+    make -j 4
     make install
 
     #从当前arch_abi编译目录跳出，对应上面的cd ${BUILD_DIR},以便function多次执行
