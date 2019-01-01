@@ -108,8 +108,8 @@ public class FFMPEGMedia : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		OptimizeCode = CodeOptimization.Never;
 		bEnableExceptions = true;
-		
-		DynamicallyLoadedModuleNames.AddRange(
+
+        DynamicallyLoadedModuleNames.AddRange(
 			new string[] {
 				"Media",
 			});
@@ -123,7 +123,10 @@ public class FFMPEGMedia : ModuleRules
 				"RenderCore",
 				"FFMPEGMediaFactory",
 				"Projects",
-			});
+                "Slate",
+                "SlateCore",
+                "UMG",
+            });
 
 		PrivateIncludePathModuleNames.AddRange(
 			new string[] {
