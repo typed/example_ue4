@@ -25,8 +25,6 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , ItemCount(0)
     , ItemHeight(100)
     , MaxPos(0)
-    , Offset(0)
-    , OffsetEnd(0)
     , Style(EReuseListStyle::Vertical)
     , ItemWidth(100)
     , BIdx(0)
@@ -121,6 +119,9 @@ void UReuseListC::Reload(int32 __ItemCount)
     ItemCount = __ItemCount;
     ScrollBoxList->SetOrientation(IsVertical() ? Orient_Vertical : Orient_Horizontal);
     ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
+    auto local_sz = GetCachedGeometry().GetLocalSize();
+    if (FMath::IsNearlyEqual(local_sz.X, 0.f, 0.0001f) || FMath::IsNearlyEqual(local_sz.Y, 0.f, 0.0001f))
+        return;
     DoReload();
 }
 
@@ -171,6 +172,7 @@ void UReuseListC::ScrollUpdate(float __Offset)
     int32 ItemWidthAndPad = ItemWidth + PaddingX;
     int32 ItemHeightAndPad = ItemHeight + PaddingY;
     int32 Offset = __Offset;
+    int32 OffsetEnd = 0;
     Offset = UKismetMathLibrary::Max(Offset, 0);
     Offset = UKismetMathLibrary::Min(Offset, MaxPos);
     if (Style == EReuseListStyle::Vertical) {
@@ -216,7 +218,7 @@ void UReuseListC::ScrollUpdate(float __Offset)
     }
     else if (Style == EReuseListStyle::VerticalGrid) {
         OffsetEnd = UKismetMathLibrary::Min((Offset + (int32)ViewSize.Y), MaxPos);
-        BIdx = UKismetMathLibrary::Max( ( Offset / ItemHeightAndPad ) * ColNum, 0);
+        BIdx = UKismetMathLibrary::Max( (Offset / ItemHeightAndPad ) * ColNum, 0);
         int32 tmp = UKismetMathLibrary::FCeil((float)OffsetEnd / ItemHeightAndPad) + 1;
         EIdx = UKismetMathLibrary::Min(tmp * ColNum - 1, ItemCount-1);
         RemoveNotUsed();

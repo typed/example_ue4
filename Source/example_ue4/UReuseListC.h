@@ -158,9 +158,7 @@ protected:
     
     int32 ItemCount;
     int32 MaxPos;
-    int32 Offset;
     TMap<int32, UUserWidget*> ItemMap;
-    int32 OffsetEnd;
     TArray<UUserWidget*> ItemPool;
     int32 BIdx;
     int32 EIdx;
