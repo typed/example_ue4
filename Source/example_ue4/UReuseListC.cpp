@@ -295,7 +295,9 @@ void UReuseListC::DoReload()
     UpdateContentSize(CanvasPanelList);
     for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
         auto uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
-        ReleaseItem(uw);
+        if (uw) {
+            ReleaseItem(uw);
+        }
     }
     ItemMap.Empty();
     float TmpMaxOffset = 0.f;
