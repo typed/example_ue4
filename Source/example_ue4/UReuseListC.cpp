@@ -119,10 +119,8 @@ void UReuseListC::Reload(int32 __ItemCount)
     ItemCount = __ItemCount;
     ScrollBoxList->SetOrientation(IsVertical() ? Orient_Vertical : Orient_Horizontal);
     ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
-    auto local_sz = GetCachedGeometry().GetLocalSize();
-    if (FMath::IsNearlyEqual(local_sz.X, 0.f, 0.0001f) || FMath::IsNearlyEqual(local_sz.Y, 0.f, 0.0001f))
-        return;
-    DoReload();
+    if (!GetCachedGeometry().GetLocalSize().Equals(FVector2D::ZeroVector, 0.0001f))
+        DoReload();
 }
 
 void UReuseListC::Refresh()
