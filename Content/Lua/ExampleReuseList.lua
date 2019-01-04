@@ -9,7 +9,7 @@ function ExampleReuseList:construct()
     self.widget.ButtonItem1.OnClicked:Add(function() self:OnClickItem1() end)
     self.widget.Button_4.OnClicked:Add(function() self:OnClear() end)
     self.widget.Button_0.OnClicked:Add(function() self:OnJumpByIdx() end)
-    --self:OnClickItem1()
+    self:OnClickItem1()
 end
 
 function ExampleReuseList:destruct()
@@ -33,11 +33,11 @@ function ExampleReuseList:OnClickItem1()
     self.widget.ReuseListC.OnCreateItem:Add(function(widget) TestReuseListItem.bind(widget, self) end)
     --local cls = US.LoadBpClass("/Game/Example/ExampleReuseList/TestReuseListItem3.TestReuseListItem3_C")
     --self.widget.ReuseListC:Reset(cls, 2, 100, 100, 5, 5)
-    self.widget.ReuseListC:Reload(5000)
+    self.widget.ReuseListC:Reload(5)
 end
 
 function ExampleReuseList:OnUpdateItem1(widget,idx)
-    --log("TestReuseListItem idx="..idx.." widget="..tostring(widget))
+    log("TestReuseListItem idx="..idx.." widget="..tostring(widget))
     local itm_widget = widget:GetLuaTable()
     itm_widget:UpdateData(idx)
 end
@@ -58,7 +58,7 @@ function TestReuseListItem:construct(parent)
     self.widget.ReuseListCBP.OnUpdateItem:Add(function(...) self:OnUpdateItem(...) end)
     self.widget.ReuseListCBP.OnCreateItem:Clear()
     self.widget.ReuseListCBP.OnCreateItem:Add(function(widget) TestReuseListItem3.bind(widget, self) end)
-    self.widget.ReuseListCBP:Reload(math.random(10))
+    --self.widget.ReuseListCBP:Reload(math.random(10))
 end
 function TestReuseListItem:destruct()
     self.widget.Button_BG.OnClicked:Clear()

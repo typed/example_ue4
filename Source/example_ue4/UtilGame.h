@@ -24,6 +24,5 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static UExampleGameInstance* GetGameInstance();
-	
-	
+
 };

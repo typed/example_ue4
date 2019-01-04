@@ -171,6 +171,14 @@ void UImageDownloader::CheckDiskFile()
 
 void UImageDownloader::Start(FString Url)
 {
+
+    //const uint32 CurrentThreadId = FPlatformTLS::GetCurrentThreadId();
+    //TArray<FStringFormatArg> Args;
+    //Args.Add(LexicalConversion::ToString(CurrentThreadId));
+    //FString TestHUDString = FString::Format(TEXT("UImageDownloader::Start threadid={0}"), Args);
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TestHUDString);
+    //check(IsInGameThread());
+
 	CheckDiskFile();
 
 	if (Url.IsEmpty()) {
@@ -183,6 +191,7 @@ void UImageDownloader::Start(FString Url)
 	FileSavePath = s_strDir / s_strSubDir / UrlHash;
 
 	//from memory
+    
 	std::map<FString, FString>::iterator it = s_mapHashPath.find(UrlHash);
 	if (it != s_mapHashPath.end()) {
 		FString PathName = it->second;
@@ -194,8 +203,10 @@ void UImageDownloader::Start(FString Url)
 		}
 		s_mapHashPath.erase(it);
 	}
-
+    
+    
 	//from disk
+    
 	UTexture2D* pTexture = GetTexture2DFromDisk(FileSavePath, InvalidImageFormat);
 	if (pTexture) {
 		FString PathName = pTexture->GetPathName();
@@ -224,6 +235,14 @@ void UImageDownloader::Start(FString Url)
 
 void UImageDownloader::HandleRequest(FHttpRequestPtr HttpRequest, FHttpResponsePtr HttpResponse, bool bSucceeded)
 {
+
+    //const uint32 CurrentThreadId = FPlatformTLS::GetCurrentThreadId();
+    //TArray<FStringFormatArg> Args;
+    //Args.Add(LexicalConversion::ToString(CurrentThreadId));
+    //FString TestHUDString = FString::Format(TEXT("UImageDownloader::HandleRequest threadid={0}"), Args);
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TestHUDString);
+    //check(IsInGameThread());
+
 	RemoveFromRoot();
 	HttpRequest->OnProcessRequestComplete().Unbind();
 	if (HttpResponse.IsValid() && EHttpResponseCodes::IsOk(HttpResponse->GetResponseCode())) {
@@ -249,6 +268,7 @@ void UImageDownloader::HandleRequest(FHttpRequestPtr HttpRequest, FHttpResponseP
 			}
 		}
 
+        
 		if (SaveDiskFile) {
 			IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 			FString Path, Filename, Extension;
@@ -262,6 +282,7 @@ void UImageDownloader::HandleRequest(FHttpRequestPtr HttpRequest, FHttpResponseP
 				delete FileHandle;
 			}
 		}
+        
 
 		UTexture2D* pTexture = GetTexture2DFromArray(OutArray, InvalidImageFormat);
 		if (pTexture) {
