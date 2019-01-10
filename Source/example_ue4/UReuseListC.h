@@ -68,6 +68,18 @@ public:
     void RefreshOne(int32 __Idx);
 
     UFUNCTION(BlueprintCallable)
+    void ScrollToStart();
+
+    UFUNCTION(BlueprintCallable)
+    void ScrollToEnd();
+
+    UFUNCTION(BlueprintCallable)
+    void SetScrollOffset(float NewScrollOffset);
+
+    UFUNCTION(BlueprintCallable)
+    float GetScrollOffset() const;
+
+    UFUNCTION(BlueprintCallable)
     void JumpByIdx(int32 __Idx) { JumpByIdxStyle(__Idx, EReuseListJumpStyle::Middle); }
 
     UFUNCTION(BlueprintCallable)
@@ -81,15 +93,7 @@ public:
 
 protected:
 
-    virtual bool Initialize();
-
-    //UVisual interface
-    virtual void ReleaseSlateResources(bool bReleaseChildren);
-    //~ End UVisual Interface
-
-    //~ Begin UWidget Interface
-    virtual void SynchronizeProperties();
-    //~ End UWidget Interface
+    bool Initialize();
 
     UPROPERTY(EditAnywhere, Category = Property)
     FScrollBoxStyle ScrollBoxStyle;
@@ -102,9 +106,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Property)
 	FVector2D ScrollBarThickness;
-
-    //UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
-    int32 ItemCacheNum;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 ItemWidth;
@@ -126,10 +127,12 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PreviewCount;
-    FTimerHandle tmhOnPreviewTick;
 
     void NativeConstruct();
     void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
+
+    void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
+    void OnWidgetRebuilt();
 
     void InitWidgetPtr();
     void ScrollUpdate(float __Offset);
@@ -147,6 +150,8 @@ protected:
     bool IsInvalidParam() const;
 
     void ClearCache();
+
+    void SyncProp();
 
     UScrollBox* ScrollBoxList;
     UCanvasPanel* CanvasPanelBg;

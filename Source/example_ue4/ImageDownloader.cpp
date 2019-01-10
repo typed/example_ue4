@@ -179,6 +179,8 @@ void UImageDownloader::Start(FString Url)
     //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TestHUDString);
     //check(IsInGameThread());
 
+    //UE_LOG(LogImageDownloader, Log, TEXT("UImageDownloader::Start"));
+
 	CheckDiskFile();
 
 	if (Url.IsEmpty()) {

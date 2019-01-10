@@ -10,6 +10,8 @@
 
 DEFINE_LOG_CATEGORY(LogUReuseListC);
 
+static const int32 ItemCacheNum = 2;
+
 UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
     , ScrollBoxList(nullptr)
@@ -19,7 +21,6 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , ViewSize(FVector2D::ZeroVector)
     , ContentSize(FVector2D::ZeroVector)
     , ItemClass(nullptr)
-    , ItemCacheNum(2)
     , PaddingX(0)
     , PaddingY(0)
     , ItemCount(0)
@@ -42,7 +43,6 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     ScrollBoxStyle.TopShadowBrush = FSlateNoResource();
     ScrollBoxStyle.RightShadowBrush = FSlateNoResource();
     ScrollBoxStyle.BottomShadowBrush = FSlateNoResource();
-    tmhOnPreviewTick.Invalidate();
 }
 
 bool UReuseListC::Initialize()
@@ -50,57 +50,15 @@ bool UReuseListC::Initialize()
     if (!Super::Initialize())
         return false;
     InitWidgetPtr();
+    SyncProp();
     return true;
-}
-
-void UReuseListC::ReleaseSlateResources(bool bReleaseChildren)
-{
-    Super::ReleaseSlateResources(bReleaseChildren);
-    auto wld = GetWorld();
-    if (wld && !wld->IsGameWorld()) {
-        if (tmhOnPreviewTick.IsValid()) {
-            GetWorld()->GetTimerManager().ClearTimer(tmhOnPreviewTick);
-            tmhOnPreviewTick.Invalidate();
-        }
-    }
-}
-
-void UReuseListC::SynchronizeProperties()
-{
-    Super::SynchronizeProperties();
-
-    ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
-    ScrollBoxList->SetScrollbarThickness(ScrollBarThickness);
-    ScrollBoxList->WidgetBarStyle = ScrollBarStyle;
-    ScrollBoxList->WidgetStyle = ScrollBoxStyle;
-
-    auto wld = GetWorld();
-    if (wld && !wld->IsGameWorld()) {
-        bool bClearCache = false;
-        if (CanvasPanelList->GetChildrenCount() == 0) {
-            if (ItemPool.IsValidIndex(0)) {
-                bClearCache = ItemPool[0]->GetClass() != ItemClass;
-            }
-        }
-        else {
-            bClearCache = CanvasPanelList->GetChildAt(0)->GetClass() != ItemClass;
-        }
-        if (bClearCache) {
-            ClearCache();
-        }
-        Reload(PreviewCount);
-
-        if (!tmhOnPreviewTick.IsValid()) {
-            GetWorld()->GetTimerManager().SetTimer(tmhOnPreviewTick, this, &UReuseListC::OnPreviewTick, 0.5f, true);
-        }
-
-    }
 }
 
 void UReuseListC::NativeConstruct()
 {
     Super::NativeConstruct();
     InitWidgetPtr();
+    SyncProp();
 }
 
 void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -136,6 +94,26 @@ void UReuseListC::RefreshOne(int32 __Idx)
     if (v) {
         OnUpdateItem.Broadcast(*v, __Idx);
     }
+}
+
+void UReuseListC::ScrollToStart()
+{
+    ScrollBoxList->ScrollToStart();
+}
+
+void UReuseListC::ScrollToEnd()
+{
+    ScrollBoxList->ScrollToEnd();
+}
+
+void UReuseListC::SetScrollOffset(float NewScrollOffset)
+{
+    ScrollBoxList->SetScrollOffset(NewScrollOffset);
+}
+
+float UReuseListC::GetScrollOffset() const
+{
+    return ScrollBoxList->GetScrollOffset();
 }
 
 void UReuseListC::JumpByIdxStyle(int32 __Idx, EReuseListJumpStyle __Style)
@@ -261,7 +239,13 @@ void UReuseListC::RemoveNotUsed()
 
 void UReuseListC::OnPreviewTick()
 {
-    Reload(PreviewCount);
+    if (ScrollBoxList->IsValidLowLevelFast() &&
+        CanvasPanelBg->IsValidLowLevelFast() &&
+        SizeBoxBg->IsValidLowLevelFast() &&
+        CanvasPanelList->IsValidLowLevelFast())
+    {
+        Reload(PreviewCount);
+    }
 }
 
 void UReuseListC::DoReload()
@@ -456,4 +440,38 @@ void UReuseListC::Reset(UClass* __ItemClass, EReuseListStyle __Style, int32 __It
     ItemHeight = __ItemHeight;
     PaddingX = __PaddingX;
     PaddingY = __PaddingY;
+}
+
+void UReuseListC::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+
+    SyncProp();
+
+    static const FName ItemClassName = "ItemClass";
+    if (PropertyChangedEvent.GetPropertyName().IsEqual(ItemClassName)) {
+        ClearCache();
+    }
+    Reload(PreviewCount);
+}
+
+void UReuseListC::OnWidgetRebuilt()
+{
+    Super::OnWidgetRebuilt();
+    InitWidgetPtr();
+    SyncProp();
+    auto wld = GetWorld();
+    if (wld && !wld->IsGameWorld()) {
+        GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UReuseListC::OnPreviewTick);
+    }
+}
+
+void UReuseListC::SyncProp()
+{
+    if (ScrollBoxList && ScrollBoxList->IsValidLowLevelFast()) {
+        ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
+        ScrollBoxList->SetScrollbarThickness(ScrollBarThickness);
+        ScrollBoxList->WidgetBarStyle = ScrollBarStyle;
+        ScrollBoxList->WidgetStyle = ScrollBoxStyle;
+    }
 }
