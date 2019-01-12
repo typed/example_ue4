@@ -237,17 +237,6 @@ void UReuseListC::RemoveNotUsed()
     }
 }
 
-void UReuseListC::OnPreviewTick()
-{
-    if (ScrollBoxList->IsValidLowLevelFast() &&
-        CanvasPanelBg->IsValidLowLevelFast() &&
-        SizeBoxBg->IsValidLowLevelFast() &&
-        CanvasPanelList->IsValidLowLevelFast())
-    {
-        Reload(PreviewCount);
-    }
-}
-
 void UReuseListC::DoReload()
 {
     if (IsInvalidParam())
@@ -465,7 +454,15 @@ void UReuseListC::OnWidgetRebuilt()
     SyncProp();
     auto wld = GetWorld();
     if (wld && !wld->IsGameWorld()) {
-        GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UReuseListC::OnPreviewTick);
+        GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]() {
+            if (ScrollBoxList->IsValidLowLevelFast() &&
+                CanvasPanelBg->IsValidLowLevelFast() &&
+                SizeBoxBg->IsValidLowLevelFast() &&
+                CanvasPanelList->IsValidLowLevelFast())
+            {
+                Reload(PreviewCount);
+            }
+        }));
     }
 }
 

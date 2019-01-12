@@ -146,8 +146,6 @@ protected:
     void Update();
     void DoJump();
 
-    void OnPreviewTick();
-
     bool IsVertical() const;
     bool IsInvalidParam() const;
 
