@@ -131,7 +131,9 @@ protected:
     void NativeConstruct();
     void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 
+#if WITH_EDITOR
     void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
+#endif
     void OnWidgetRebuilt();
 
     void InitWidgetPtr();

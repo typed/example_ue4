@@ -442,18 +442,21 @@ void UReuseListC::Reset(UClass* __ItemClass, EReuseListStyle __Style, int32 __It
     PaddingY = __PaddingY;
 }
 
+#if WITH_EDITOR
 void UReuseListC::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
-
     SyncProp();
-
-    static const FName ItemClassName = "ItemClass";
-    if (PropertyChangedEvent.GetPropertyName().IsEqual(ItemClassName)) {
-        ClearCache();
+    auto wld = GetWorld();
+    if (wld && !wld->IsGameWorld()) {
+        static const FName TmpName = "ItemClass";
+        if (PropertyChangedEvent.GetPropertyName().IsEqual(TmpName)) {
+            ClearCache();
+        }
+        Reload(PreviewCount);
     }
-    Reload(PreviewCount);
 }
+#endif
 
 void UReuseListC::OnWidgetRebuilt()
 {
