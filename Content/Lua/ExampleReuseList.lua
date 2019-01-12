@@ -18,22 +18,22 @@ function ExampleReuseList:destruct()
     self.widget.Button_4.OnClicked:Clear()
     self.widget.Button_Close.OnClicked:Clear()
     self.widget.ButtonItem1.OnClicked:Clear()
-    self.widget.ReuseListC.OnUpdateItem:Clear() 
-    self.widget.ReuseListC.OnCreateItem:Clear()
+    self.widget.ReuseList2.OnUpdateItem:Clear() 
+    self.widget.ReuseList2.OnCreateItem:Clear()
 end
 
 function ExampleReuseList:OnJumpByIdx()
-    self.widget.ReuseListC:JumpByIdx(22,0)
+    self.widget.ReuseList2:JumpByIdx(22,0)
 end
 
 function ExampleReuseList:OnClickItem1()
-    self.widget.ReuseListC.OnUpdateItem:Clear()
-    self.widget.ReuseListC.OnUpdateItem:Add(function(...) self:OnUpdateItem1(...) end)
-    self.widget.ReuseListC.OnCreateItem:Clear()
-    self.widget.ReuseListC.OnCreateItem:Add(function(widget) TestReuseListItem.bind(widget, self) end)
+    self.widget.ReuseList2.OnUpdateItem:Clear()
+    self.widget.ReuseList2.OnUpdateItem:Add(function(...) self:OnUpdateItem1(...) end)
+    self.widget.ReuseList2.OnCreateItem:Clear()
+    self.widget.ReuseList2.OnCreateItem:Add(function(widget) TestReuseListItem.bind(widget, self) end)
     --local cls = US.LoadBpClass("/Game/Example/ExampleReuseList/TestReuseListItem3.TestReuseListItem3_C")
-    --self.widget.ReuseListC:Reset(cls, 2, 100, 100, 5, 5)
-    self.widget.ReuseListC:Reload(50)
+    --self.widget.ReuseList2:Reset(cls, 2, 100, 100, 5, 5)
+    self.widget.ReuseList2:Reload(50)
 end
 
 function ExampleReuseList:OnUpdateItem1(widget,idx)
@@ -43,7 +43,7 @@ function ExampleReuseList:OnUpdateItem1(widget,idx)
 end
 
 function ExampleReuseList:OnClear()
-    self.widget.ReuseListC:Clear()
+    self.widget.ReuseList2:Clear()
     --DumpSingleObjRef(self)
     --log_tree("debug.getregistry().SLUA_PTR_USERTABLE_MAPPING", debug.getregistry().SLUA_PTR_USERTABLE_MAPPING)
 end
@@ -54,16 +54,16 @@ function TestReuseListItem:construct(parent)
     self.m_parent = parent
     self.m_idx = 0
     self.widget.Button_BG.OnClicked:Add(function() self:OnClickItem1BG() end)
-    self.widget.ReuseListCBP.OnUpdateItem:Clear()
-    self.widget.ReuseListCBP.OnUpdateItem:Add(function(...) self:OnUpdateItem(...) end)
-    self.widget.ReuseListCBP.OnCreateItem:Clear()
-    self.widget.ReuseListCBP.OnCreateItem:Add(function(widget) TestReuseListItem3.bind(widget, self) end)
-    --self.widget.ReuseListCBP:Reload(math.random(10))
+    self.widget.ReuseList2.OnUpdateItem:Clear()
+    self.widget.ReuseList2.OnUpdateItem:Add(function(...) self:OnUpdateItem(...) end)
+    self.widget.ReuseList2.OnCreateItem:Clear()
+    self.widget.ReuseList2.OnCreateItem:Add(function(widget) TestReuseListItem3.bind(widget, self) end)
+    --self.widget.ReuseList2:Reload(math.random(10))
 end
 function TestReuseListItem:destruct()
     self.widget.Button_BG.OnClicked:Clear()
-    self.widget.ReuseListCBP.OnUpdateItem:Clear()
-    self.widget.ReuseListCBP.OnCreateItem:Clear()
+    self.widget.ReuseList2.OnUpdateItem:Clear()
+    self.widget.ReuseList2.OnCreateItem:Clear()
 end
 function TestReuseListItem:OnClickItem1BG()
     --local itm = self.ItmList[self.m_idx]
