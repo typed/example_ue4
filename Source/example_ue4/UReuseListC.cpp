@@ -66,7 +66,8 @@ void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     Super::NativeTick(MyGeometry, InDeltaTime);
     if (IsInvalidParam())
         return;
-    if (!ViewSize.Equals(GetCachedGeometry().GetLocalSize(), 0.0001f))
+    const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
+    if (!ViewSize.Equals(lzSz, 0.0001f))
         DoReload();
     Update();
     DoJump();
@@ -77,8 +78,12 @@ void UReuseListC::Reload(int32 __ItemCount)
     ItemCount = __ItemCount;
     ScrollBoxList->SetOrientation(IsVertical() ? Orient_Vertical : Orient_Horizontal);
     ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
-    if (!GetCachedGeometry().GetLocalSize().Equals(FVector2D::ZeroVector, 0.0001f))
-        DoReload();
+    const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
+    if (lzSz.Equals(FVector2D::ZeroVector, 0.0001f)) {
+        ViewSize = lzSz;
+        return;
+    }
+    DoReload();
 }
 
 void UReuseListC::Refresh()
