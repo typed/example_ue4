@@ -28,8 +28,6 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , MaxPos(0)
     , Style(EReuseListStyle::Vertical)
     , ItemWidth(100)
-    , BIdx(0)
-    , EIdx(0)
     , ColNum(0)
     , RowNum(0)
     , CurLine(-999)
@@ -38,6 +36,8 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , NeedJump(false)
     , PreviewCount(5)
     , ScrollBarVisibility(ESlateVisibility::Collapsed)
+    , NotFullAlignStyle(EReuseListNotFullAlignStyle::Start)
+    , AlignSpace(0.f)
 {
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
     ScrollBoxStyle.TopShadowBrush = FSlateNoResource();
@@ -148,26 +148,57 @@ void UReuseListC::InitWidgetPtr()
     ensure(CanvasPanelList);
 }
 
+void UReuseListC::ComputeAlignSpace()
+{
+    AlignSpace = 0.f;
+    float content = 0.f;
+    float view = 0.f;
+    if (IsVertical()) {
+        content = ContentSize.Y;
+        view = ViewSize.Y;
+    }
+    else {
+        content = ContentSize.X;
+        view = ViewSize.X;
+    }
+    if (content < view) {
+        switch (NotFullAlignStyle)
+        {
+        case EReuseListNotFullAlignStyle::Start:
+            AlignSpace = 0.f;
+            break;
+        case EReuseListNotFullAlignStyle::Middle:
+            AlignSpace = (view - content) / 2.f;
+            break;
+        case EReuseListNotFullAlignStyle::End:
+            AlignSpace = view - content;
+            break;
+        }
+    }
+}
+
 void UReuseListC::ScrollUpdate(float __Offset)
 {
     int32 ItemWidthAndPad = ItemWidth + PaddingX;
     int32 ItemHeightAndPad = ItemHeight + PaddingY;
     int32 Offset = __Offset;
     int32 OffsetEnd = 0;
+    int32 BIdx = 0;
+    int32 EIdx = 0;
     Offset = UKismetMathLibrary::Max(Offset, 0);
     Offset = UKismetMathLibrary::Min(Offset, MaxPos);
     if (Style == EReuseListStyle::Vertical) {
         OffsetEnd = UKismetMathLibrary::Min((Offset + (int32)ViewSize.Y), MaxPos);
         BIdx = UKismetMathLibrary::Max(Offset / ItemHeightAndPad - ItemCacheNum, 0);
         EIdx = UKismetMathLibrary::Min(OffsetEnd / ItemHeightAndPad + ItemCacheNum, ItemCount-1);
-        RemoveNotUsed();
+        RemoveNotUsed(BIdx, EIdx);
         for (int32 i = BIdx; i <= EIdx; i++) {
             if (!ItemMap.Contains(i)) {
                 auto w = NewItem();
                 if (w) {
                     auto cps = Cast<UCanvasPanelSlot>(w->Slot);
                     cps->SetAnchors(FAnchors(0, 0, 0, 0));
-                    cps->SetOffsets(FMargin(0, i * ItemHeightAndPad, ViewSize.X, ItemHeight));
+                    cps->SetOffsets(FMargin(0, i * ItemHeightAndPad + AlignSpace, ViewSize.X, ItemHeight));
                     ItemMap.Add(i, w);
                     OnUpdateItem.Broadcast(w, i);
                 }
@@ -178,7 +209,7 @@ void UReuseListC::ScrollUpdate(float __Offset)
         OffsetEnd = UKismetMathLibrary::Min((Offset + (int32)ViewSize.X), MaxPos);
         BIdx = UKismetMathLibrary::Max(Offset / ItemWidthAndPad - ItemCacheNum, 0);
         EIdx = UKismetMathLibrary::Min(OffsetEnd / ItemWidthAndPad + ItemCacheNum, ItemCount-1);
-        RemoveNotUsed();
+        RemoveNotUsed(BIdx, EIdx);
         for (int32 i = BIdx; i <= EIdx; i++) {
             if (!ItemMap.Contains(i)) {
                 auto w = NewItem();
@@ -186,10 +217,10 @@ void UReuseListC::ScrollUpdate(float __Offset)
                     auto cps = Cast<UCanvasPanelSlot>(w->Slot);
                     cps->SetAnchors(FAnchors(0, 0, 0, 0));
                     if (ItemHeight <= 0) {
-                        cps->SetOffsets(FMargin(i * ItemWidthAndPad, 0, ItemWidth, ViewSize.Y));
+                        cps->SetOffsets(FMargin(i * ItemWidthAndPad + AlignSpace, 0, ItemWidth, ViewSize.Y));
                     }
                     else {
-                        cps->SetOffsets(FMargin(i * ItemWidthAndPad, (ViewSize.Y - ItemHeight) / 2.f, ItemWidth, ItemHeight));
+                        cps->SetOffsets(FMargin(i * ItemWidthAndPad + AlignSpace, (ViewSize.Y - ItemHeight) / 2.f, ItemWidth, ItemHeight));
                     }
                     ItemMap.Add(i, w);
                     OnUpdateItem.Broadcast(w, i);
@@ -202,14 +233,14 @@ void UReuseListC::ScrollUpdate(float __Offset)
         BIdx = UKismetMathLibrary::Max( (Offset / ItemHeightAndPad ) * ColNum, 0);
         int32 tmp = UKismetMathLibrary::FCeil((float)OffsetEnd / ItemHeightAndPad) + 1;
         EIdx = UKismetMathLibrary::Min(tmp * ColNum - 1, ItemCount-1);
-        RemoveNotUsed();
+        RemoveNotUsed(BIdx, EIdx);
         for (int32 i = BIdx; i <= EIdx; i++) {
             if (!ItemMap.Contains(i)) {
                 auto w = NewItem();
                 if (w) {
                     auto cps = Cast<UCanvasPanelSlot>(w->Slot);
                     cps->SetAnchors(FAnchors(0, 0, 0, 0));
-                    cps->SetOffsets(FMargin((i%ColNum)*ItemWidthAndPad, (i / ColNum)*ItemHeightAndPad, ItemWidth, ItemHeight));
+                    cps->SetOffsets(FMargin((i%ColNum)*ItemWidthAndPad, (i / ColNum)*ItemHeightAndPad + AlignSpace, ItemWidth, ItemHeight));
                     ItemMap.Add(i, w);
                     OnUpdateItem.Broadcast(w, i);
                 }
@@ -232,7 +263,7 @@ void UReuseListC::UpdateContentSize(UWidget* widget)
     }
 }
 
-void UReuseListC::RemoveNotUsed()
+void UReuseListC::RemoveNotUsed(int32 BIdx, int32 EIdx)
 {
     for (TMap<int32, UUserWidget*>::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
         if (!UKismetMathLibrary::InRange_IntInt(iter->Key, BIdx, EIdx)) {
@@ -269,6 +300,7 @@ void UReuseListC::DoReload()
     }
     UpdateContentSize(SizeBoxBg);
     UpdateContentSize(CanvasPanelList);
+    ComputeAlignSpace();
     for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
         auto uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
         if (uw) {
@@ -443,7 +475,7 @@ void UReuseListC::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedE
     SyncProp();
     auto wld = GetWorld();
     if (wld && !wld->IsGameWorld()) {
-        static const FName TmpName = "ItemClass";
+        static const FName TmpName = TEXT("ItemClass");
         if (PropertyChangedEvent.GetPropertyName().IsEqual(TmpName)) {
             ClearCache();
         }

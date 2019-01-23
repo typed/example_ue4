@@ -33,7 +33,7 @@ function ExampleReuseList:OnClickItem1()
     self.widget.ReuseList2.OnCreateItem:Add(function(widget) TestReuseListItem.bind(widget, self) end)
     --local cls = US.LoadBpClass("/Game/Example/ExampleReuseList/TestReuseListItem3.TestReuseListItem3_C")
     --self.widget.ReuseList2:Reset(cls, 2, 100, 100, 5, 5)
-    self.widget.ReuseList2:Reload(50)
+    self.widget.ReuseList2:Reload(math.random(10))
 end
 
 function ExampleReuseList:OnUpdateItem1(widget,idx)

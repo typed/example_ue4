@@ -36,6 +36,14 @@ enum class EReuseListJumpStyle : uint8
     End,
 };
 
+UENUM(BlueprintType)
+enum class EReuseListNotFullAlignStyle : uint8
+{
+    Start,
+    Middle,
+    End,
+};
+
 UCLASS()
 class EXAMPLE_UE4_API UReuseListC : public UUserWidget
 {
@@ -128,6 +136,9 @@ protected:
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PreviewCount;
 
+    UPROPERTY(EditAnywhere, Category = Property)
+    EReuseListNotFullAlignStyle NotFullAlignStyle;
+
     void NativeConstruct();
     void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 
@@ -139,12 +150,13 @@ protected:
     void InitWidgetPtr();
     void ScrollUpdate(float __Offset);
     void UpdateContentSize(UWidget* widget);
-    void RemoveNotUsed();
+    void RemoveNotUsed(int32 BIdx, int32 EIdx);
     void DoReload();
     UUserWidget* NewItem();
     void ReleaseItem(UUserWidget* __Item);
     void Update();
     void DoJump();
+    void ComputeAlignSpace();
 
     bool IsVertical() const;
     bool IsInvalidParam() const;
@@ -165,13 +177,12 @@ protected:
     int32 MaxPos;
     TMap<int32, UUserWidget*> ItemMap;
     TArray<UUserWidget*> ItemPool;
-    int32 BIdx;
-    int32 EIdx;
     int32 ColNum;
     int32 RowNum;
     int32 CurLine;
     int32 JumpIdx;
     EReuseListJumpStyle JumpStyle;
+    float AlignSpace;
     bool NeedJump;
 
 };
