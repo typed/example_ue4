@@ -88,6 +88,12 @@ public:
     float GetScrollOffset() const;
 
     UFUNCTION(BlueprintCallable)
+    const FVector2D& GetViewSize() const;
+
+    UFUNCTION(BlueprintCallable)
+    const FVector2D& GetContentSize() const;
+
+    UFUNCTION(BlueprintCallable)
     void JumpByIdx(int32 __Idx) { JumpByIdxStyle(__Idx, EReuseListJumpStyle::Middle); }
 
     UFUNCTION(BlueprintCallable)
@@ -139,6 +145,9 @@ protected:
     UPROPERTY(EditAnywhere, Category = Property)
     EReuseListNotFullAlignStyle NotFullAlignStyle;
 
+    UPROPERTY(EditAnywhere, Category = Property)
+    bool NotFullScrollBoxHitTestInvisible;
+
     void NativeConstruct();
     void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 
@@ -157,6 +166,7 @@ protected:
     void Update();
     void DoJump();
     void ComputeAlignSpace();
+    void ComputeScrollBoxHitTest();
 
     bool IsVertical() const;
     bool IsInvalidParam() const;
@@ -183,6 +193,7 @@ protected:
     int32 JumpIdx;
     EReuseListJumpStyle JumpStyle;
     float AlignSpace;
+    ESlateVisibility ScrollBoxVisibility;
     bool NeedJump;
 
 };

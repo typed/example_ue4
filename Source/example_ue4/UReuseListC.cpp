@@ -37,6 +37,8 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , PreviewCount(5)
     , ScrollBarVisibility(ESlateVisibility::Collapsed)
     , NotFullAlignStyle(EReuseListNotFullAlignStyle::Start)
+    , NotFullScrollBoxHitTestInvisible(false)
+    , ScrollBoxVisibility(ESlateVisibility::Visible)
     , AlignSpace(0.f)
 {
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
@@ -121,6 +123,16 @@ float UReuseListC::GetScrollOffset() const
     return ScrollBoxList->GetScrollOffset();
 }
 
+const FVector2D& UReuseListC::GetViewSize() const
+{
+    return ViewSize;
+}
+
+const FVector2D& UReuseListC::GetContentSize() const
+{
+    return ContentSize;
+}
+
 void UReuseListC::JumpByIdxStyle(int32 __Idx, EReuseListJumpStyle __Style)
 {
     JumpIdx = __Idx;
@@ -175,6 +187,19 @@ void UReuseListC::ComputeAlignSpace()
             break;
         }
     }
+}
+
+void UReuseListC::ComputeScrollBoxHitTest()
+{
+    if (NotFullScrollBoxHitTestInvisible) {
+        float vlen = (IsVertical() ? ViewSize.Y : ViewSize.X);
+        float clen = (IsVertical() ? ContentSize.Y : ContentSize.X);
+        if (vlen > clen) {
+            ScrollBoxList->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+            return;
+        }
+    }
+    ScrollBoxList->SetVisibility(ScrollBoxVisibility);
 }
 
 void UReuseListC::ScrollUpdate(float __Offset)
@@ -301,6 +326,7 @@ void UReuseListC::DoReload()
     UpdateContentSize(SizeBoxBg);
     UpdateContentSize(CanvasPanelList);
     ComputeAlignSpace();
+    ComputeScrollBoxHitTest();
     for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
         auto uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
         if (uw) {
@@ -510,5 +536,6 @@ void UReuseListC::SyncProp()
         ScrollBoxList->SetScrollbarThickness(ScrollBarThickness);
         ScrollBoxList->WidgetBarStyle = ScrollBarStyle;
         ScrollBoxList->WidgetStyle = ScrollBoxStyle;
+        ScrollBoxVisibility = ScrollBoxList->GetVisibility();
     }
 }
