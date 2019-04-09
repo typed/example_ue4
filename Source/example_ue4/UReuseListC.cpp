@@ -38,7 +38,6 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , ScrollBarVisibility(ESlateVisibility::Collapsed)
     , NotFullAlignStyle(EReuseListNotFullAlignStyle::Start)
     , NotFullScrollBoxHitTestInvisible(false)
-    , ScrollBoxVisibility(ESlateVisibility::Visible)
     , AlignSpace(0.f)
 {
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
@@ -199,7 +198,7 @@ void UReuseListC::ComputeScrollBoxHitTest()
             return;
         }
     }
-    ScrollBoxList->SetVisibility(ScrollBoxVisibility);
+    ScrollBoxList->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UReuseListC::ScrollUpdate(float __Offset)
@@ -536,6 +535,5 @@ void UReuseListC::SyncProp()
         ScrollBoxList->SetScrollbarThickness(ScrollBarThickness);
         ScrollBoxList->WidgetBarStyle = ScrollBarStyle;
         ScrollBoxList->WidgetStyle = ScrollBoxStyle;
-        ScrollBoxVisibility = ScrollBoxList->GetVisibility();
     }
 }

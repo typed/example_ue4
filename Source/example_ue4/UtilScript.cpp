@@ -54,6 +54,14 @@ void UUtilScript::TraceAllObject()
 	}
 }
 
+void UUtilScript::TraceAllUserWidget()
+{
+    for (TObjectIterator<UUserWidget> It; It; ++It) {
+        UUserWidget* w = *It;
+        UE_LOG(LogUtil, Log, TEXT("Found UUserWidget:%x Name: %s"), w, *(w->GetName()));
+    }
+}
+
 void UUtilScript::TestShowUserWidget(FString name, int idx)
 {
 	TWeakObjectPtr<UUserWidget> w = UUtilScript::CreateUserWidget(name);

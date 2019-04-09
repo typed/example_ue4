@@ -33,6 +33,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static void TraceAllObject();
 
+    UFUNCTION(BlueprintCallable)
+    static void TraceAllUserWidget();
+
 	UFUNCTION(BlueprintCallable)
 	static void TestShowUserWidget(FString name, int idx);
 

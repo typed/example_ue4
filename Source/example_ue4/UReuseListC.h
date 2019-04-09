@@ -193,7 +193,6 @@ protected:
     int32 JumpIdx;
     EReuseListJumpStyle JumpStyle;
     float AlignSpace;
-    ESlateVisibility ScrollBoxVisibility;
     bool NeedJump;
 
 };
