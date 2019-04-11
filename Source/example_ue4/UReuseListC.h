@@ -26,6 +26,7 @@ enum class EReuseListStyle : uint8
     Vertical,
     Horizontal,
     VerticalGrid,
+    HorizontalGrid,
 };
 
 UENUM(BlueprintType)

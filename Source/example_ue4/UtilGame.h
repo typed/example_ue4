@@ -25,4 +25,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static UExampleGameInstance* GetGameInstance();
 
+    UFUNCTION(BlueprintCallable)
+    static int Test_TCHAR_TO_UTF8();
+
 };

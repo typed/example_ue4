@@ -256,7 +256,7 @@ void UReuseListC::ScrollUpdate(float __Offset)
         OffsetEnd = UKismetMathLibrary::Min((Offset + (int32)ViewSize.Y), MaxPos);
         BIdx = UKismetMathLibrary::Max( (Offset / ItemHeightAndPad ) * ColNum, 0);
         int32 tmp = UKismetMathLibrary::FCeil((float)OffsetEnd / ItemHeightAndPad) + 1;
-        EIdx = UKismetMathLibrary::Min(tmp * ColNum - 1, ItemCount-1);
+        EIdx = UKismetMathLibrary::Min(tmp * ColNum - 1, ItemCount - 1);
         RemoveNotUsed(BIdx, EIdx);
         for (int32 i = BIdx; i <= EIdx; i++) {
             if (!ItemMap.Contains(i)) {
@@ -265,6 +265,25 @@ void UReuseListC::ScrollUpdate(float __Offset)
                     auto cps = Cast<UCanvasPanelSlot>(w->Slot);
                     cps->SetAnchors(FAnchors(0, 0, 0, 0));
                     cps->SetOffsets(FMargin((i%ColNum)*ItemWidthAndPad, (i / ColNum)*ItemHeightAndPad + AlignSpace, ItemWidth, ItemHeight));
+                    ItemMap.Add(i, w);
+                    OnUpdateItem.Broadcast(w, i);
+                }
+            }
+        }
+    }
+    else if (Style == EReuseListStyle::HorizontalGrid) {
+        OffsetEnd = UKismetMathLibrary::Min((Offset + (int32)ViewSize.X), MaxPos);
+        BIdx = UKismetMathLibrary::Max((Offset / ItemWidthAndPad) * RowNum, 0);
+        int32 tmp = UKismetMathLibrary::FCeil((float)OffsetEnd / ItemWidthAndPad) + 1;
+        EIdx = UKismetMathLibrary::Min(tmp * RowNum - 1, ItemCount - 1);
+        RemoveNotUsed(BIdx, EIdx);
+        for (int32 i = BIdx; i <= EIdx; i++) {
+            if (!ItemMap.Contains(i)) {
+                auto w = NewItem();
+                if (w) {
+                    auto cps = Cast<UCanvasPanelSlot>(w->Slot);
+                    cps->SetAnchors(FAnchors(0, 0, 0, 0));
+                    cps->SetOffsets(FMargin( (i / RowNum) * ItemWidthAndPad + AlignSpace, (i % RowNum) * ItemHeightAndPad, ItemWidth, ItemHeight));
                     ItemMap.Add(i, w);
                     OnUpdateItem.Broadcast(w, i);
                 }
@@ -320,6 +339,13 @@ void UReuseListC::DoReload()
         MaxPos = (ItemHeight + PaddingY) * RowNum - PaddingY;
         ContentSize.X = ViewSize.X;
         ContentSize.Y = MaxPos;
+        break;
+    case EReuseListStyle::HorizontalGrid:
+        RowNum = UKismetMathLibrary::Max((PaddingY + (int32)ViewSize.Y) / (ItemHeight + PaddingY), 1);
+        ColNum = UKismetMathLibrary::FCeil((float)ItemCount / RowNum);
+        MaxPos = (ItemWidth + PaddingX) * ColNum - PaddingX;
+        ContentSize.X = MaxPos;
+        ContentSize.Y = ViewSize.Y;
         break;
     }
     UpdateContentSize(SizeBoxBg);
@@ -405,6 +431,12 @@ void UReuseListC::DoJump()
             return;
         }
         tmpScroll = ItemHeightAndPad * (JumpIdx / ColNum) - tmpItemOffset;
+    }
+    else if (Style == EReuseListStyle::HorizontalGrid) {
+        if (ContentSize.X < ViewSize.X) {
+            return;
+        }
+        tmpScroll = ItemWidthAndPad * (JumpIdx / RowNum) - tmpItemOffset;
     }
 
     tmpScroll = UKismetMathLibrary::FMax(tmpScroll, 0);
