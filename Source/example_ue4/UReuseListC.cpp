@@ -264,7 +264,7 @@ void UReuseListC::ScrollUpdate(float __Offset)
                 if (w) {
                     auto cps = Cast<UCanvasPanelSlot>(w->Slot);
                     cps->SetAnchors(FAnchors(0, 0, 0, 0));
-                    cps->SetOffsets(FMargin((i%ColNum)*ItemWidthAndPad, (i / ColNum)*ItemHeightAndPad + AlignSpace, ItemWidth, ItemHeight));
+                    cps->SetOffsets(FMargin( (i % ColNum) * ItemWidthAndPad, (i / ColNum) * ItemHeightAndPad + AlignSpace, ItemWidth, ItemHeight));
                     ItemMap.Add(i, w);
                     OnUpdateItem.Broadcast(w, i);
                 }
