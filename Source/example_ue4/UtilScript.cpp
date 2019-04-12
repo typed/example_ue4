@@ -112,3 +112,31 @@ void UUtilScript::DoFile(FString name)
         state->doFile(TCHAR_TO_UTF8(*name));
     }
 }
+
+//SaveDir
+FString UUtilScript::GetSavedDir()
+{
+    return FPaths::ProjectSavedDir();
+}
+
+//Search File
+TArray<FString> UUtilScript::SearchFileAbsPath(FString base_dir, FString dir, FString ext, bool isRecursive)
+{
+    TArray<FString> aRet;
+    FString sPath = base_dir + dir;
+    IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+    if (isRecursive) {
+        PlatformFile.FindFilesRecursively(aRet, *sPath, *ext);
+    }
+    else {
+        PlatformFile.FindFiles(aRet, *sPath, *ext);
+    }
+    return aRet;
+}
+
+//Delete File
+bool UUtilScript::DeleteFileAbsPath(FString path)
+{
+    IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+    return PlatformFile.DeleteFile(*path);
+}

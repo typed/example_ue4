@@ -11,6 +11,7 @@ class UUserWidget;
 /**
  * 
  */
+
 UCLASS()
 class EXAMPLE_UE4_API UUtilScript : public UObject
 {
@@ -44,5 +45,17 @@ public:
 
     UFUNCTION(BlueprintCallable)
     static void DoFile(FString name);
+
+    //SaveDir
+    UFUNCTION(BlueprintCallable)
+    static FString GetSavedDir();
+
+    //Search File
+    UFUNCTION(BlueprintCallable)
+    static TArray<FString> SearchFileAbsPath(FString base_dir, FString dir, FString ext, bool isRecursive);
+
+    //Delete File
+    UFUNCTION(BlueprintCallable)
+    static bool DeleteFileAbsPath(FString path);
 	
 };
