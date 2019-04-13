@@ -159,11 +159,11 @@ protected:
 
     void InitWidgetPtr();
     void ScrollUpdate(float __Offset);
-    void UpdateContentSize(UWidget* widget);
+    void UpdateContentSize(TWeakObjectPtr<UWidget> widget);
     void RemoveNotUsed(int32 BIdx, int32 EIdx);
     void DoReload();
-    UUserWidget* NewItem();
-    void ReleaseItem(UUserWidget* __Item);
+    TWeakObjectPtr<UUserWidget> NewItem();
+    void ReleaseItem(TWeakObjectPtr<UUserWidget> __Item);
     void Update();
     void DoJump();
     void ComputeAlignSpace();
@@ -176,18 +176,18 @@ protected:
 
     void SyncProp();
 
-    UScrollBox* ScrollBoxList;
-    UCanvasPanel* CanvasPanelBg;
-    USizeBox* SizeBoxBg;
-    UCanvasPanel* CanvasPanelList;
+    TWeakObjectPtr<UScrollBox> ScrollBoxList;
+    TWeakObjectPtr<UCanvasPanel> CanvasPanelBg;
+    TWeakObjectPtr<USizeBox> SizeBoxBg;
+    TWeakObjectPtr<UCanvasPanel> CanvasPanelList;
     
     FVector2D ViewSize;
     FVector2D ContentSize;
     
     int32 ItemCount;
     int32 MaxPos;
-    TMap<int32, UUserWidget*> ItemMap;
-    TArray<UUserWidget*> ItemPool;
+    TMap<int32, TWeakObjectPtr<UUserWidget> > ItemMap;
+    TArray<TWeakObjectPtr<UUserWidget> > ItemPool;
     int32 ColNum;
     int32 RowNum;
     int32 CurLine;

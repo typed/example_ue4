@@ -89,7 +89,7 @@ void UReuseListC::Reload(int32 __ItemCount)
 
 void UReuseListC::Refresh()
 {
-    for (TMap<int32, UUserWidget*>::TConstIterator iter(ItemMap); iter; ++iter) {
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
         RefreshOne(iter->Key);
     }
 }
@@ -98,7 +98,7 @@ void UReuseListC::RefreshOne(int32 __Idx)
 {
     auto v = ItemMap.Find(__Idx);
     if (v) {
-        OnUpdateItem.Broadcast(*v, __Idx);
+        OnUpdateItem.Broadcast((*v).Get(), __Idx);
     }
 }
 
@@ -147,16 +147,16 @@ void UReuseListC::Clear()
 void UReuseListC::InitWidgetPtr()
 {
     ScrollBoxList = Cast<UScrollBox>(GetWidgetFromName(FName(TEXT("ScrollBoxList"))));
-    ensure(ScrollBoxList);
+    ensure(ScrollBoxList.IsValid());
 
     CanvasPanelBg = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelBg"))));
-    ensure(CanvasPanelBg);
+    ensure(CanvasPanelBg.IsValid());
 
     SizeBoxBg = Cast<USizeBox>(GetWidgetFromName(FName(TEXT("SizeBoxBg"))));
-    ensure(SizeBoxBg);
+    ensure(SizeBoxBg.IsValid());
 
     CanvasPanelList = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelList"))));
-    ensure(CanvasPanelList);
+    ensure(CanvasPanelList.IsValid());
 }
 
 void UReuseListC::ComputeAlignSpace()
@@ -219,12 +219,12 @@ void UReuseListC::ScrollUpdate(float __Offset)
         for (int32 i = BIdx; i <= EIdx; i++) {
             if (!ItemMap.Contains(i)) {
                 auto w = NewItem();
-                if (w) {
+                if (w.IsValid()) {
                     auto cps = Cast<UCanvasPanelSlot>(w->Slot);
                     cps->SetAnchors(FAnchors(0, 0, 0, 0));
                     cps->SetOffsets(FMargin(0, i * ItemHeightAndPad + AlignSpace, ViewSize.X, ItemHeight));
                     ItemMap.Add(i, w);
-                    OnUpdateItem.Broadcast(w, i);
+                    OnUpdateItem.Broadcast(w.Get(), i);
                 }
             }
         }
@@ -237,7 +237,7 @@ void UReuseListC::ScrollUpdate(float __Offset)
         for (int32 i = BIdx; i <= EIdx; i++) {
             if (!ItemMap.Contains(i)) {
                 auto w = NewItem();
-                if (w) {
+                if (w.IsValid()) {
                     auto cps = Cast<UCanvasPanelSlot>(w->Slot);
                     cps->SetAnchors(FAnchors(0, 0, 0, 0));
                     if (ItemHeight <= 0) {
@@ -247,7 +247,7 @@ void UReuseListC::ScrollUpdate(float __Offset)
                         cps->SetOffsets(FMargin(i * ItemWidthAndPad + AlignSpace, (ViewSize.Y - ItemHeight) / 2.f, ItemWidth, ItemHeight));
                     }
                     ItemMap.Add(i, w);
-                    OnUpdateItem.Broadcast(w, i);
+                    OnUpdateItem.Broadcast(w.Get(), i);
                 }
             }
         }
@@ -261,12 +261,12 @@ void UReuseListC::ScrollUpdate(float __Offset)
         for (int32 i = BIdx; i <= EIdx; i++) {
             if (!ItemMap.Contains(i)) {
                 auto w = NewItem();
-                if (w) {
+                if (w.IsValid()) {
                     auto cps = Cast<UCanvasPanelSlot>(w->Slot);
                     cps->SetAnchors(FAnchors(0, 0, 0, 0));
                     cps->SetOffsets(FMargin( (i % ColNum) * ItemWidthAndPad, (i / ColNum) * ItemHeightAndPad + AlignSpace, ItemWidth, ItemHeight));
                     ItemMap.Add(i, w);
-                    OnUpdateItem.Broadcast(w, i);
+                    OnUpdateItem.Broadcast(w.Get(), i);
                 }
             }
         }
@@ -280,12 +280,12 @@ void UReuseListC::ScrollUpdate(float __Offset)
         for (int32 i = BIdx; i <= EIdx; i++) {
             if (!ItemMap.Contains(i)) {
                 auto w = NewItem();
-                if (w) {
+                if (w.IsValid()) {
                     auto cps = Cast<UCanvasPanelSlot>(w->Slot);
                     cps->SetAnchors(FAnchors(0, 0, 0, 0));
                     cps->SetOffsets(FMargin( (i / RowNum) * ItemWidthAndPad + AlignSpace, (i % RowNum) * ItemHeightAndPad, ItemWidth, ItemHeight));
                     ItemMap.Add(i, w);
-                    OnUpdateItem.Broadcast(w, i);
+                    OnUpdateItem.Broadcast(w.Get(), i);
                 }
             }
         }
@@ -293,7 +293,7 @@ void UReuseListC::ScrollUpdate(float __Offset)
     OnScrollItem.Broadcast(BIdx, EIdx);
 }
 
-void UReuseListC::UpdateContentSize(UWidget* widget)
+void UReuseListC::UpdateContentSize(TWeakObjectPtr<UWidget> widget)
 {
     auto cps = Cast<UCanvasPanelSlot>(widget->Slot);
     if (IsVertical()) {
@@ -308,9 +308,9 @@ void UReuseListC::UpdateContentSize(UWidget* widget)
 
 void UReuseListC::RemoveNotUsed(int32 BIdx, int32 EIdx)
 {
-    for (TMap<int32, UUserWidget*>::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
         if (!UKismetMathLibrary::InRange_IntInt(iter->Key, BIdx, EIdx)) {
-            ReleaseItem(iter->Value);
+            ReleaseItem(iter->Value.Get());
             iter.RemoveCurrent();
         }
     }
@@ -348,8 +348,8 @@ void UReuseListC::DoReload()
         ContentSize.Y = ViewSize.Y;
         break;
     }
-    UpdateContentSize(SizeBoxBg);
-    UpdateContentSize(CanvasPanelList);
+    UpdateContentSize(SizeBoxBg.Get());
+    UpdateContentSize(CanvasPanelList.Get());
     ComputeAlignSpace();
     ComputeScrollBoxHitTest();
     for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
@@ -450,7 +450,7 @@ void UReuseListC::DoJump()
     ScrollUpdate(tmpScroll);
 }
 
-UUserWidget* UReuseListC::NewItem()
+TWeakObjectPtr<UUserWidget> UReuseListC::NewItem()
 {
     if (ItemPool.IsValidIndex(0)) {
         auto tmp = ItemPool[0];
@@ -459,18 +459,18 @@ UUserWidget* UReuseListC::NewItem()
         return tmp;
     }
     else {
-        UUserWidget* widget = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
-        if (widget == nullptr) {
+        TWeakObjectPtr<UUserWidget> widget = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
+        if (!widget.IsValid()) {
             return nullptr;
         }
-        CanvasPanelList->AddChild(widget);
+        CanvasPanelList->AddChild(widget.Get());
         widget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-        OnCreateItem.Broadcast(widget);
+        OnCreateItem.Broadcast(widget.Get());
         return widget;
     }
 }
 
-void UReuseListC::ReleaseItem(UUserWidget* __Item)
+void UReuseListC::ReleaseItem(TWeakObjectPtr<UUserWidget> __Item)
 {
     __Item->SetVisibility(ESlateVisibility::Collapsed);
     ItemPool.AddUnique(__Item);
@@ -562,7 +562,7 @@ void UReuseListC::OnWidgetRebuilt()
 
 void UReuseListC::SyncProp()
 {
-    if (ScrollBoxList && ScrollBoxList->IsValidLowLevelFast()) {
+    if (ScrollBoxList.IsValid()) {
         ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
         ScrollBoxList->SetScrollbarThickness(ScrollBarThickness);
         ScrollBoxList->WidgetBarStyle = ScrollBarStyle;
