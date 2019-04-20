@@ -6,7 +6,6 @@
 #include "UObject/NoExportTypes.h"
 #include "UObject/ObjectMacros.h"
 #include "Interfaces/IHttpRequest.h"
-#include <map>
 #include "ImageDownloader.generated.h"
 
 class UTexture2D;
@@ -69,7 +68,7 @@ public:
 
 private:
 
-	static std::map<FString, FString> s_mapHashPath;
+	static TMap<FString, TWeakObjectPtr<UTexture2D> > s_mapTexture;
 
 	void HandleRequest(FHttpRequestPtr HttpRequest, FHttpResponsePtr HttpResponse, bool bSucceeded);
 

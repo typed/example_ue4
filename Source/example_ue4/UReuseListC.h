@@ -123,6 +123,9 @@ protected:
 	FVector2D ScrollBarThickness;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
+    int32 ItemCacheNum;
+
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 ItemWidth;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))

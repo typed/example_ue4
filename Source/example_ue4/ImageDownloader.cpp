@@ -12,14 +12,14 @@
 
 DEFINE_LOG_CATEGORY(LogImageDownloader);
 
-std::map<FString, FString> UImageDownloader::s_mapHashPath;
+TMap<FString, TWeakObjectPtr<UTexture2D> > UImageDownloader::s_mapTexture;
 FString UImageDownloader::s_strDir;
 FString UImageDownloader::s_strRootDir = "ImageDownload";
 FString UImageDownloader::s_strSubDir;
 int32 UImageDownloader::s_nSubDirTime = 24*3600;
 bool UImageDownloader::s_bCheckDiskFile = true;
 
-static UTexture2D* GetTexture2DFromArray(const TArray<uint8>& OutArray, bool& InvalidImageFormat)
+static TWeakObjectPtr<UTexture2D> GetTexture2DFromArray(const TArray<uint8>& OutArray, bool& InvalidImageFormat)
 {
 	InvalidImageFormat = false;
 	IImageWrapperModule& imageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
@@ -28,13 +28,13 @@ static UTexture2D* GetTexture2DFromArray(const TArray<uint8>& OutArray, bool& In
 		InvalidImageFormat = true;
 		return nullptr;
 	}
-	UTexture2D* OutTex = nullptr;
+    TWeakObjectPtr<UTexture2D> OutTex;
 	TSharedPtr<IImageWrapper> imageWrapper = imageWrapperModule.CreateImageWrapper(format);
 	if (imageWrapper.IsValid() && imageWrapper->SetCompressed(OutArray.GetData(), OutArray.Num())) {
 		const TArray<uint8>* uncompressedData = nullptr;
 		if (imageWrapper->GetRaw(ERGBFormat::BGRA, 8, uncompressedData)) {
 			OutTex = UTexture2D::CreateTransient(imageWrapper->GetWidth(), imageWrapper->GetHeight(), PF_B8G8R8A8);
-			if (OutTex) {
+			if (OutTex.IsValid()) {
 				void* TextureData = OutTex->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
 				FMemory::Memcpy(TextureData, uncompressedData->GetData(), uncompressedData->Num());
 				OutTex->PlatformData->Mips[0].BulkData.Unlock();
@@ -45,7 +45,7 @@ static UTexture2D* GetTexture2DFromArray(const TArray<uint8>& OutArray, bool& In
 	return OutTex;
 }
 
-static UTexture2D* GetTexture2DFromDisk(FString PathName, bool& InvalidImageFormat)
+static TWeakObjectPtr<UTexture2D> GetTexture2DFromDisk(FString PathName, bool& InvalidImageFormat)
 {
 	InvalidImageFormat = false;
 	if (!FPaths::FileExists(PathName)) {
@@ -171,14 +171,6 @@ void UImageDownloader::CheckDiskFile()
 
 void UImageDownloader::Start(FString Url)
 {
-
-    //const uint32 CurrentThreadId = FPlatformTLS::GetCurrentThreadId();
-    //TArray<FStringFormatArg> Args;
-    //Args.Add(LexicalConversion::ToString(CurrentThreadId));
-    //FString TestHUDString = FString::Format(TEXT("UImageDownloader::Start threadid={0}"), Args);
-    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TestHUDString);
-    //check(IsInGameThread());
-
     //UE_LOG(LogImageDownloader, Log, TEXT("UImageDownloader::Start"));
 
 	CheckDiskFile();
@@ -194,27 +186,24 @@ void UImageDownloader::Start(FString Url)
 
 	//from memory
     
-	std::map<FString, FString>::iterator it = s_mapHashPath.find(UrlHash);
-	if (it != s_mapHashPath.end()) {
-		FString PathName = it->second;
-		UTexture2D* pTexture = LoadObject<UTexture2D>(nullptr, *PathName);
-		if (pTexture) {
-			//UE_LOG(LogImageDownloader, Log, TEXT("from memory %s %x"), *PathName, (uint64)pTexture);
-			OnSuccess.Broadcast(pTexture, this);
+    const TWeakObjectPtr<UTexture2D>* pp = s_mapTexture.Find(UrlHash);
+	if (pp) {
+		const TWeakObjectPtr<UTexture2D> pTexture = *pp;
+		if (pTexture.IsValid()) {
+			UE_LOG(LogImageDownloader, Log, TEXT("from memory %s %x"), *pTexture->GetPathName(), (uint64)pTexture.Get());
+			OnSuccess.Broadcast(pTexture.Get(), this);
 			return;
 		}
-		s_mapHashPath.erase(it);
+        s_mapTexture.Remove(UrlHash);
 	}
     
     
 	//from disk
-    
-	UTexture2D* pTexture = GetTexture2DFromDisk(FileSavePath, InvalidImageFormat);
-	if (pTexture) {
-		FString PathName = pTexture->GetPathName();
-		s_mapHashPath[UrlHash] = PathName;
-		//UE_LOG(LogImageDownloader, Log, TEXT("from disk %s"), *PathName);
-		OnSuccess.Broadcast(pTexture, this);
+    TWeakObjectPtr<UTexture2D> pTexture = GetTexture2DFromDisk(FileSavePath, InvalidImageFormat);
+	if (pTexture.IsValid()) {
+        s_mapTexture.Add(UrlHash, pTexture);
+		UE_LOG(LogImageDownloader, Log, TEXT("from disk %s"), *pTexture->GetPathName());
+		OnSuccess.Broadcast(pTexture.Get(), this);
 		return;
 	}
 	if (InvalidImageFormat) {
@@ -237,14 +226,6 @@ void UImageDownloader::Start(FString Url)
 
 void UImageDownloader::HandleRequest(FHttpRequestPtr HttpRequest, FHttpResponsePtr HttpResponse, bool bSucceeded)
 {
-
-    //const uint32 CurrentThreadId = FPlatformTLS::GetCurrentThreadId();
-    //TArray<FStringFormatArg> Args;
-    //Args.Add(LexicalConversion::ToString(CurrentThreadId));
-    //FString TestHUDString = FString::Format(TEXT("UImageDownloader::HandleRequest threadid={0}"), Args);
-    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TestHUDString);
-    //check(IsInGameThread());
-
 	RemoveFromRoot();
 	HttpRequest->OnProcessRequestComplete().Unbind();
 	if (HttpResponse.IsValid() && EHttpResponseCodes::IsOk(HttpResponse->GetResponseCode())) {
@@ -259,13 +240,12 @@ void UImageDownloader::HandleRequest(FHttpRequestPtr HttpRequest, FHttpResponseP
             FileSavePath = s_strDir / s_strSubDir / UrlHash;
         }
 
-		std::map<FString, FString>::iterator it = s_mapHashPath.find(UrlHash);
-		if (it != s_mapHashPath.end()) {
-			FString PathName = it->second;
-			UTexture2D* pTexture = LoadObject<UTexture2D>(nullptr, *PathName);
-			if (pTexture) {
-				//UE_LOG(LogImageDownloader, Log, TEXT("from memory %s %x HandleRequest"), *PathName, (uint64)pTexture);
-				OnSuccess.Broadcast(pTexture, this);
+        const TWeakObjectPtr<UTexture2D>* pp = s_mapTexture.Find(UrlHash);
+		if (pp) {
+            const TWeakObjectPtr<UTexture2D> pTexture = *pp;
+            if (pTexture.IsValid()) {
+				UE_LOG(LogImageDownloader, Log, TEXT("from memory %s %x HandleRequest"), *pTexture->GetPathName(), (uint64)pTexture.Get());
+                OnSuccess.Broadcast(pTexture.Get(), this);
 				return;
 			}
 		}
@@ -286,12 +266,11 @@ void UImageDownloader::HandleRequest(FHttpRequestPtr HttpRequest, FHttpResponseP
 		}
         
 
-		UTexture2D* pTexture = GetTexture2DFromArray(OutArray, InvalidImageFormat);
-		if (pTexture) {
-			FString PathName = pTexture->GetPathName();
-			s_mapHashPath[UrlHash] = PathName;
-			//UE_LOG(LogImageDownloader, Log, TEXT("from http %s"), *PathName);
-			OnSuccess.Broadcast(pTexture, this);
+        TWeakObjectPtr<UTexture2D> pTexture = GetTexture2DFromArray(OutArray, InvalidImageFormat);
+		if (pTexture.IsValid()) {
+            s_mapTexture.Add(UrlHash, pTexture);
+			UE_LOG(LogImageDownloader, Log, TEXT("from http %s"), *pTexture->GetPathName());
+			OnSuccess.Broadcast(pTexture.Get(), this);
 			return;
 		}
 

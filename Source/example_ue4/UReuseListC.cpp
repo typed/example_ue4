@@ -10,8 +10,6 @@
 
 DEFINE_LOG_CATEGORY(LogUReuseListC);
 
-static const int32 ItemCacheNum = 2;
-
 UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
     , ScrollBoxList(nullptr)
@@ -27,6 +25,7 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , ItemHeight(100)
     , MaxPos(0)
     , Style(EReuseListStyle::Vertical)
+    , ItemCacheNum(2)
     , ItemWidth(100)
     , ColNum(0)
     , RowNum(0)
