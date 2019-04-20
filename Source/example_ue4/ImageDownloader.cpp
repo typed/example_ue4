@@ -150,12 +150,12 @@ void UImageDownloader::CheckDiskFile()
 					return true;
 				}
 				PlatformFile.DeleteDirectoryRecursively(FilenameOrDirectory);
-				//UE_LOG(LogImageDownloader, Log, TEXT("DeleteDir:%s"), FilenameOrDirectory);
+				UE_LOG(LogImageDownloader, Log, TEXT("DeleteDir:%s"), FilenameOrDirectory);
 				bDel = true;
 			}
 			else {
 				PlatformFile.DeleteFile(FilenameOrDirectory);
-				//UE_LOG(LogImageDownloader, Log, TEXT("DeleteFile:%s"), FilenameOrDirectory);
+				UE_LOG(LogImageDownloader, Log, TEXT("DeleteFile:%s"), FilenameOrDirectory);
 				bDel = true;
 			}
 			return false;
@@ -171,7 +171,7 @@ void UImageDownloader::CheckDiskFile()
 
 void UImageDownloader::Start(FString Url)
 {
-    //UE_LOG(LogImageDownloader, Log, TEXT("UImageDownloader::Start"));
+    UE_LOG(LogImageDownloader, Log, TEXT("UImageDownloader::Start"));
 
 	CheckDiskFile();
 
@@ -189,7 +189,7 @@ void UImageDownloader::Start(FString Url)
 	if (pp) {
 		const TWeakObjectPtr<UTexture2D> pTexture = *pp;
 		if (pTexture.IsValid()) {
-			//UE_LOG(LogImageDownloader, Log, TEXT("from memory %s %x"), *pTexture->GetPathName(), (uint64)pTexture.Get());
+			UE_LOG(LogImageDownloader, Log, TEXT("from memory %s %x"), *pTexture->GetPathName(), (uint64)pTexture.Get());
 			OnSuccess.Broadcast(pTexture.Get(), this);
 			return;
 		}
@@ -201,7 +201,7 @@ void UImageDownloader::Start(FString Url)
     TWeakObjectPtr<UTexture2D> pTexture = GetTexture2DFromDisk(FileSavePath, InvalidImageFormat);
 	if (pTexture.IsValid()) {
         s_mapTexture.Add(UrlHash, pTexture);
-		//UE_LOG(LogImageDownloader, Log, TEXT("from disk %s"), *pTexture->GetPathName());
+		UE_LOG(LogImageDownloader, Log, TEXT("from disk %s"), *pTexture->GetPathName());
 		OnSuccess.Broadcast(pTexture.Get(), this);
 		return;
 	}
@@ -220,7 +220,7 @@ void UImageDownloader::Start(FString Url)
 		return;
 	}
 	OnFail.Broadcast(nullptr, this);
-	//UE_LOG(LogImageDownloader, Log, TEXT("HttpRequest->ProcessRequest error"));
+	UE_LOG(LogImageDownloader, Log, TEXT("HttpRequest->ProcessRequest error"));
 }
 
 void UImageDownloader::HandleRequest(FHttpRequestPtr HttpRequest, FHttpResponsePtr HttpResponse, bool bSucceeded)
@@ -243,7 +243,7 @@ void UImageDownloader::HandleRequest(FHttpRequestPtr HttpRequest, FHttpResponseP
 		if (pp) {
             const TWeakObjectPtr<UTexture2D> pTexture = *pp;
             if (pTexture.IsValid()) {
-				//UE_LOG(LogImageDownloader, Log, TEXT("from memory %s %x HandleRequest"), *pTexture->GetPathName(), (uint64)pTexture.Get());
+				UE_LOG(LogImageDownloader, Log, TEXT("from memory %s %x HandleRequest"), *pTexture->GetPathName(), (uint64)pTexture.Get());
                 OnSuccess.Broadcast(pTexture.Get(), this);
 				return;
 			}
@@ -268,7 +268,7 @@ void UImageDownloader::HandleRequest(FHttpRequestPtr HttpRequest, FHttpResponseP
         TWeakObjectPtr<UTexture2D> pTexture = GetTexture2DFromArray(OutArray, InvalidImageFormat);
 		if (pTexture.IsValid()) {
             s_mapTexture.Add(UrlHash, pTexture);
-			//UE_LOG(LogImageDownloader, Log, TEXT("from http %s"), *pTexture->GetPathName());
+			UE_LOG(LogImageDownloader, Log, TEXT("from http %s"), *pTexture->GetPathName());
 			OnSuccess.Broadcast(pTexture.Get(), this);
 			return;
 		}
