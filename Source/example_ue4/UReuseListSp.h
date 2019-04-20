@@ -102,7 +102,7 @@ public:
     void Clear();
 
     UFUNCTION(BlueprintCallable)
-    void Reset(UClass* __ItemClass, EReuseListSpStyle __Style, int32 __ItemSize, int32 __ItemPadding);
+    void Reset(TSubclassOf<UUserWidget> __ItemClass, EReuseListSpStyle __Style, int32 __ItemSize, int32 __ItemPadding);
 
     UFUNCTION(BlueprintCallable)
     void ClearSpecialSize();
@@ -127,6 +127,9 @@ protected:
 	FVector2D ScrollBarThickness;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
+    int32 ItemCacheNum;
+
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 ItemSize;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
@@ -135,8 +138,8 @@ protected:
     UPROPERTY(EditAnywhere, Category = Property)
     EReuseListSpStyle Style;
 
-    UPROPERTY(EditAnywhere, Category = Property, meta = (BlueprintBaseOnly = ""))
-    UClass* ItemClass;
+    UPROPERTY(EditAnywhere, Category = Property)
+    TSubclassOf<UUserWidget> ItemClass;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PreviewCount;
@@ -157,11 +160,11 @@ protected:
 
     void InitWidgetPtr();
     void ScrollUpdate(float __Offset);
-    void UpdateContentSize(UWidget* widget);
+    void UpdateContentSize(TWeakObjectPtr<UWidget> widget);
     void RemoveNotUsed(int32 BIdx, int32 EIdx);
     void DoReload();
-    UUserWidget* NewItem();
-    void ReleaseItem(UUserWidget* __Item);
+    TWeakObjectPtr<UUserWidget> NewItem();
+    void ReleaseItem(TWeakObjectPtr<UUserWidget> __Item);
     void Update();
     void DoJump();
     void ComputeAlignSpace();
@@ -177,18 +180,18 @@ protected:
 
     void SyncProp();
 
-    UScrollBox* ScrollBoxList;
-    UCanvasPanel* CanvasPanelBg;
-    USizeBox* SizeBoxBg;
-    UCanvasPanel* CanvasPanelList;
+    TWeakObjectPtr<UScrollBox> ScrollBoxList;
+    TWeakObjectPtr<UCanvasPanel> CanvasPanelBg;
+    TWeakObjectPtr<USizeBox> SizeBoxBg;
+    TWeakObjectPtr<UCanvasPanel> CanvasPanelList;
     
     FVector2D ViewSize;
     FVector2D ContentSize;
     
     int32 ItemCount;
     int32 MaxPos;
-    TMap<int32, UUserWidget*> ItemMap;
-    TArray<UUserWidget*> ItemPool;
+    TMap<int32, TWeakObjectPtr<UUserWidget> > ItemMap;
+    TArray<TWeakObjectPtr<UUserWidget> > ItemPool;
     TArray<int32> ArrOffset;
     TMap<int32, int32> SpecialSizeMap;
     int32 CurLine;

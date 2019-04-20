@@ -32,13 +32,16 @@ function ExampleReuseList:OnClickItem1()
     self.widget.ReuseList2.OnUpdateItem:Clear()
     self.widget.ReuseList2.OnUpdateItem:Add(function(...) self:OnUpdateItem1(...) end)
     self.widget.ReuseList2.OnCreateItem:Clear()
-    self.widget.ReuseList2.OnCreateItem:Add(function(widget) TestReuseListItem.bind(widget, self) log("create widget="..tostring(widget)) end)
+    self.widget.ReuseList2.OnCreateItem:Add(function(widget)
+        TestReuseListItem.bind(widget, self)
+        --log("create widget="..tostring(widget))
+    end)
     self.widget.ReuseList2:Reload(100000)
     --self.widget.ReuseList2:Reload(3)
 end
 
 function ExampleReuseList:OnUpdateItem1(widget,idx)
-    --log("TestReuseListItem idx="..idx.." widget="..tostring(widget))
+    log("OnUpdateItem1 idx="..idx.." widget="..tostring(widget))
     local itm_widget = widget:GetLuaTable()
     itm_widget:UpdateData(idx)
 end

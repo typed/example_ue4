@@ -10,8 +10,6 @@
 
 DEFINE_LOG_CATEGORY(LogUReuseListSp);
 
-static const int32 ItemCacheNum = 2;
-
 UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
     , ScrollBoxList(nullptr)
@@ -20,6 +18,7 @@ UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     , CanvasPanelList(nullptr)
     , ViewSize(FVector2D::ZeroVector)
     , ContentSize(FVector2D::ZeroVector)
+    , ItemCacheNum(2)
     , ItemClass(nullptr)
     , ItemPadding(0)
     , ItemCount(0)
@@ -86,16 +85,16 @@ void UReuseListSp::Reload(int32 __ItemCount)
 
 void UReuseListSp::Refresh()
 {
-    for (TMap<int32, UUserWidget*>::TConstIterator iter(ItemMap); iter; ++iter) {
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
         RefreshOne(iter->Key);
     }
 }
 
 void UReuseListSp::RefreshOne(int32 __Idx)
 {
-    auto v = ItemMap.Find(__Idx);
+    TWeakObjectPtr<UUserWidget>* v = ItemMap.Find(__Idx);
     if (v) {
-        OnUpdateItem.Broadcast(*v, __Idx);
+        OnUpdateItem.Broadcast(v->Get(), __Idx);
     }
 }
 
@@ -144,16 +143,16 @@ void UReuseListSp::Clear()
 void UReuseListSp::InitWidgetPtr()
 {
     ScrollBoxList = Cast<UScrollBox>(GetWidgetFromName(FName(TEXT("ScrollBoxList"))));
-    ensure(ScrollBoxList);
+    ensure(ScrollBoxList.IsValid());
 
     CanvasPanelBg = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelBg"))));
-    ensure(CanvasPanelBg);
+    ensure(CanvasPanelBg.IsValid());
 
     SizeBoxBg = Cast<USizeBox>(GetWidgetFromName(FName(TEXT("SizeBoxBg"))));
-    ensure(SizeBoxBg);
+    ensure(SizeBoxBg.IsValid());
 
     CanvasPanelList = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelList"))));
-    ensure(CanvasPanelList);
+    ensure(CanvasPanelList.IsValid());
 }
 
 void UReuseListSp::ComputeAlignSpace()
@@ -254,8 +253,8 @@ void UReuseListSp::ScrollUpdate(float __Offset)
     RemoveNotUsed(BIdx, EIdx);
     for (int32 i = BIdx; i <= EIdx; i++) {
         if (!ItemMap.Contains(i)) {
-            auto w = NewItem();
-            if (w) {
+            TWeakObjectPtr<UUserWidget> w = NewItem();
+            if (w.IsValid()) {
                 int32 sz_item = GetItemSize(i);
                 auto cps = Cast<UCanvasPanelSlot>(w->Slot);
                 cps->SetAnchors(FAnchors(0, 0, 0, 0));
@@ -264,14 +263,14 @@ void UReuseListSp::ScrollUpdate(float __Offset)
                 else
                     cps->SetOffsets(FMargin(ArrOffset[i] + AlignSpace, 0, sz_item, ViewSize.Y));
                 ItemMap.Add(i, w);
-                OnUpdateItem.Broadcast(w, i);
+                OnUpdateItem.Broadcast(w.Get(), i);
             }
         }
     }
     OnScrollItem.Broadcast(BIdx, EIdx);
 }
 
-void UReuseListSp::UpdateContentSize(UWidget* widget)
+void UReuseListSp::UpdateContentSize(TWeakObjectPtr<UWidget> widget)
 {
     auto cps = Cast<UCanvasPanelSlot>(widget->Slot);
     if (IsVertical()) {
@@ -286,7 +285,7 @@ void UReuseListSp::UpdateContentSize(UWidget* widget)
 
 void UReuseListSp::RemoveNotUsed(int32 BIdx, int32 EIdx)
 {
-    for (TMap<int32, UUserWidget*>::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
         if (!UKismetMathLibrary::InRange_IntInt(iter->Key, BIdx, EIdx)) {
             ReleaseItem(iter->Value);
             iter.RemoveCurrent();
@@ -378,7 +377,7 @@ void UReuseListSp::DoJump()
     ScrollUpdate(tmpScroll);
 }
 
-UUserWidget* UReuseListSp::NewItem()
+TWeakObjectPtr<UUserWidget> UReuseListSp::NewItem()
 {
     if (ItemPool.IsValidIndex(0)) {
         auto tmp = ItemPool[0];
@@ -387,18 +386,18 @@ UUserWidget* UReuseListSp::NewItem()
         return tmp;
     }
     else {
-        UUserWidget* widget = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
-        if (widget == nullptr) {
+        TWeakObjectPtr<UUserWidget> widget = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
+        if (!widget.IsValid()) {
             return nullptr;
         }
-        CanvasPanelList->AddChild(widget);
+        CanvasPanelList->AddChild(widget.Get());
         widget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-        OnCreateItem.Broadcast(widget);
+        OnCreateItem.Broadcast(widget.Get());
         return widget;
     }
 }
 
-void UReuseListSp::ReleaseItem(UUserWidget* __Item)
+void UReuseListSp::ReleaseItem(TWeakObjectPtr<UUserWidget> __Item)
 {
     __Item->SetVisibility(ESlateVisibility::Collapsed);
     ItemPool.AddUnique(__Item);
@@ -433,7 +432,7 @@ bool UReuseListSp::IsInvalidParam() const
     return ItemSize <= 0;
 }
 
-void UReuseListSp::Reset(UClass* __ItemClass, EReuseListSpStyle __Style, int32 __ItemSize, int32 __ItemPadding)
+void UReuseListSp::Reset(TSubclassOf<UUserWidget> __ItemClass, EReuseListSpStyle __Style, int32 __ItemSize, int32 __ItemPadding)
 {
     Clear();
     ClearCache();
@@ -480,7 +479,7 @@ void UReuseListSp::OnWidgetRebuilt()
 
 void UReuseListSp::SyncProp()
 {
-    if (ScrollBoxList && ScrollBoxList->IsValidLowLevelFast()) {
+    if (ScrollBoxList.IsValid()) {
         ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
         ScrollBoxList->SetScrollbarThickness(ScrollBarThickness);
         ScrollBoxList->WidgetBarStyle = ScrollBarStyle;

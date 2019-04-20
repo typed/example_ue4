@@ -185,12 +185,11 @@ void UImageDownloader::Start(FString Url)
 	FileSavePath = s_strDir / s_strSubDir / UrlHash;
 
 	//from memory
-    
     const TWeakObjectPtr<UTexture2D>* pp = s_mapTexture.Find(UrlHash);
 	if (pp) {
 		const TWeakObjectPtr<UTexture2D> pTexture = *pp;
 		if (pTexture.IsValid()) {
-			UE_LOG(LogImageDownloader, Log, TEXT("from memory %s %x"), *pTexture->GetPathName(), (uint64)pTexture.Get());
+			//UE_LOG(LogImageDownloader, Log, TEXT("from memory %s %x"), *pTexture->GetPathName(), (uint64)pTexture.Get());
 			OnSuccess.Broadcast(pTexture.Get(), this);
 			return;
 		}
@@ -202,7 +201,7 @@ void UImageDownloader::Start(FString Url)
     TWeakObjectPtr<UTexture2D> pTexture = GetTexture2DFromDisk(FileSavePath, InvalidImageFormat);
 	if (pTexture.IsValid()) {
         s_mapTexture.Add(UrlHash, pTexture);
-		UE_LOG(LogImageDownloader, Log, TEXT("from disk %s"), *pTexture->GetPathName());
+		//UE_LOG(LogImageDownloader, Log, TEXT("from disk %s"), *pTexture->GetPathName());
 		OnSuccess.Broadcast(pTexture.Get(), this);
 		return;
 	}
@@ -244,7 +243,7 @@ void UImageDownloader::HandleRequest(FHttpRequestPtr HttpRequest, FHttpResponseP
 		if (pp) {
             const TWeakObjectPtr<UTexture2D> pTexture = *pp;
             if (pTexture.IsValid()) {
-				UE_LOG(LogImageDownloader, Log, TEXT("from memory %s %x HandleRequest"), *pTexture->GetPathName(), (uint64)pTexture.Get());
+				//UE_LOG(LogImageDownloader, Log, TEXT("from memory %s %x HandleRequest"), *pTexture->GetPathName(), (uint64)pTexture.Get());
                 OnSuccess.Broadcast(pTexture.Get(), this);
 				return;
 			}
@@ -269,7 +268,7 @@ void UImageDownloader::HandleRequest(FHttpRequestPtr HttpRequest, FHttpResponseP
         TWeakObjectPtr<UTexture2D> pTexture = GetTexture2DFromArray(OutArray, InvalidImageFormat);
 		if (pTexture.IsValid()) {
             s_mapTexture.Add(UrlHash, pTexture);
-			UE_LOG(LogImageDownloader, Log, TEXT("from http %s"), *pTexture->GetPathName());
+			//UE_LOG(LogImageDownloader, Log, TEXT("from http %s"), *pTexture->GetPathName());
 			OnSuccess.Broadcast(pTexture.Get(), this);
 			return;
 		}
