@@ -433,9 +433,8 @@ void UReuseListC::DoJump()
 
 TWeakObjectPtr<UUserWidget> UReuseListC::NewItem()
 {
-    if (ItemPool.IsValidIndex(0)) {
-        auto tmp = ItemPool[0];
-        ItemPool.RemoveAt(0);
+    if (ItemPool.Num() > 0) {
+        auto tmp = ItemPool.Pop();
         tmp->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
         return tmp;
     }
