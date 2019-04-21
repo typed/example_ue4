@@ -92,8 +92,16 @@ void UReuseListC::Reload(int32 __ItemCount)
 
 void UReuseListC::Refresh()
 {
-    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
-        OnUpdateItem.Broadcast(iter->Value.Get(), iter->Key);
+    if (DelayUpdateNumReal <= 0) {
+        for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
+            OnUpdateItem.Broadcast(iter->Value.Get(), iter->Key);
+        }
+    }
+    else {
+        for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
+            SendDoUpdateItem(iter->Key);
+        }
+        ItemMap.Empty();
     }
 }
 
@@ -101,7 +109,8 @@ void UReuseListC::RefreshOne(int32 __Idx)
 {
     auto v = ItemMap.Find(__Idx);
     if (v) {
-        OnUpdateItem.Broadcast((*v).Get(), __Idx);
+        ItemMap.Remove(__Idx);
+        SendDoUpdateItem(__Idx);
     }
 }
 
@@ -604,10 +613,8 @@ void UReuseListC::SyncProp()
         ScrollBoxList->WidgetStyle = ScrollBoxStyle;
     }
     auto wld = GetWorld();
-    if (wld && !wld->IsGameWorld()) {
+    if (wld && !wld->IsGameWorld())
         DelayUpdateNumReal = 0;
-    }
-    else {
+    else
         DelayUpdateNumReal = DelayUpdateNum;
-    }
 }
