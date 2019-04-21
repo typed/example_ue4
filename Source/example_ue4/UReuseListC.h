@@ -104,7 +104,7 @@ public:
     void Clear();
 
     UFUNCTION(BlueprintCallable)
-    void Reset(UClass* __ItemClass, EReuseListStyle __Style, int32 __ItemWidth, int32 __ItemHeight, int32 __PaddingX, int32 __PaddingY);
+    void Reset(TSubclassOf<UUserWidget> __ItemClass, EReuseListStyle __Style, int32 __ItemWidth, int32 __ItemHeight, int32 __PaddingX, int32 __PaddingY);
 
 protected:
 
@@ -123,9 +123,6 @@ protected:
 	FVector2D ScrollBarThickness;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
-    int32 ItemCacheNum;
-
-    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 ItemWidth;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
@@ -140,8 +137,8 @@ protected:
     UPROPERTY(EditAnywhere, Category = Property)
     EReuseListStyle Style;
 
-    UPROPERTY(EditAnywhere, Category = Property, meta = (BlueprintBaseOnly = ""))
-    UClass* ItemClass;
+    UPROPERTY(EditAnywhere, Category = Property)
+    TSubclassOf<UUserWidget> ItemClass;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PreviewCount;
@@ -151,6 +148,12 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = Property)
     bool NotFullScrollBoxHitTestInvisible;
+
+    UPROPERTY(EditAnywhere, Category = Optimization, meta = (ClampMin = "0"))
+    int32 ItemCacheNum;
+
+    UPROPERTY(EditAnywhere, Category = Optimization, meta = (ClampMin = "0"))
+    int32 DelayUpdateNum;
 
     void NativeConstruct();
     void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
@@ -172,6 +175,9 @@ protected:
     void ComputeAlignSpace();
     void ComputeScrollBoxHitTest();
 
+    void SendDoUpdateItem(int32 idx);
+    void DoUpdateItem();
+
     bool IsVertical() const;
     bool IsInvalidParam() const;
 
@@ -191,12 +197,15 @@ protected:
     int32 MaxPos;
     TMap<int32, TWeakObjectPtr<UUserWidget> > ItemMap;
     TArray<TWeakObjectPtr<UUserWidget> > ItemPool;
+    TArray<int32> QueueDoUpdateItem;
     int32 ColNum;
     int32 RowNum;
     int32 CurLine;
     int32 JumpIdx;
+    int32 DelayUpdateNumReal;
     EReuseListJumpStyle JumpStyle;
     float AlignSpace;
+    int32 LastOffset;
     bool NeedJump;
 
 };
