@@ -56,9 +56,19 @@ void UUtilScript::TraceAllObject()
 
 void UUtilScript::TraceAllUserWidget()
 {
+    UE_LOG(LogUtil, Log, TEXT("TraceAllUserWidget"));
     for (TObjectIterator<UUserWidget> It; It; ++It) {
         UUserWidget* w = *It;
         UE_LOG(LogUtil, Log, TEXT("Found UUserWidget:%x Name: %s"), w, *(w->GetName()));
+    }
+}
+
+void UUtilScript::TraceAllTexture2D()
+{
+    UE_LOG(LogUtil, Log, TEXT("TraceAllTexture2D"));
+    for (TObjectIterator<UTexture2D> It; It; ++It) {
+        UTexture2D* w = *It;
+        UE_LOG(LogUtil, Log, TEXT("Found UTexture2D:%x PathName: %s"), w, *(w->GetPathName()));
     }
 }
 
