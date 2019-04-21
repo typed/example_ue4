@@ -10,6 +10,8 @@ function ExampleReuseList:construct()
     self.widget.ButtonItem2.OnClicked:Add(function() self:OnClickItem2() end)
     self.widget.Button_4.OnClicked:Add(function() self:OnClear() end)
     self.widget.Button_0.OnClicked:Add(function() self:OnJumpByIdx() end)
+    self.widget.ButtonRefresh.OnClicked:Add(function() self.widget.ReuseList2:Refresh() end)
+    self.widget.ButtonRefreshOne.OnClicked:Add(function() self.widget.ReuseList2:RefreshOne(5) end)
     self:OnClickItem1()
 end
 
@@ -22,6 +24,8 @@ function ExampleReuseList:destruct()
     self.widget.ButtonItem2.OnClicked:Clear()
     self.widget.ReuseList2.OnUpdateItem:Clear() 
     self.widget.ReuseList2.OnCreateItem:Clear()
+    self.widget.ButtonRefresh.OnClicked:Clear()
+    self.widget.ButtonRefreshOne.OnClicked:Clear()
 end
 
 function ExampleReuseList:OnJumpByIdx()

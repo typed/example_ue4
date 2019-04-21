@@ -99,6 +99,7 @@ void UReuseListC::Refresh()
     }
     else {
         for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
+            ReleaseItem(iter->Value);
             SendDoUpdateItem(iter->Key);
         }
         ItemMap.Empty();
@@ -109,6 +110,7 @@ void UReuseListC::RefreshOne(int32 __Idx)
 {
     auto v = ItemMap.Find(__Idx);
     if (v) {
+        ReleaseItem(*v);
         ItemMap.Remove(__Idx);
         SendDoUpdateItem(__Idx);
     }
