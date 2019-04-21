@@ -571,6 +571,16 @@ void UReuseListC::Reset(TSubclassOf<UUserWidget> __ItemClass, EReuseListStyle __
     PaddingY = __PaddingY;
 }
 
+void UReuseListC::SetDelayUpdateNum(int32 __Num)
+{
+    DelayUpdateNum = __Num;
+    auto wld = GetWorld();
+    if (wld && !wld->IsGameWorld())
+        DelayUpdateNumReal = 0;
+    else
+        DelayUpdateNumReal = DelayUpdateNum;
+}
+
 #if WITH_EDITOR
 void UReuseListC::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
@@ -614,9 +624,5 @@ void UReuseListC::SyncProp()
         ScrollBoxList->WidgetBarStyle = ScrollBarStyle;
         ScrollBoxList->WidgetStyle = ScrollBoxStyle;
     }
-    auto wld = GetWorld();
-    if (wld && !wld->IsGameWorld())
-        DelayUpdateNumReal = 0;
-    else
-        DelayUpdateNumReal = DelayUpdateNum;
+    SetDelayUpdateNum(DelayUpdateNum);
 }
