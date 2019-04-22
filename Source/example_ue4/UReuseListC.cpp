@@ -92,26 +92,35 @@ void UReuseListC::Reload(int32 __ItemCount)
 
 void UReuseListC::Refresh()
 {
-    if (DelayUpdateNumReal <= 0) {
-        for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
-            OnUpdateItem.Broadcast(iter->Value.Get(), iter->Key);
-        }
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
+        AddDelayUpdate(iter->Key);
     }
-    else {
-        for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
-            ReleaseItem(iter->Value);
-            AddDelayUpdate(iter->Key);
-        }
-        ItemMap.Empty();
-    }
+    //if (DelayUpdateNumReal <= 0) {
+    //    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
+    //        OnUpdateItem.Broadcast(iter->Value.Get(), iter->Key);
+    //    }
+    //}
+    //else {
+    //    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
+    //        ReleaseItem(iter->Value);
+    //        AddDelayUpdate(iter->Key);
+    //    }
+    //    ItemMap.Empty();
+    //}
 }
 
 void UReuseListC::RefreshOne(int32 __Idx)
 {
     auto v = ItemMap.Find(__Idx);
     if (v) {
-        ReleaseItem(*v);
-        ItemMap.Remove(__Idx);
+        //if (DelayUpdateNumReal <= 0) {
+        //    OnUpdateItem.Broadcast((*v).Get(), __Idx);
+        //}
+        //else {
+        //    ReleaseItem(*v);
+        //    ItemMap.Remove(__Idx);
+        //    AddDelayUpdate(__Idx);
+        //}
         AddDelayUpdate(__Idx);
     }
 }
@@ -516,45 +525,51 @@ void UReuseListC::DoDelayUpdate()
         int32 idx = DelayUpdateList[0];
         DelayUpdateList.RemoveAt(0);
         --tmp;
-        if (Style == EReuseListStyle::Vertical) {
-            mar.Left = 0;
-            mar.Top = idx * ItemHeightAndPad + AlignSpace;
-            mar.Right = ViewSize.X;
-            mar.Bottom = ItemHeight;
+        auto v = ItemMap.Find(idx);
+        if (v) {
+            OnUpdateItem.Broadcast((*v).Get(), idx);
         }
-        else if (Style == EReuseListStyle::Horizontal) {
-            if (ItemHeight <= 0) {
-                mar.Left = idx * ItemWidthAndPad + AlignSpace;
-                mar.Top = 0;
-                mar.Right = ItemWidth;
-                mar.Bottom = ViewSize.Y;
+        else {
+            if (Style == EReuseListStyle::Vertical) {
+                mar.Left = 0;
+                mar.Top = idx * ItemHeightAndPad + AlignSpace;
+                mar.Right = ViewSize.X;
+                mar.Bottom = ItemHeight;
             }
-            else {
-                mar.Left = idx * ItemWidthAndPad + AlignSpace;
-                mar.Top = (ViewSize.Y - ItemHeight) / 2.f;
+            else if (Style == EReuseListStyle::Horizontal) {
+                if (ItemHeight <= 0) {
+                    mar.Left = idx * ItemWidthAndPad + AlignSpace;
+                    mar.Top = 0;
+                    mar.Right = ItemWidth;
+                    mar.Bottom = ViewSize.Y;
+                }
+                else {
+                    mar.Left = idx * ItemWidthAndPad + AlignSpace;
+                    mar.Top = (ViewSize.Y - ItemHeight) / 2.f;
+                    mar.Right = ItemWidth;
+                    mar.Bottom = ItemHeight;
+                }
+            }
+            else if (Style == EReuseListStyle::VerticalGrid) {
+                mar.Left = (idx % ColNum) * ItemWidthAndPad;
+                mar.Top = (idx / ColNum) * ItemHeightAndPad + AlignSpace;
                 mar.Right = ItemWidth;
                 mar.Bottom = ItemHeight;
             }
-        }
-        else if (Style == EReuseListStyle::VerticalGrid) {
-            mar.Left = (idx % ColNum) * ItemWidthAndPad;
-            mar.Top = (idx / ColNum) * ItemHeightAndPad + AlignSpace;
-            mar.Right = ItemWidth;
-            mar.Bottom = ItemHeight;
-        }
-        else if (Style == EReuseListStyle::HorizontalGrid) {
-            mar.Left = (idx / RowNum) * ItemWidthAndPad + AlignSpace;
-            mar.Top = (idx % RowNum) * ItemHeightAndPad;
-            mar.Right = ItemWidth;
-            mar.Bottom = ItemHeight;
-        }
-        auto w = NewItem();
-        if (w.IsValid()) {
-            auto cps = Cast<UCanvasPanelSlot>(w->Slot);
-            cps->SetAnchors(ach);
-            cps->SetOffsets(mar);
-            ItemMap.Add(idx, w);
-            OnUpdateItem.Broadcast(w.Get(), idx);
+            else if (Style == EReuseListStyle::HorizontalGrid) {
+                mar.Left = (idx / RowNum) * ItemWidthAndPad + AlignSpace;
+                mar.Top = (idx % RowNum) * ItemHeightAndPad;
+                mar.Right = ItemWidth;
+                mar.Bottom = ItemHeight;
+            }
+            auto w = NewItem();
+            if (w.IsValid()) {
+                auto cps = Cast<UCanvasPanelSlot>(w->Slot);
+                cps->SetAnchors(ach);
+                cps->SetOffsets(mar);
+                ItemMap.Add(idx, w);
+                OnUpdateItem.Broadcast(w.Get(), idx);
+            }
         }
     } while (DelayUpdateList.Num() > 0 && tmp > 0);
 }
