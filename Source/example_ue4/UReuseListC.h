@@ -178,8 +178,8 @@ protected:
     void ComputeAlignSpace();
     void ComputeScrollBoxHitTest();
 
-    void SendDoUpdateItem(int32 idx);
-    void DoUpdateItem();
+    void AddDelayUpdate(int32 idx);
+    void DoDelayUpdate();
 
     bool IsVertical() const;
     bool IsInvalidParam() const;
@@ -200,7 +200,7 @@ protected:
     int32 MaxPos;
     TMap<int32, TWeakObjectPtr<UUserWidget> > ItemMap;
     TArray<TWeakObjectPtr<UUserWidget> > ItemPool;
-    TArray<int32> QueueDoUpdateItem;
+    TArray<int32> DelayUpdateList;
     int32 ColNum;
     int32 RowNum;
     int32 CurLine;

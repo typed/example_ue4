@@ -72,7 +72,7 @@ void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
     if (!ViewSize.Equals(lzSz, 0.0001f))
         DoReload();
-    DoUpdateItem();
+    DoDelayUpdate();
     Update();
     DoJump();
 }
@@ -100,7 +100,7 @@ void UReuseListC::Refresh()
     else {
         for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
             ReleaseItem(iter->Value);
-            SendDoUpdateItem(iter->Key);
+            AddDelayUpdate(iter->Key);
         }
         ItemMap.Empty();
     }
@@ -112,7 +112,7 @@ void UReuseListC::RefreshOne(int32 __Idx)
     if (v) {
         ReleaseItem(*v);
         ItemMap.Remove(__Idx);
-        SendDoUpdateItem(__Idx);
+        AddDelayUpdate(__Idx);
     }
 }
 
@@ -251,14 +251,14 @@ void UReuseListC::ScrollUpdate(float __Offset)
     if (LastOffset <= Offset) {
         for (int32 i = BIdx; i <= EIdx; ++i) {
             if (!ItemMap.Contains(i)) {
-                SendDoUpdateItem(i);
+                AddDelayUpdate(i);
             }
         }
     }
     else {
         for (int32 i = EIdx; i >= BIdx; --i) {
             if (!ItemMap.Contains(i)) {
-                SendDoUpdateItem(i);
+                AddDelayUpdate(i);
             }
         }
     }
@@ -287,10 +287,10 @@ void UReuseListC::RemoveNotUsed(int32 BIdx, int32 EIdx)
             iter.RemoveCurrent();
         }
     }
-    for (int32 i = QueueDoUpdateItem.Num() - 1; i >= 0; --i) {
-        int32 idx = QueueDoUpdateItem[i];
+    for (int32 i = DelayUpdateList.Num() - 1; i >= 0; --i) {
+        int32 idx = DelayUpdateList[i];
         if (!UKismetMathLibrary::InRange_IntInt(idx, BIdx, EIdx)) {
-            QueueDoUpdateItem.RemoveAt(i);
+            DelayUpdateList.RemoveAt(i);
         }
     }
 }
@@ -338,7 +338,7 @@ void UReuseListC::DoReload()
         }
     }
     ItemMap.Empty();
-    QueueDoUpdateItem.Empty();
+    DelayUpdateList.Empty();
     float TmpMaxOffset = 0.f;
     ScrollBoxList->GetScrollOffset();
     TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
@@ -493,27 +493,28 @@ bool UReuseListC::IsInvalidParam() const
         return ItemWidth <= 0;
 }
 
-void UReuseListC::SendDoUpdateItem(int32 idx)
+void UReuseListC::AddDelayUpdate(int32 idx)
 {
-    QueueDoUpdateItem.Remove(idx);
-    QueueDoUpdateItem.Add(idx);
+    DelayUpdateList.Remove(idx);
+    DelayUpdateList.Add(idx);
     if (DelayUpdateNumReal <= 0) {
-        DoUpdateItem();
+        DoDelayUpdate();
     }
 }
 
-void UReuseListC::DoUpdateItem()
+void UReuseListC::DoDelayUpdate()
 {
-    if (QueueDoUpdateItem.Num() == 0) {
+    if (DelayUpdateList.Num() == 0) {
         return;
     }
     int32 ItemWidthAndPad = ItemWidth + PaddingX;
     int32 ItemHeightAndPad = ItemHeight + PaddingY;
     int32 tmp = DelayUpdateNumReal;
     FMargin mar;
+    FAnchors ach(0, 0, 0, 0);
     do {
-        int32 idx = QueueDoUpdateItem[0];
-        QueueDoUpdateItem.RemoveAt(0);
+        int32 idx = DelayUpdateList[0];
+        DelayUpdateList.RemoveAt(0);
         --tmp;
         if (Style == EReuseListStyle::Vertical) {
             mar.Left = 0;
@@ -550,12 +551,12 @@ void UReuseListC::DoUpdateItem()
         auto w = NewItem();
         if (w.IsValid()) {
             auto cps = Cast<UCanvasPanelSlot>(w->Slot);
-            cps->SetAnchors(FAnchors(0, 0, 0, 0));
+            cps->SetAnchors(ach);
             cps->SetOffsets(mar);
             ItemMap.Add(idx, w);
             OnUpdateItem.Broadcast(w.Get(), idx);
         }
-    } while (QueueDoUpdateItem.Num() > 0 && tmp > 0);
+    } while (DelayUpdateList.Num() > 0 && tmp > 0);
 }
 
 void UReuseListC::Reset(TSubclassOf<UUserWidget> __ItemClass, EReuseListStyle __Style, int32 __ItemWidth, int32 __ItemHeight, int32 __PaddingX, int32 __PaddingY)
