@@ -17,12 +17,10 @@ UUserWidget* UUtilScript::CreateUserWidget(FString name)
 	TSubclassOf<UUserWidget> uclass = ::LoadClass<UUserWidget>(nullptr, *name);
 	if (uclass == nullptr)
 		return nullptr;
-	if (!ASluaActor::instance)
-		return nullptr;
-	UWorld* wld = ASluaActor::instance->GetWorld();
-	if (!wld)
-		return nullptr;
-	UUserWidget* widget = CreateWidget<UUserWidget>(wld, uclass);
+    UWorld* wld = UUtilGame::GetMyWorld();
+    if (wld == nullptr)
+        return nullptr;
+	UUserWidget* widget = CreateWidget<UUserWidget>(UUtilGame::GetMyWorld(), uclass);
 	//UE_LOG(LogUtil, Log, TEXT("UScriptHelperClient::CreateUserWidget World:%x Name: %s"), wld, *(wld->GetName()));
 	return widget;
 }
@@ -44,13 +42,10 @@ UClass* UUtilScript::LoadBpClass(FString name)
 
 void UUtilScript::TraceAllObject()
 {
-	//for (TObjectIterator<UObject> It; It; ++It) {
-	//	UObject* CurrentObject = *It;
-	//	UE_LOG(LogUtil, Log, TEXT("Found UObject named: %s"), *(CurrentObject->GetName()));
-	//}
-	for (TObjectIterator<UUserWidget> It; It; ++It) {
-		UUserWidget* w = *It;
-		UE_LOG(LogUtil, Log, TEXT("Found UUserWidget:%x Name: %s"), w, *(w->GetName()));
+    UE_LOG(LogUtil, Log, TEXT("TraceAllObject"));
+	for (TObjectIterator<UObject> It; It; ++It) {
+        UObject* w = *It;
+		UE_LOG(LogUtil, Log, TEXT("Found UObject:%x PathName: %s"), w, *(w->GetPathName()));
 	}
 }
 
@@ -59,7 +54,7 @@ void UUtilScript::TraceAllUserWidget()
     UE_LOG(LogUtil, Log, TEXT("TraceAllUserWidget"));
     for (TObjectIterator<UUserWidget> It; It; ++It) {
         UUserWidget* w = *It;
-        UE_LOG(LogUtil, Log, TEXT("Found UUserWidget:%x Name: %s"), w, *(w->GetName()));
+        UE_LOG(LogUtil, Log, TEXT("Found UUserWidget:%x PathName: %s"), w, *(w->GetPathName()));
     }
 }
 
@@ -149,4 +144,9 @@ bool UUtilScript::DeleteFileAbsPath(FString path)
 {
     IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
     return PlatformFile.DeleteFile(*path);
+}
+
+void UUtilScript::ScreenMessage(FString text)
+{
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, text);
 }

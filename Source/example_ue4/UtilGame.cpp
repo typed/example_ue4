@@ -4,7 +4,7 @@
 
 UWorld* UUtilGame::GetMyWorld()
 {
-	return GEngine->GetWorld();
+	return GWorld->GetWorld();
 }
 
 UExampleGameInstance* UUtilGame::GetGameInstance()

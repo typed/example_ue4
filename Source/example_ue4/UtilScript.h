@@ -60,5 +60,8 @@ public:
     //Delete File
     UFUNCTION(BlueprintCallable)
     static bool DeleteFileAbsPath(FString path);
+
+    UFUNCTION(BlueprintCallable)
+    void ScreenMessage(FString text);
 	
 };
