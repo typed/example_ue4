@@ -463,18 +463,17 @@ void UReuseListSp::OnWidgetRebuilt()
     Super::OnWidgetRebuilt();
     InitWidgetPtr();
     SyncProp();
+#if WITH_EDITOR
     auto wld = GetWorld();
     if (wld && !wld->IsGameWorld()) {
-        GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]() {
-            if (ScrollBoxList->IsValidLowLevelFast() &&
-                CanvasPanelBg->IsValidLowLevelFast() &&
-                SizeBoxBg->IsValidLowLevelFast() &&
-                CanvasPanelList->IsValidLowLevelFast())
-            {
-                Reload(PreviewCount);
+        TWeakObjectPtr<UReuseListSp> self = this;
+        wld->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([=]() {
+            if (self.IsValid()) {
+                self->Reload(PreviewCount);
             }
         }));
     }
+#endif
 }
 
 void UReuseListSp::SyncProp()

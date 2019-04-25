@@ -597,6 +597,7 @@ void UReuseListC::OnWidgetRebuilt()
     Super::OnWidgetRebuilt();
     InitWidgetPtr();
     SyncProp();
+#if WITH_EDITOR
     auto wld = GetWorld();
     if (wld && !wld->IsGameWorld()) {
         TWeakObjectPtr<UReuseListC> self = this;
@@ -606,6 +607,7 @@ void UReuseListC::OnWidgetRebuilt()
             }
         }));
     }
+#endif
 }
 
 void UReuseListC::SyncProp()
