@@ -12,6 +12,7 @@
 #include "LogDefine.h"
 
 
+
 UUserWidget* UUtilScript::CreateUserWidget(FString name)
 {
 	TSubclassOf<UUserWidget> uclass = ::LoadClass<UUserWidget>(nullptr, *name);
@@ -33,6 +34,11 @@ void UUtilScript::GC()
 UObject* UUtilScript::LoadRes(FString name)
 {
     return ::LoadObject<UObject>(nullptr, *name);
+}
+
+UObject* UUtilScript::FindRes(FString name)
+{
+    return ::FindObject<UObject>(nullptr, *name);
 }
 
 UClass* UUtilScript::LoadBpClass(FString name)

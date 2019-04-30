@@ -31,6 +31,9 @@ public:
     UFUNCTION(BlueprintCallable)
     static UObject* LoadRes(FString name);
 
+    UFUNCTION(BlueprintCallable)
+    static UObject* FindRes(FString name);
+
 	UFUNCTION(BlueprintCallable)
 	static void TraceAllObject();
 
