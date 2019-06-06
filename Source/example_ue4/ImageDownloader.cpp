@@ -18,6 +18,8 @@ FString UImageDownloader::s_strRootDir = "ImageDownload";
 FString UImageDownloader::s_strSubDir;
 int32 UImageDownloader::s_nSubDirTime = 24*3600;
 bool UImageDownloader::s_bCheckDiskFile = true;
+TMap<FString, int32> UImageDownloader::s_mapInvalidFormatTryCount;
+int32 UImageDownloader::s_nInvalidFormatTryMaxCount = 5;
 
 static TWeakObjectPtr<UTexture2D> GetTexture2DFromArray(const TArray<uint8>& OutArray, bool& InvalidImageFormat)
 {
@@ -206,8 +208,11 @@ void UImageDownloader::Start(FString Url)
 		return;
 	}
 	if (InvalidImageFormat) {
-		OnFail.Broadcast(nullptr, this);
-		return;
+        auto p = s_mapInvalidFormatTryCount.Find(UrlHash);
+        if (p && *p >= s_nInvalidFormatTryMaxCount) {
+            OnFail.Broadcast(nullptr, this);
+            return;
+        }
 	}
 
 	//from http
@@ -272,6 +277,15 @@ void UImageDownloader::HandleRequest(FHttpRequestPtr HttpRequest, FHttpResponseP
 			OnSuccess.Broadcast(pTexture.Get(), this);
 			return;
 		}
+
+        //http retry count++. this count not strict.
+        if (InvalidImageFormat) {
+            int32 count = 0;
+            auto p = s_mapInvalidFormatTryCount.Find(UrlHash);
+            if (p) count = *p;
+            s_mapInvalidFormatTryCount.Add(UrlHash, ++count);
+            UE_LOG(LogImageDownloader, Log, TEXT("url=[%s] InvalidFormatTryCount %d"), *HttpResponse->GetURL(), count);
+        }
 
 	}
     if (HttpResponse.IsValid())

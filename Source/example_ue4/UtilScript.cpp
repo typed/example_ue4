@@ -22,7 +22,7 @@ UUserWidget* UUtilScript::CreateUserWidget(FString name)
     if (wld == nullptr)
         return nullptr;
 	UUserWidget* widget = CreateWidget<UUserWidget>(UUtilGame::GetMyWorld(), uclass);
-	//UE_LOG(LogUtil, Log, TEXT("UScriptHelperClient::CreateUserWidget World:%x Name: %s"), wld, *(wld->GetName()));
+	UE_LOG(LogUtil, Log, TEXT("UUtilScript::CreateUserWidget Widget:%x Name: %s"), widget, *(widget->GetName()));
 	return widget;
 }
 
