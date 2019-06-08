@@ -380,10 +380,12 @@ void UReuseListSp::DoJump()
 TWeakObjectPtr<UUserWidget> UReuseListSp::NewItem()
 {
     if (ItemPool.IsValidIndex(0)) {
-        auto tmp = ItemPool[0];
+        TWeakObjectPtr<UUserWidget> widget = ItemPool[0];
         ItemPool.RemoveAt(0);
-        tmp->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-        return tmp;
+        if (widget.IsValid()) {
+            widget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+        }
+        return widget;
     }
     else {
         TWeakObjectPtr<UUserWidget> widget = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
