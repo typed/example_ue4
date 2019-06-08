@@ -173,6 +173,7 @@ protected:
     void DoReload();
     TWeakObjectPtr<UUserWidget> NewItem();
     void ReleaseItem(TWeakObjectPtr<UUserWidget> __Item);
+    void ReleaseAllItem();
     void Update();
     void DoJump();
     void ComputeAlignSpace();

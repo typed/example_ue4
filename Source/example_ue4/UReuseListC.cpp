@@ -85,6 +85,7 @@ void UReuseListC::Reload(int32 __ItemCount)
     const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
     if (lzSz.Equals(FVector2D::ZeroVector, 0.0001f)) {
         ViewSize = lzSz;
+        ReleaseAllItem();
         return;
     }
     DoReload();
@@ -320,14 +321,7 @@ void UReuseListC::DoReload()
     UpdateContentSize(CanvasPanelList.Get());
     ComputeAlignSpace();
     ComputeScrollBoxHitTest();
-    for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
-        auto uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
-        if (uw) {
-            ReleaseItem(uw);
-        }
-    }
-    ItemMap.Empty();
-    DelayUpdateList.Empty();
+    ReleaseAllItem();
     float TmpMaxOffset = 0.f;
     ScrollBoxList->GetScrollOffset();
     TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
@@ -423,9 +417,11 @@ void UReuseListC::DoJump()
 TWeakObjectPtr<UUserWidget> UReuseListC::NewItem()
 {
     if (ItemPool.Num() > 0) {
-        auto tmp = ItemPool.Pop();
-        tmp->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-        return tmp;
+        TWeakObjectPtr<UUserWidget> widget = ItemPool.Pop();
+        if (widget.IsValid()) {
+            widget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+        }
+        return widget;
     }
     else {
         TWeakObjectPtr<UUserWidget> widget = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
@@ -443,6 +439,20 @@ void UReuseListC::ReleaseItem(TWeakObjectPtr<UUserWidget> __Item)
 {
     __Item->SetVisibility(ESlateVisibility::Collapsed);
     ItemPool.AddUnique(__Item);
+}
+
+void UReuseListC::ReleaseAllItem()
+{
+    if (CanvasPanelList.IsValid()) {
+        for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
+            auto uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
+            if (uw) {
+                ReleaseItem(uw);
+            }
+        }
+    }
+    ItemMap.Empty();
+    DelayUpdateList.Empty();
 }
 
 void UReuseListC::Update()

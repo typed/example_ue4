@@ -403,6 +403,19 @@ void UReuseListSp::ReleaseItem(TWeakObjectPtr<UUserWidget> __Item)
     ItemPool.AddUnique(__Item);
 }
 
+void UReuseListSp::ReleaseAllItem()
+{
+    if (CanvasPanelList.IsValid()) {
+        for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
+            auto uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
+            if (uw) {
+                ReleaseItem(uw);
+            }
+        }
+    }
+    ItemMap.Empty();
+}
+
 void UReuseListSp::Update()
 {
     int32 tmpLine = 0;
