@@ -106,9 +106,6 @@ public:
     UFUNCTION(BlueprintCallable)
     void Reset(TSubclassOf<UUserWidget> __ItemClass, EReuseListStyle __Style, int32 __ItemWidth, int32 __ItemHeight, int32 __PaddingX, int32 __PaddingY);
 
-    UFUNCTION(BlueprintCallable)
-    void SetDelayUpdateNum(int32 __Num);
-
 protected:
 
     bool Initialize();
@@ -156,7 +153,7 @@ protected:
     int32 ItemCacheNum;
 
     UPROPERTY(EditAnywhere, Category = Optimization, meta = (ClampMin = "0"))
-    int32 DelayUpdateNum;
+    int32 DelayUpdateTimeLimitMS;
 
     void NativeConstruct();
     void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
@@ -179,11 +176,14 @@ protected:
     void ComputeAlignSpace();
     void ComputeScrollBoxHitTest();
 
+    int32 GetDelayUpdateTimeLimitMS();
     void AddDelayUpdate(int32 idx);
     void DoDelayUpdate();
 
     bool IsVertical() const;
     bool IsInvalidParam() const;
+
+    
 
     void ClearCache();
 
@@ -206,7 +206,6 @@ protected:
     int32 RowNum;
     int32 CurLine;
     int32 JumpIdx;
-    int32 DelayUpdateNumReal;
     EReuseListJumpStyle JumpStyle;
     float AlignSpace;
     int32 LastOffset;

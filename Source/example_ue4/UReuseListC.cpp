@@ -38,8 +38,7 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , NotFullAlignStyle(EReuseListNotFullAlignStyle::Start)
     , NotFullScrollBoxHitTestInvisible(false)
     , AlignSpace(0.f)
-    , DelayUpdateNum(0)
-    , DelayUpdateNumReal(0)
+    , DelayUpdateTimeLimitMS(0)
     , LastOffset(0)
 {
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
@@ -492,11 +491,20 @@ bool UReuseListC::IsInvalidParam() const
         return ItemWidth <= 0;
 }
 
+int32 UReuseListC::GetDelayUpdateTimeLimitMS()
+{
+    auto wld = GetWorld();
+    if (wld && !wld->IsGameWorld()) {
+        return 0;
+    }
+    return DelayUpdateTimeLimitMS;
+}
+
 void UReuseListC::AddDelayUpdate(int32 idx)
 {
     DelayUpdateList.Remove(idx);
     DelayUpdateList.Add(idx);
-    if (DelayUpdateNumReal <= 0) {
+    if (GetDelayUpdateTimeLimitMS() == 0) {
         DoDelayUpdate();
     }
 }
@@ -508,13 +516,17 @@ void UReuseListC::DoDelayUpdate()
     }
     int32 ItemWidthAndPad = ItemWidth + PaddingX;
     int32 ItemHeightAndPad = ItemHeight + PaddingY;
-    int32 tmp = DelayUpdateNumReal;
     FMargin mar;
     FAnchors ach(0, 0, 0, 0);
+    //test
+    //static int32 s_key = 0;
+    //s_key++;
+    int32 timeLimit = GetDelayUpdateTimeLimitMS();
+    double timeLimitSec = timeLimit / 1000.f;
+    double sec = FPlatformTime::Seconds();
     do {
         int32 idx = DelayUpdateList[0];
         DelayUpdateList.RemoveAt(0);
-        --tmp;
         auto v = ItemMap.Find(idx);
         if (v) {
             OnUpdateItem.Broadcast((*v).Get(), idx);
@@ -561,7 +573,16 @@ void UReuseListC::DoDelayUpdate()
                 OnUpdateItem.Broadcast(w.Get(), idx);
             }
         }
-    } while (DelayUpdateList.Num() > 0 && tmp > 0);
+        //time limit
+        if (timeLimit > 0) {
+            double deltaTm = FPlatformTime::Seconds() - sec;
+            if (deltaTm > timeLimitSec) {
+                break;
+            }
+        }
+        //test
+        //UE_LOG(LogUReuseListC, Log, TEXT("OnUpdateItem key=%d idx=%d"), s_key, idx);
+    } while (DelayUpdateList.Num() > 0);
 }
 
 void UReuseListC::Reset(TSubclassOf<UUserWidget> __ItemClass, EReuseListStyle __Style, int32 __ItemWidth, int32 __ItemHeight, int32 __PaddingX, int32 __PaddingY)
@@ -574,16 +595,6 @@ void UReuseListC::Reset(TSubclassOf<UUserWidget> __ItemClass, EReuseListStyle __
     ItemHeight = __ItemHeight;
     PaddingX = __PaddingX;
     PaddingY = __PaddingY;
-}
-
-void UReuseListC::SetDelayUpdateNum(int32 __Num)
-{
-    DelayUpdateNum = __Num;
-    auto wld = GetWorld();
-    if (wld && !wld->IsGameWorld())
-        DelayUpdateNumReal = 0;
-    else
-        DelayUpdateNumReal = DelayUpdateNum;
 }
 
 #if WITH_EDITOR
@@ -628,5 +639,4 @@ void UReuseListC::SyncProp()
         ScrollBoxList->WidgetBarStyle = ScrollBarStyle;
         ScrollBoxList->WidgetStyle = ScrollBoxStyle;
     }
-    SetDelayUpdateNum(DelayUpdateNum);
 }
