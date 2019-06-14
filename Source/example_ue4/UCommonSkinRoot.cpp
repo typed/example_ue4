@@ -2,6 +2,7 @@
 
 #include "UCommonSkinRoot.h"
 #include "Runtime/UMG/Public/Components/CanvasPanel.h"
+#include "Runtime/UMG/Public/Components/CanvasPanelSlot.h"
 
 DEFINE_LOG_CATEGORY(LogUCommonSkinRoot);
 
@@ -47,6 +48,13 @@ UUserWidget* UCommonSkinRoot::LoadSkin(FString __WidgetPath)
         return widget_src.Get();
     CanvasPanelRoot->ClearChildren();
     CanvasPanelRoot->AddChild(widget.Get());
+    auto cps = Cast<UCanvasPanelSlot>(widget->Slot);
+    if (cps) {
+        FMargin mar(0, 0, 0, 0);
+        FAnchors ach(0, 0, 1, 1);
+        cps->SetAnchors(ach);
+        cps->SetOffsets(mar);
+    }
     return widget.Get();
 }
 
