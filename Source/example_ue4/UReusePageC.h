@@ -16,6 +16,8 @@ Description: ÷ÿ”√“≥«©
  * 
  */
 
+class UCanvasPanel;
+
 UCLASS()
 class EXAMPLE_UE4_API UReusePageC : public UUserWidget
 {
@@ -55,28 +57,16 @@ public:
     UFUNCTION(BlueprintCallable)
     virtual void ClearCache();
 
-    //UVisual interface
-    virtual void ReleaseSlateResources(bool bReleaseChildren) override;
-    //~ End UVisual Interface
-
-    //~ Begin UWidget Interface
-    virtual void SynchronizeProperties() override;
-    //~ End UWidget Interface
-
 protected:
 
-    UPROPERTY(EditAnywhere, Category = Property, meta = (BlueprintBaseOnly = ""))
-    class UWidgetBlueprintGeneratedClass* ItemClass;
+    UPROPERTY(EditAnywhere, Category = Property)
+    TSubclassOf<UUserWidget> ItemClass;
 
     UPROPERTY(EditAnywhere, Category = Property)
     bool Loop;
 
     UPROPERTY(EditAnywhere, Category = Property)
     bool StyleUpDown;
-
-    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
-    int32 PreviewCount;
-    FTimerHandle tmhOnPreviewTick;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "1"))
     float DChgPageParam;
@@ -118,10 +108,10 @@ protected:
 
     bool IsValidClass() const;
 
-    class UCanvasPanel* CanvasPanelRoot;
+    TWeakObjectPtr<UCanvasPanel> CanvasPanelRoot;
     FVector2D ViewSize;
-    TMap<int32, UUserWidget* > ItemMap;
-    TArray< UUserWidget* > ItemPool;
+    TMap<int32, TWeakObjectPtr<UUserWidget> > ItemMap;
+    TArray< TWeakObjectPtr<UUserWidget> > ItemPool;
     int32 Count;
     int32 Page;
     int32 BeginBlock;

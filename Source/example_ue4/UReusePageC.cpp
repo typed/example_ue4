@@ -32,7 +32,6 @@ UReusePageC::UReusePageC(const FObjectInitializer& ObjectInitializer)
     , NeedUpdateOffset(false)
     , NeedUpdateSlip(false)
     , NeedUpdatePage(false)
-    , PreviewCount(3)
 {
 
 }
@@ -42,34 +41,8 @@ bool UReusePageC::Initialize()
     if (!Super::Initialize())
         return false;
     CanvasPanelRoot = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelRoot"))));
-    ensure(CanvasPanelRoot);
+    ensure(CanvasPanelRoot.IsValid());
     return true;
-}
-
-void UReusePageC::ReleaseSlateResources(bool bReleaseChildren)
-{
-    Super::ReleaseSlateResources(bReleaseChildren);
-    if (tmhOnPreviewTick.IsValid()) {
-        GetWorld()->GetTimerManager().ClearTimer(tmhOnPreviewTick);
-        tmhOnPreviewTick.Invalidate();
-    }
-}
-
-void UReusePageC::SynchronizeProperties()
-{
-    Super::SynchronizeProperties();
-
-    auto wld = GetWorld();
-    if (wld && !wld->IsGameWorld()) {
-
-        Reload(PreviewCount);
-
-        if (!tmhOnPreviewTick.IsValid()) {
-            GetWorld()->GetTimerManager().SetTimer(tmhOnPreviewTick, this, &UReusePageC::OnPreviewTick, 0.25f, true);
-        }
-        //GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UReusePageC::OnPreviewTick);
-
-    }
 }
 
 void UReusePageC::ClearCache()
@@ -172,13 +145,15 @@ UUserWidget* UReusePageC::NewItem()
 {
     UUserWidget* tmp = nullptr;
     if (ItemPool.IsValidIndex(0)) {
-        tmp = ItemPool[0];
+        tmp = ItemPool[0].Get();
         ItemPool.RemoveAt(0);
         tmp->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
     }
     else {
         tmp = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
-        ensure(tmp);
+        if (tmp == nullptr) {
+            return nullptr;
+        }
         CanvasPanelRoot->AddChild(tmp);
         tmp->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
         OnCreateItem.Broadcast(tmp);
@@ -194,9 +169,9 @@ void UReusePageC::ReleaseItem(UUserWidget* widget)
 
 void UReusePageC::RemoveNotUsed(TMap<int32, int32>& ItemIdxMap)
 {
-    for (TMap<int32, UUserWidget* >::TIterator iter(ItemMap); iter; ++iter) {
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter(ItemMap); iter; ++iter) {
         if (!ItemIdxMap.Contains(iter->Key)) {
-            ReleaseItem(iter->Value);
+            ReleaseItem(iter->Value.Get());
             iter.RemoveCurrent();
         }
     }
@@ -348,13 +323,15 @@ void UReusePageC::UpdateOffset()
         int32 idx = it->Value;
         UUserWidget* curitem = nullptr;
         auto ptr = ItemMap.Find(itmIdx);
-        if (ptr == nullptr) {
+        if (ptr == nullptr || !(*ptr).IsValid()) {
             curitem = NewItem();
-            ItemMap.Add(itmIdx, curitem);
-            OnUpdateItem.Broadcast(curitem, itmIdx);
+            if (curitem) {
+                ItemMap.Add(itmIdx, curitem);
+                OnUpdateItem.Broadcast(curitem, itmIdx);
+            }
         }
         else {
-            curitem = *ptr;
+            curitem = (*ptr).Get();
         }
         float t = idx * ViewLen - Offset;
         FMargin mar;
@@ -401,7 +378,6 @@ void UReusePageC::UpdatePage()
 void UReusePageC::OnPreviewTick()
 {
     NativeTick(GetCachedGeometry(), 0.25f);
-    //Reload(PreviewCount);
 }
 
 bool UReusePageC::IsValidClass() const
