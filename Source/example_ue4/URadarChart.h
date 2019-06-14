@@ -63,7 +63,7 @@ protected:
     float MinProgress;
 
     UPROPERTY(EditAnywhere, Category = Property)
-    FText TestProgress;
+    TArray<float> TestProgress;
 
     //~ Begin UWidget Interface
     virtual void SynchronizeProperties() override;
