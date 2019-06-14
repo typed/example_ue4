@@ -99,8 +99,8 @@ void UReuseListC::Refresh()
 
 void UReuseListC::RefreshOne(int32 __Idx)
 {
-    auto v = ItemMap.Find(__Idx);
-    if (v) {
+    TWeakObjectPtr<UUserWidget>* v = ItemMap.Find(__Idx);
+    if (v && (*v).IsValid()) {
         AddDelayUpdate(__Idx);
     }
 }
@@ -257,7 +257,7 @@ void UReuseListC::ScrollUpdate(float __Offset)
 
 void UReuseListC::UpdateContentSize(TWeakObjectPtr<UWidget> widget)
 {
-    auto cps = Cast<UCanvasPanelSlot>(widget->Slot);
+    UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(widget->Slot);
     if (cps) {
         if (IsVertical()) {
             cps->SetAnchors(FAnchors(0, 0, 1, 0));
@@ -445,7 +445,7 @@ void UReuseListC::ReleaseAllItem()
 {
     if (CanvasPanelList.IsValid()) {
         for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
-            auto uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
+            UUserWidget* uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
             if (uw) {
                 ReleaseItem(uw);
             }
@@ -494,7 +494,7 @@ bool UReuseListC::IsInvalidParam() const
 
 int32 UReuseListC::GetDelayUpdateTimeLimitMS()
 {
-    auto wld = GetWorld();
+    UWorld* wld = GetWorld();
     if (wld && !wld->IsGameWorld()) {
         return 0;
     }
@@ -528,8 +528,8 @@ void UReuseListC::DoDelayUpdate()
     do {
         int32 idx = DelayUpdateList[0];
         DelayUpdateList.RemoveAt(0);
-        auto v = ItemMap.Find(idx);
-        if (v) {
+        TWeakObjectPtr<UUserWidget>* v = ItemMap.Find(idx);
+        if (v && (*v).IsValid()) {
             OnUpdateItem.Broadcast((*v).Get(), idx);
         }
         else {
@@ -565,9 +565,9 @@ void UReuseListC::DoDelayUpdate()
                 mar.Right = ItemWidth;
                 mar.Bottom = ItemHeight;
             }
-            auto w = NewItem();
+            TWeakObjectPtr<UUserWidget> w = NewItem();
             if (w.IsValid()) {
-                auto cps = Cast<UCanvasPanelSlot>(w->Slot);
+                UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(w->Slot);
                 if (cps) {
                     cps->SetAnchors(ach);
                     cps->SetOffsets(mar);
@@ -605,7 +605,7 @@ void UReuseListC::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedE
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
     SyncProp();
-    auto wld = GetWorld();
+    UWorld* wld = GetWorld();
     if (wld && !wld->IsGameWorld()) {
         static const FName TmpName = TEXT("ItemClass");
         if (PropertyChangedEvent.GetPropertyName().IsEqual(TmpName)) {
@@ -622,7 +622,7 @@ void UReuseListC::OnWidgetRebuilt()
     InitWidgetPtr();
     SyncProp();
 #if WITH_EDITOR
-    auto wld = GetWorld();
+    UWorld* wld = GetWorld();
     if (wld && !wld->IsGameWorld()) {
         TWeakObjectPtr<UReuseListC> self = this;
         wld->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([=]() {
