@@ -258,13 +258,15 @@ void UReuseListC::ScrollUpdate(float __Offset)
 void UReuseListC::UpdateContentSize(TWeakObjectPtr<UWidget> widget)
 {
     auto cps = Cast<UCanvasPanelSlot>(widget->Slot);
-    if (IsVertical()) {
-        cps->SetAnchors(FAnchors(0, 0, 1, 0));
-        cps->SetOffsets(FMargin(0, 0, 0, ContentSize.Y));
-    }
-    else {
-        cps->SetAnchors(FAnchors(0, 0, 0, 1));
-        cps->SetOffsets(FMargin(0, 0, ContentSize.X, 0));
+    if (cps) {
+        if (IsVertical()) {
+            cps->SetAnchors(FAnchors(0, 0, 1, 0));
+            cps->SetOffsets(FMargin(0, 0, 0, ContentSize.Y));
+        }
+        else {
+            cps->SetAnchors(FAnchors(0, 0, 0, 1));
+            cps->SetOffsets(FMargin(0, 0, ContentSize.X, 0));
+        }
     }
 }
 
@@ -424,12 +426,11 @@ TWeakObjectPtr<UUserWidget> UReuseListC::NewItem()
     }
     else {
         TWeakObjectPtr<UUserWidget> widget = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
-        if (!widget.IsValid()) {
-            return nullptr;
+        if (widget.IsValid()) {
+            CanvasPanelList->AddChild(widget.Get());
+            widget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+            OnCreateItem.Broadcast(widget.Get());
         }
-        CanvasPanelList->AddChild(widget.Get());
-        widget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-        OnCreateItem.Broadcast(widget.Get());
         return widget;
     }
 }
@@ -567,8 +568,10 @@ void UReuseListC::DoDelayUpdate()
             auto w = NewItem();
             if (w.IsValid()) {
                 auto cps = Cast<UCanvasPanelSlot>(w->Slot);
-                cps->SetAnchors(ach);
-                cps->SetOffsets(mar);
+                if (cps) {
+                    cps->SetAnchors(ach);
+                    cps->SetOffsets(mar);
+                }
                 ItemMap.Add(idx, w);
                 OnUpdateItem.Broadcast(w.Get(), idx);
             }
