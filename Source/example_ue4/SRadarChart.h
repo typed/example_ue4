@@ -31,6 +31,9 @@ public:
 
     void SetMinProgress(float __MinProgress);
 
+    void SetPosOffset(const TArray<FVector2D>& __PosOffset);
+    FVector2D GetPosOffset(int32 __idx) const;
+
     void SetBrush(const FSlateBrush& __Brush);
 
     void SetProgress(int32 i, float prg);
@@ -54,5 +57,7 @@ protected:
     TMap<int32, float> Progress;
 
     float MinProgress;
+
+    TArray<FVector2D> PosOffset;
 
 };

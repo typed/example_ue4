@@ -31,6 +31,19 @@ void SRadarChart::SetMinProgress(float __MinProgress)
     MinProgress = __MinProgress;
 }
 
+void SRadarChart::SetPosOffset(const TArray<FVector2D>& __PosOffset)
+{
+    PosOffset = __PosOffset;
+}
+
+FVector2D SRadarChart::GetPosOffset(int32 __idx) const
+{
+    if (PosOffset.IsValidIndex(__idx)) {
+        return PosOffset[__idx];
+    }
+    return FVector2D::ZeroVector;
+}
+
 void SRadarChart::SetBrush(const FSlateBrush& __Brush)
 {
     Brush = __Brush;
@@ -52,15 +65,16 @@ void SRadarChart::ResetProgress()
     Progress.Empty();
 }
 
-#define ComputeSlateVertex(ant, col) \
-    float tmp; \
-    float Theta = i * WedgeAngle; \
-    tmp = radius * GetProgress(i) + ant; \
-    vec.X = PtCenter.X + tmp * FMath::Cos(Theta); \
-    vec.Y = PtCenter.Y - tmp * FMath::Sin(Theta); \
-    TexCoords.X = 0.5f + (vec.X - PtCenter.X) / diameter; \
-    TexCoords.Y = 0.5f + (vec.Y - PtCenter.Y) / diameter; \
-    v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, vec, TexCoords, col);
+#define ComputeSlateVertex(ant, col) {\
+    Theta = i * WedgeAngle;\
+    tmp = radius * GetProgress(i) + ant;\
+    FVector2D pt_offset = GetPosOffset(i);\
+    vec.X = PtCenter.X + tmp * FMath::Cos(Theta) + pt_offset.X;\
+    vec.Y = PtCenter.Y - tmp * FMath::Sin(Theta) + pt_offset.Y;\
+    TexCoords.X = 0.5f + (vec.X - PtCenter.X) / diameter;\
+    TexCoords.Y = 0.5f + (vec.Y - PtCenter.Y) / diameter;\
+    v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, vec, TexCoords, col);\
+}
 
 int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
@@ -77,14 +91,16 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
     float WedgeAngle = (2.f * PI) / SideCount;
     float radius = FMath::Min(LocalSz.X / 2.f, LocalSz.Y / 2.f);
     float diameter = radius * 2.f;
+    float tmp;
+    float Theta;
     FVector2D PtCenter;
     PtCenter.X = LocalSz.X / 2.f;
     PtCenter.Y = LocalSz.Y / 2.f;
     FSlateVertex v;
+    FVector2D vec;
     FVector2D TexCoords(0.5f, 0.5f);
     v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, PtCenter, TexCoords, FColor::White);
     av.Add(v);
-    FVector2D vec;
     for (int32 i = 0; i < SideCount; i++) {
         ComputeSlateVertex(0.f, FColor::White)
         av.Add(v);

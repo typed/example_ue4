@@ -77,6 +77,7 @@ void URadarChart::SynchronizeProperties()
         MyRadarChart->SetAntialias(Antialias);
         MyRadarChart->SetBrush(Brush);
         MyRadarChart->SetMinProgress(MinProgress);
+        MyRadarChart->SetPosOffset(PosOffset);
 
 #if WITH_EDITOR
         auto wld = GetWorld();
