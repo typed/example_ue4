@@ -66,8 +66,8 @@ void SRadarChart::ResetProgress()
 }
 
 #define ComputeSlateVertex(ant, col) {\
-    Theta = i * WedgeAngle;\
-    tmp = radius * GetProgress(i) + ant;\
+    float Theta = i * WedgeAngle;\
+    float tmp = radius * GetProgress(i) + ant;\
     FVector2D pt_offset = GetPosOffset(i);\
     vec.X = PtCenter.X + tmp * FMath::Cos(Theta) + pt_offset.X;\
     vec.Y = PtCenter.Y - tmp * FMath::Sin(Theta) + pt_offset.Y;\
@@ -91,8 +91,6 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
     float WedgeAngle = (2.f * PI) / SideCount;
     float radius = FMath::Min(LocalSz.X / 2.f, LocalSz.Y / 2.f);
     float diameter = radius * 2.f;
-    float tmp;
-    float Theta;
     FVector2D PtCenter;
     PtCenter.X = LocalSz.X / 2.f;
     PtCenter.Y = LocalSz.Y / 2.f;
