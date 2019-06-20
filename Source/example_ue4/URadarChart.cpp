@@ -78,13 +78,19 @@ void URadarChart::SynchronizeProperties()
         MyRadarChart->SetBrush(Brush);
         MyRadarChart->SetMinProgress(MinProgress);
         MyRadarChart->SetPosOffset(PosOffset);
+        MyRadarChart->SetPosColor(PosColor);
 
 #if WITH_EDITOR
         auto wld = GetWorld();
         if (wld && !wld->IsGameWorld()) {
             MyRadarChart->ResetProgress();
-            for (int32 i = 0; i < TestProgress.Num(); i++) {
-                MyRadarChart->SetProgress(i, TestProgress[i]);
+            for (int32 i = 0; i < SideCount; i++) {
+                if (TestProgress.IsValidIndex(i)) {
+                    MyRadarChart->SetProgress(i, TestProgress[i]);
+                }
+                else {
+                    MyRadarChart->SetProgress(i, 1.f);
+                }
             }
         }
 #endif

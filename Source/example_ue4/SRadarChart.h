@@ -34,6 +34,9 @@ public:
     void SetPosOffset(const TArray<FVector2D>& __PosOffset);
     FVector2D GetPosOffset(int32 __idx) const;
 
+    void SetPosColor(const TArray<FColor>& __PosColor);
+    FColor GetPosColor(int32 __idx) const;
+
     void SetBrush(const FSlateBrush& __Brush);
 
     void SetProgress(int32 i, float prg);
@@ -59,5 +62,7 @@ protected:
     float MinProgress;
 
     TArray<FVector2D> PosOffset;
+
+    TArray<FColor> PosColor;
 
 };

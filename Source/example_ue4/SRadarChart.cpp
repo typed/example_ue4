@@ -44,6 +44,19 @@ FVector2D SRadarChart::GetPosOffset(int32 __idx) const
     return FVector2D::ZeroVector;
 }
 
+void SRadarChart::SetPosColor(const TArray<FColor>& __PosColor)
+{
+    PosColor = __PosColor;
+}
+
+FColor SRadarChart::GetPosColor(int32 __idx) const
+{
+    if (PosColor.IsValidIndex(__idx)) {
+        return PosColor[__idx];
+    }
+    return FColor::White;
+}
+
 void SRadarChart::SetBrush(const FSlateBrush& __Brush)
 {
     Brush = __Brush;
@@ -97,10 +110,10 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
     FSlateVertex v;
     FVector2D vec;
     FVector2D TexCoords(0.5f, 0.5f);
-    v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, PtCenter, TexCoords, FColor::White);
+    v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, PtCenter, TexCoords, GetPosColor(0));
     av.Add(v);
     for (int32 i = 0; i < SideCount; i++) {
-        ComputeSlateVertex(0.f, FColor::White)
+        ComputeSlateVertex(0.f, GetPosColor(i + 1))
         av.Add(v);
     }
     for (int32 i = 1; i <= SideCount; i++) {
@@ -111,9 +124,9 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
     }
 
     if (Antialias > 0.f) {
-        FColor BdCol = FColor::White;
-        BdCol.A = 0.f;
         for (int32 i = 0; i < SideCount; i++) {
+            FColor BdCol = GetPosColor(i + 1);
+            BdCol.A = 0.f;
             ComputeSlateVertex(Antialias, BdCol)
             av.Add(v);
         }

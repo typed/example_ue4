@@ -66,6 +66,9 @@ protected:
     TArray<FVector2D> PosOffset;
 
     UPROPERTY(EditAnywhere, Category = Property)
+    TArray<FColor> PosColor;
+
+    UPROPERTY(EditAnywhere, Category = Property)
     TArray<float> TestProgress;
 
     //~ Begin UWidget Interface
