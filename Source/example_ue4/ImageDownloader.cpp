@@ -18,8 +18,6 @@ FString UImageDownloader::s_strRootDir = "ImageDownload";
 FString UImageDownloader::s_strSubDir;
 int32 UImageDownloader::s_nSubDirTime = 24*3600;
 bool UImageDownloader::s_bCheckDiskFile = true;
-TMap<FString, int32> UImageDownloader::s_mapInvalidFormatTryCount;
-int32 UImageDownloader::s_nInvalidFormatTryMaxCount = 5;
 
 static TWeakObjectPtr<UTexture2D> GetTexture2DFromArray(const TArray<uint8>& OutArray, bool& InvalidImageFormat)
 {
@@ -198,7 +196,6 @@ void UImageDownloader::Start(FString Url)
         s_mapTexture.Remove(UrlHash);
 	}
     
-    
 	//from disk
     TWeakObjectPtr<UTexture2D> pTexture = GetTexture2DFromDisk(FileSavePath, InvalidImageFormat);
 	if (pTexture.IsValid()) {
@@ -208,11 +205,8 @@ void UImageDownloader::Start(FString Url)
 		return;
 	}
 	if (InvalidImageFormat) {
-        auto p = s_mapInvalidFormatTryCount.Find(UrlHash);
-        if (p && *p >= s_nInvalidFormatTryMaxCount) {
-            OnFail.Broadcast(nullptr, this);
-            return;
-        }
+        OnFail.Broadcast(nullptr, this);
+        return;
 	}
 
 	//from http
@@ -253,43 +247,34 @@ void UImageDownloader::HandleRequest(FHttpRequestPtr HttpRequest, FHttpResponseP
 				return;
 			}
 		}
-
         
-		if (SaveDiskFile) {
-			IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-			FString Path, Filename, Extension;
-			FPaths::Split(FileSavePath, Path, Filename, Extension);
-			if (!PlatformFile.DirectoryExists(*Path)) {
-				PlatformFile.CreateDirectoryTree(*Path);
-			}
-			IFileHandle* FileHandle = PlatformFile.OpenWrite(*FileSavePath);
-			if (FileHandle) {
-				FileHandle->Write(OutArray.GetData(), OutArray.Num());
-				delete FileHandle;
-			}
-		}
-        
-
         TWeakObjectPtr<UTexture2D> pTexture = GetTexture2DFromArray(OutArray, InvalidImageFormat);
 		if (pTexture.IsValid()) {
             s_mapTexture.Add(UrlHash, pTexture);
 			UE_LOG(LogImageDownloader, Log, TEXT("from http %s"), *pTexture->GetPathName());
-			OnSuccess.Broadcast(pTexture.Get(), this);
-			return;
 		}
 
-        //http retry count++. this count not strict.
-        if (InvalidImageFormat) {
-            int32 count = 0;
-            auto p = s_mapInvalidFormatTryCount.Find(UrlHash);
-            if (p) count = *p;
-            s_mapInvalidFormatTryCount.Add(UrlHash, ++count);
-            UE_LOG(LogImageDownloader, Log, TEXT("url=[%s] InvalidFormatTryCount %d"), *HttpResponse->GetURL(), count);
+        if (SaveDiskFile && pTexture.IsValid()) {
+            IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+            FString Path, Filename, Extension;
+            FPaths::Split(FileSavePath, Path, Filename, Extension);
+            if (!PlatformFile.DirectoryExists(*Path)) {
+                PlatformFile.CreateDirectoryTree(*Path);
+            }
+            IFileHandle* FileHandle = PlatformFile.OpenWrite(*FileSavePath);
+            if (FileHandle) {
+                FileHandle->Write(OutArray.GetData(), OutArray.Num());
+                delete FileHandle;
+            }
+        }
+
+        if (pTexture.IsValid()) {
+            OnSuccess.Broadcast(pTexture.Get(), this);
+            return;
         }
 
 	}
-    if (HttpResponse.IsValid())
-    {
+    if (HttpResponse.IsValid()) {
         UE_LOG(LogTemp, Warning, TEXT("HttpResponse error code %d, url=[%s]"), HttpResponse->GetResponseCode(), *HttpResponse->GetURL());
     }
 	OnFail.Broadcast(nullptr, this);

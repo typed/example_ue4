@@ -82,9 +82,6 @@ private:
 	static int32 s_nSubDirTime;
 	static bool s_bCheckDiskFile;
 
-    static TMap<FString, int32> s_mapInvalidFormatTryCount;
-    static int32 s_nInvalidFormatTryMaxCount;
-
     static TWeakObjectPtr<UImageDownloader> ImageDownloaderInGame;
 
 };
