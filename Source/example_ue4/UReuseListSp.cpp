@@ -29,12 +29,14 @@ UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     , JumpIdx(0)
     , JumpStyle(EReuseListSpJumpStyle::Middle)
     , NeedJump(false)
-    , NeedFillArrOffset(true)
+    , NeedFillArrOffset(false)
+    , NeedAdjustItem(false)
+    , NeedAdjustItemWidgetSize(false)
     , PreviewCount(5)
     , ScrollBarVisibility(ESlateVisibility::Collapsed)
     , NotFullAlignStyle(EReuseListSpNotFullAlignStyle::Start)
     , NotFullScrollBoxHitTestInvisible(false)
-    , AlignSpace(0.f)
+    , AutoAdjustItemSize(true)
 {
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
     ScrollBoxStyle.TopShadowBrush = FSlateNoResource();
@@ -64,10 +66,27 @@ void UReuseListSp::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     if (IsInvalidParam())
         return;
     const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
-    if (!ViewSize.Equals(lzSz, 0.0001f))
+    if (!ViewSize.Equals(lzSz, 0.0001f)) {
         DoReload();
+    }
     Update();
-    DoJump();
+    AdjustItem();
+    //     if (NeedAdjustItem) {
+    //         NeedAdjustItem = false;
+    //         AdjustItem();
+    //     }
+    if (NeedFillArrOffset) {
+        NeedFillArrOffset = false;
+        FillArrOffset();
+    }
+    if (NeedAdjustItemWidgetSize) {
+        NeedAdjustItemWidgetSize = false;
+        AdjustItemWidgetSize();
+    }
+    if (NeedJump) {
+        NeedJump = false;
+        DoJump();
+    }
 }
 
 void UReuseListSp::Reload(int32 __ItemCount)
@@ -78,8 +97,10 @@ void UReuseListSp::Reload(int32 __ItemCount)
     const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
     if (lzSz.Equals(FVector2D::ZeroVector, 0.0001f)) {
         ViewSize = lzSz;
+        ReleaseAllItem();
         return;
     }
+    FillArrOffset();
     DoReload();
 }
 
@@ -155,9 +176,9 @@ void UReuseListSp::InitWidgetPtr()
     ensure(CanvasPanelList.IsValid());
 }
 
-void UReuseListSp::ComputeAlignSpace()
+float UReuseListSp::GetAlignSpace()
 {
-    AlignSpace = 0.f;
+    float AlignSpace = 0.f;
     float content = 0.f;
     float view = 0.f;
     if (IsVertical()) {
@@ -182,6 +203,7 @@ void UReuseListSp::ComputeAlignSpace()
             break;
         }
     }
+    return AlignSpace;
 }
 
 void UReuseListSp::ComputeScrollBoxHitTest()
@@ -201,19 +223,18 @@ void UReuseListSp::ClearSpecialSize()
 {
     SpecialSizeMap.Empty();
     NeedFillArrOffset = true;
+    NeedAdjustItemWidgetSize = true;
 }
 
 void UReuseListSp::AddSpecialSize(int32 __Idx, int32 __Size)
 {
     SpecialSizeMap.Add(__Idx, __Size);
     NeedFillArrOffset = true;
+    NeedAdjustItemWidgetSize = true;
 }
 
 void UReuseListSp::FillArrOffset()
 {
-    if (!NeedFillArrOffset)
-        return;
-    NeedFillArrOffset = false;
     ArrOffset.Empty();
     int32 tmpOffset = 0;
     for (int32 i = 0; i < ItemCount; i++) {
@@ -222,11 +243,23 @@ void UReuseListSp::FillArrOffset()
     }
     MaxPos = tmpOffset;
     MaxPos -= ItemPadding;
+
+    if (IsVertical()) {
+        ContentSize.X = ViewSize.X;
+        ContentSize.Y = MaxPos;
+    }
+    else {
+        ContentSize.X = MaxPos;
+        ContentSize.Y = ViewSize.Y;
+    }
+    UpdateContentSize(SizeBoxBg);
+    UpdateContentSize(CanvasPanelList);
+
 }
 
 int32 UReuseListSp::GetItemSize(int32 idx)
 {
-    const int32 *pValue = SpecialSizeMap.Find(idx);
+    const int32* pValue = SpecialSizeMap.Find(idx);
     if (pValue)
         return *pValue;
     else
@@ -235,7 +268,6 @@ int32 UReuseListSp::GetItemSize(int32 idx)
 
 void UReuseListSp::ScrollUpdate(float __Offset)
 {
-    
     int32 Offset = __Offset;
     int32 OffsetEnd = 0;
     int32 BIdx = 0;
@@ -244,26 +276,32 @@ void UReuseListSp::ScrollUpdate(float __Offset)
     Offset = UKismetMathLibrary::Min(Offset, MaxPos);
     int32 vlen = (IsVertical() ? ViewSize.Y : ViewSize.X);
     OffsetEnd = Offset + vlen;
-    
+
     BIdx = Algo::LowerBound(ArrOffset, Offset);
     BIdx = UKismetMathLibrary::Max(BIdx - ItemCacheNum, 0);
     EIdx = Algo::LowerBound(ArrOffset, OffsetEnd);
     EIdx = UKismetMathLibrary::Min(EIdx + ItemCacheNum, ItemCount - 1);
 
     RemoveNotUsed(BIdx, EIdx);
+
+    float AlignSpace = GetAlignSpace();
     for (int32 i = BIdx; i <= EIdx; i++) {
         if (!ItemMap.Contains(i)) {
             TWeakObjectPtr<UUserWidget> w = NewItem();
             if (w.IsValid()) {
-                int32 sz_item = GetItemSize(i);
-                auto cps = Cast<UCanvasPanelSlot>(w->Slot);
-                cps->SetAnchors(FAnchors(0, 0, 0, 0));
-                if (IsVertical())
-                    cps->SetOffsets(FMargin(0, ArrOffset[i] + AlignSpace, ViewSize.X, sz_item));
-                else
-                    cps->SetOffsets(FMargin(ArrOffset[i] + AlignSpace, 0, sz_item, ViewSize.Y));
-                ItemMap.Add(i, w);
-                OnUpdateItem.Broadcast(w.Get(), i);
+                UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(w->Slot);
+                if (cps) {
+                    cps->SetAnchors(FAnchors(0, 0, 0, 0));
+                    int32 offset = (ArrOffset.IsValidIndex(i) ? ArrOffset[i] : 0);
+                    int32 sz_item = GetItemSize(i);
+                    if (IsVertical())
+                        cps->SetOffsets(FMargin(0, offset + AlignSpace, ViewSize.X, sz_item));
+                    else
+                        cps->SetOffsets(FMargin(offset + AlignSpace, 0, sz_item, ViewSize.Y));
+                    ItemMap.Add(i, w);
+                    OnUpdateItem.Broadcast(w.Get(), i);
+                    NeedAdjustItem = true;
+                }
             }
         }
     }
@@ -297,22 +335,11 @@ void UReuseListSp::DoReload()
 {
     if (IsInvalidParam())
         return;
-    FillArrOffset();
     ViewSize = GetCachedGeometry().GetLocalSize();
-    if (IsVertical()) {
-        ContentSize.X = ViewSize.X;
-        ContentSize.Y = MaxPos;
-    }
-    else {
-        ContentSize.X = MaxPos;
-        ContentSize.Y = ViewSize.Y;
-    }
-    UpdateContentSize(SizeBoxBg);
-    UpdateContentSize(CanvasPanelList);
-    ComputeAlignSpace();
+    FillArrOffset();
     ComputeScrollBoxHitTest();
     for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
-        auto uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
+        UUserWidget* uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
         if (uw) {
             ReleaseItem(uw);
         }
@@ -337,9 +364,6 @@ void UReuseListSp::DoReload()
 
 void UReuseListSp::DoJump()
 {
-    if (!NeedJump)
-        return;
-    NeedJump = false;
 
     if (JumpIdx < 0 || JumpIdx >= ItemCount) {
         return;
@@ -409,7 +433,7 @@ void UReuseListSp::ReleaseAllItem()
 {
     if (CanvasPanelList.IsValid()) {
         for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
-            auto uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
+            UUserWidget* uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
             if (uw) {
                 ReleaseItem(uw);
             }
@@ -479,7 +503,7 @@ void UReuseListSp::OnWidgetRebuilt()
     InitWidgetPtr();
     SyncProp();
 #if WITH_EDITOR
-    auto wld = GetWorld();
+    UWorld* wld = GetWorld();
     if (wld && !wld->IsGameWorld()) {
         TWeakObjectPtr<UReuseListSp> self = this;
         wld->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([=]() {
@@ -498,5 +522,51 @@ void UReuseListSp::SyncProp()
         ScrollBoxList->SetScrollbarThickness(ScrollBarThickness);
         ScrollBoxList->WidgetBarStyle = ScrollBarStyle;
         ScrollBoxList->WidgetStyle = ScrollBoxStyle;
+    }
+}
+
+void UReuseListSp::AdjustItem()
+{
+    if (!AutoAdjustItemSize)
+        return;
+    //bool print_log = false;
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
+        TWeakObjectPtr<UUserWidget> wdg = iter->Value;
+        if (wdg.IsValid()) {
+            int32 idx = iter->Key;
+            FVector2D sz = wdg->GetDesiredSize();
+            int32 size = GetItemSize(idx);
+            int32 size_now = (IsVertical() ? sz.Y : sz.X);
+            if (size_now != size) {
+                AddSpecialSize(idx, size_now);
+                //print_log = true;
+            }
+        }
+    }
+//     if (print_log) {
+//         for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
+//             FVector2D sz = iter->Value->GetDesiredSize();
+//             UE_LOG(LogUReuseListSp, Log, TEXT("AdjustItem idx=%d x=%f y=%f"), iter->Key, sz.X, sz.Y);
+//         }
+//     }
+}
+
+void UReuseListSp::AdjustItemWidgetSize()
+{
+    float AlignSpace = GetAlignSpace();
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
+        int32 idx = iter->Key;
+        TWeakObjectPtr<UUserWidget> wdg = iter->Value;
+        if (wdg.IsValid()) {
+            UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(wdg->Slot);
+            if (cps) {
+                int32 size = GetItemSize(idx);
+                int32 offset = (ArrOffset.IsValidIndex(idx) ? ArrOffset[idx] : 0);
+                if (IsVertical())
+                    cps->SetOffsets(FMargin(0, offset + AlignSpace, ViewSize.X, size));
+                else
+                    cps->SetOffsets(FMargin(offset + AlignSpace, 0, size, ViewSize.Y));
+            }
+        }
     }
 }

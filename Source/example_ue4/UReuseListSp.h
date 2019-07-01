@@ -13,8 +13,8 @@ Description: 重用列表
 #include "UReuseListSp.generated.h"
 
 /**
- * 
- */
+*
+*/
 
 class UScrollBox;
 class USizeBox;
@@ -46,8 +46,8 @@ enum class EReuseListSpNotFullAlignStyle : uint8
 UCLASS()
 class EXAMPLE_UE4_API UReuseListSp : public UUserWidget
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+
 public:
 
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateItemDelegate, UUserWidget*, Widget, int32, Idx);
@@ -120,11 +120,11 @@ protected:
     UPROPERTY(EditAnywhere, Category = Property)
     FScrollBarStyle ScrollBarStyle;
 
-	UPROPERTY(EditAnywhere, Category = Property)
-	ESlateVisibility ScrollBarVisibility;
+    UPROPERTY(EditAnywhere, Category = Property)
+    ESlateVisibility ScrollBarVisibility;
 
-	UPROPERTY(EditAnywhere, Category = Property)
-	FVector2D ScrollBarThickness;
+    UPROPERTY(EditAnywhere, Category = Property)
+    FVector2D ScrollBarThickness;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 ItemCacheNum;
@@ -150,6 +150,9 @@ protected:
     UPROPERTY(EditAnywhere, Category = Property)
     bool NotFullScrollBoxHitTestInvisible;
 
+    UPROPERTY(EditAnywhere, Category = Property)
+    bool AutoAdjustItemSize;
+
     void NativeConstruct();
     void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 
@@ -168,11 +171,14 @@ protected:
     void ReleaseAllItem();
     void Update();
     void DoJump();
-    void ComputeAlignSpace();
+    float GetAlignSpace();
     void ComputeScrollBoxHitTest();
 
     void FillArrOffset();
     int32 GetItemSize(int32 idx);
+
+    void AdjustItem();
+    void AdjustItemWidgetSize();
 
     bool IsVertical() const;
     bool IsInvalidParam() const;
@@ -185,10 +191,10 @@ protected:
     TWeakObjectPtr<UCanvasPanel> CanvasPanelBg;
     TWeakObjectPtr<USizeBox> SizeBoxBg;
     TWeakObjectPtr<UCanvasPanel> CanvasPanelList;
-    
+
     FVector2D ViewSize;
     FVector2D ContentSize;
-    
+
     int32 ItemCount;
     int32 MaxPos;
     TMap<int32, TWeakObjectPtr<UUserWidget> > ItemMap;
@@ -198,9 +204,10 @@ protected:
     int32 CurLine;
     int32 JumpIdx;
     EReuseListSpJumpStyle JumpStyle;
-    float AlignSpace;
     bool NeedJump;
     bool NeedFillArrOffset;
+    bool NeedAdjustItem;
+    bool NeedAdjustItemWidgetSize;
 
 };
 
