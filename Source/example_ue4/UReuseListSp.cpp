@@ -116,6 +116,7 @@ void UReuseListSp::RefreshOne(int32 __Idx)
     TWeakObjectPtr<UUserWidget>* v = ItemMap.Find(__Idx);
     if (v) {
         OnUpdateItem.Broadcast(v->Get(), __Idx);
+        NeedAdjustItem = true;
     }
 }
 
