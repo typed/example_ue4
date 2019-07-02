@@ -51,16 +51,12 @@ class EXAMPLE_UE4_API UReuseListSp : public UUserWidget
 public:
 
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateItemDelegate, UUserWidget*, Widget, int32, Idx);
-    DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnScrollItemDelegate, int32, BeginIdx, int32, EndIdx);
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCreateItemDelegate, UUserWidget*, widget);
 
     UReuseListSp(const FObjectInitializer& ObjectInitializer);
 
     UPROPERTY(BlueprintAssignable)
     FOnUpdateItemDelegate OnUpdateItem;
-
-    UPROPERTY(BlueprintAssignable)
-    FOnScrollItemDelegate OnScrollItem;
 
     UPROPERTY(BlueprintAssignable)
     FOnCreateItemDelegate OnCreateItem;
@@ -125,9 +121,6 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = Property)
     FVector2D ScrollBarThickness;
-
-    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
-    int32 ItemCacheNum;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 ItemSize;
@@ -201,12 +194,11 @@ protected:
     TArray<TWeakObjectPtr<UUserWidget> > ItemPool;
     TArray<int32> ArrOffset;
     TMap<int32, int32> SpecialSizeMap;
-    int32 CurLine;
     int32 JumpIdx;
     EReuseListSpJumpStyle JumpStyle;
     bool NeedJump;
     bool NeedFillArrOffset;
-    //bool NeedAdjustItem;
+    bool NeedAdjustItem;
     bool NeedAdjustItemWidgetSize;
 
 };

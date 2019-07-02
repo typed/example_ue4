@@ -18,19 +18,17 @@ UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     , CanvasPanelList(nullptr)
     , ViewSize(FVector2D::ZeroVector)
     , ContentSize(FVector2D::ZeroVector)
-    , ItemCacheNum(2)
     , ItemClass(nullptr)
     , ItemPadding(0)
     , ItemCount(0)
     , MaxPos(0)
     , Style(EReuseListSpStyle::Vertical)
     , ItemSize(100)
-    , CurLine(-999)
     , JumpIdx(0)
     , JumpStyle(EReuseListSpJumpStyle::Middle)
     , NeedJump(false)
     , NeedFillArrOffset(false)
-    //, NeedAdjustItem(false)
+    , NeedAdjustItem(false)
     , NeedAdjustItemWidgetSize(false)
     , PreviewCount(5)
     , ScrollBarVisibility(ESlateVisibility::Collapsed)
@@ -65,17 +63,11 @@ void UReuseListSp::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     Super::NativeTick(MyGeometry, InDeltaTime);
     if (IsInvalidParam())
         return;
-    const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
-    if (!ViewSize.Equals(lzSz, 0.0001f)) {
-        DoReload();
+
+    if (NeedAdjustItem) {
+        NeedAdjustItem = false;
+        AdjustItem();
     }
-    Update();
-    
-    AdjustItem();
-    //if (NeedAdjustItem) {
-    //    NeedAdjustItem = false;
-    //    AdjustItem();
-    //}
     if (NeedFillArrOffset) {
         NeedFillArrOffset = false;
         FillArrOffset();
@@ -84,6 +76,13 @@ void UReuseListSp::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
         NeedAdjustItemWidgetSize = false;
         AdjustItemWidgetSize();
     }
+
+    const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
+    if (!ViewSize.Equals(lzSz, 0.0001f)) {
+        DoReload();
+    }
+
+    Update();
 
     if (NeedJump) {
         NeedJump = false;
@@ -118,7 +117,7 @@ void UReuseListSp::RefreshOne(int32 __Idx)
     TWeakObjectPtr<UUserWidget>* v = ItemMap.Find(__Idx);
     if (v) {
         OnUpdateItem.Broadcast(v->Get(), __Idx);
-        //NeedAdjustItem = true;
+        NeedAdjustItem = true;
     }
 }
 
@@ -264,7 +263,7 @@ int32 UReuseListSp::GetItemSize(int32 idx)
 {
     const int32* pValue = SpecialSizeMap.Find(idx);
     if (pValue)
-        return *pValue;
+        return (*pValue > 0 ? *pValue : 1);
     else
         return ItemSize;
 }
@@ -280,10 +279,12 @@ void UReuseListSp::ScrollUpdate(float __Offset)
     int32 vlen = (IsVertical() ? ViewSize.Y : ViewSize.X);
     OffsetEnd = Offset + vlen;
 
-    BIdx = Algo::LowerBound(ArrOffset, Offset);
-    BIdx = UKismetMathLibrary::Max(BIdx - ItemCacheNum, 0);
+    BIdx = Algo::LowerBound(ArrOffset, Offset) - 1;
+    BIdx = UKismetMathLibrary::Max(BIdx, 0);
     EIdx = Algo::LowerBound(ArrOffset, OffsetEnd);
-    EIdx = UKismetMathLibrary::Min(EIdx + ItemCacheNum, ItemCount - 1);
+    EIdx = UKismetMathLibrary::Min(EIdx, ItemCount - 1);
+
+    //UE_LOG(LogUReuseListSp, Log, TEXT("UReuseListSp::ScrollUpdate Offset=%d BIdx=%d EIdx=%d"), Offset, BIdx, EIdx);
 
     RemoveNotUsed(BIdx, EIdx);
 
@@ -303,12 +304,11 @@ void UReuseListSp::ScrollUpdate(float __Offset)
                         cps->SetOffsets(FMargin(offset + AlignSpace, 0, sz_item, ViewSize.Y));
                     ItemMap.Add(i, w);
                     OnUpdateItem.Broadcast(w.Get(), i);
-                    //NeedAdjustItem = true;
+                    NeedAdjustItem = true;
                 }
             }
         }
     }
-    OnScrollItem.Broadcast(BIdx, EIdx);
 }
 
 void UReuseListSp::UpdateContentSize(TWeakObjectPtr<UWidget> widget)
@@ -348,8 +348,7 @@ void UReuseListSp::DoReload()
         }
     }
     ItemMap.Empty();
-    float TmpMaxOffset = 0.f;
-    TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
+    float TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
     if (TmpMaxOffset <= 0.f) {
         ScrollBoxList->ScrollToStart();
     }
@@ -362,7 +361,7 @@ void UReuseListSp::DoReload()
             ScrollBoxList->ScrollToEnd();
         }
     }
-    ScrollUpdate(ScrollBoxList->GetScrollOffset());
+    //ScrollUpdate(ScrollBoxList->GetScrollOffset());
 }
 
 void UReuseListSp::DoJump()
@@ -447,13 +446,7 @@ void UReuseListSp::ReleaseAllItem()
 
 void UReuseListSp::Update()
 {
-    int32 tmpLine = 0;
-    float tmpOffset = ScrollBoxList->GetScrollOffset();
-    tmpLine = (int32)tmpOffset / (ItemSize + ItemPadding);
-    if (tmpLine != CurLine) {
-        CurLine = tmpLine;
-        ScrollUpdate(tmpOffset);
-    }
+    ScrollUpdate(ScrollBoxList->GetScrollOffset());
 }
 
 void UReuseListSp::ClearCache()
