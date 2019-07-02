@@ -162,7 +162,6 @@ protected:
     TWeakObjectPtr<UUserWidget> NewItem();
     void ReleaseItem(TWeakObjectPtr<UUserWidget> __Item);
     void ReleaseAllItem();
-    void Update();
     void DoJump();
     float GetAlignSpace();
     void ComputeScrollBoxHitTest();
@@ -172,6 +171,7 @@ protected:
 
     void AdjustItem();
     void AdjustItemWidgetSize();
+    void AdjustScrollOffset();
 
     bool IsVertical() const;
     bool IsInvalidParam() const;
@@ -200,6 +200,7 @@ protected:
     bool NeedFillArrOffset;
     bool NeedAdjustItem;
     bool NeedAdjustItemWidgetSize;
+    bool NeedAdjustScrollOffset;
 
 };
 

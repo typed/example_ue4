@@ -30,6 +30,7 @@ UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     , NeedFillArrOffset(false)
     , NeedAdjustItem(false)
     , NeedAdjustItemWidgetSize(false)
+    , NeedAdjustScrollOffset(false)
     , PreviewCount(5)
     , ScrollBarVisibility(ESlateVisibility::Collapsed)
     , NotFullAlignStyle(EReuseListSpNotFullAlignStyle::Start)
@@ -61,6 +62,7 @@ void UReuseListSp::NativeConstruct()
 void UReuseListSp::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
     Super::NativeTick(MyGeometry, InDeltaTime);
+
     if (IsInvalidParam())
         return;
 
@@ -82,12 +84,18 @@ void UReuseListSp::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
         DoReload();
     }
 
-    Update();
+    ScrollUpdate(ScrollBoxList->GetScrollOffset());
 
     if (NeedJump) {
         NeedJump = false;
         DoJump();
     }
+
+    if (NeedAdjustScrollOffset) {
+        NeedAdjustScrollOffset = false;
+        AdjustScrollOffset();
+    }
+
 }
 
 void UReuseListSp::Reload(int32 __ItemCount)
@@ -151,6 +159,7 @@ const FVector2D& UReuseListSp::GetContentSize() const
     return ContentSize;
 }
 
+// this jump function is not good!
 void UReuseListSp::JumpByIdxStyle(int32 __Idx, EReuseListSpJumpStyle __Style)
 {
     JumpIdx = __Idx;
@@ -257,6 +266,8 @@ void UReuseListSp::FillArrOffset()
     UpdateContentSize(SizeBoxBg);
     UpdateContentSize(CanvasPanelList);
 
+    NeedAdjustScrollOffset = true;
+
 }
 
 int32 UReuseListSp::GetItemSize(int32 idx)
@@ -313,14 +324,16 @@ void UReuseListSp::ScrollUpdate(float __Offset)
 
 void UReuseListSp::UpdateContentSize(TWeakObjectPtr<UWidget> widget)
 {
-    auto cps = Cast<UCanvasPanelSlot>(widget->Slot);
-    if (IsVertical()) {
-        cps->SetAnchors(FAnchors(0, 0, 1, 0));
-        cps->SetOffsets(FMargin(0, 0, 0, ContentSize.Y));
-    }
-    else {
-        cps->SetAnchors(FAnchors(0, 0, 0, 1));
-        cps->SetOffsets(FMargin(0, 0, ContentSize.X, 0));
+    UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(widget->Slot);
+    if (cps) {
+        if (IsVertical()) {
+            cps->SetAnchors(FAnchors(0, 0, 1, 0));
+            cps->SetOffsets(FMargin(0, 0, 0, ContentSize.Y));
+        }
+        else {
+            cps->SetAnchors(FAnchors(0, 0, 0, 1));
+            cps->SetOffsets(FMargin(0, 0, ContentSize.X, 0));
+        }
     }
 }
 
@@ -348,20 +361,7 @@ void UReuseListSp::DoReload()
         }
     }
     ItemMap.Empty();
-    float TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
-    if (TmpMaxOffset <= 0.f) {
-        ScrollBoxList->ScrollToStart();
-    }
-    else {
-        float cur = ScrollBoxList->GetScrollOffset();
-        if (cur <= 0.f) {
-            ScrollBoxList->ScrollToStart();
-        }
-        if (cur >= TmpMaxOffset) {
-            ScrollBoxList->ScrollToEnd();
-        }
-    }
-    //ScrollUpdate(ScrollBoxList->GetScrollOffset());
+    NeedAdjustScrollOffset = true;
 }
 
 void UReuseListSp::DoJump()
@@ -444,11 +444,6 @@ void UReuseListSp::ReleaseAllItem()
     ItemMap.Empty();
 }
 
-void UReuseListSp::Update()
-{
-    ScrollUpdate(ScrollBoxList->GetScrollOffset());
-}
-
 void UReuseListSp::ClearCache()
 {
     ItemPool.Empty();
@@ -482,7 +477,7 @@ void UReuseListSp::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
     SyncProp();
-    auto wld = GetWorld();
+    UWorld* wld = GetWorld();
     if (wld && !wld->IsGameWorld()) {
         static const FName TmpName = TEXT("ItemClass");
         if (PropertyChangedEvent.GetPropertyName().IsEqual(TmpName)) {
@@ -563,6 +558,23 @@ void UReuseListSp::AdjustItemWidgetSize()
                 else
                     cps->SetOffsets(FMargin(offset + AlignSpace, 0, size, ViewSize.Y));
             }
+        }
+    }
+}
+
+void UReuseListSp::AdjustScrollOffset()
+{
+    float TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
+    if (TmpMaxOffset <= 0.f) {
+        ScrollBoxList->ScrollToStart();
+    }
+    else {
+        float cur = ScrollBoxList->GetScrollOffset();
+        if (cur <= 0.f) {
+            ScrollBoxList->ScrollToStart();
+        }
+        if (cur >= TmpMaxOffset) {
+            ScrollBoxList->ScrollToEnd();
         }
     }
 }

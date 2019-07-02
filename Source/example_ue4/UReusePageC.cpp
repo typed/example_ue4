@@ -322,7 +322,7 @@ void UReusePageC::UpdateOffset()
         int32 itmIdx = it->Key;
         int32 idx = it->Value;
         UUserWidget* curitem = nullptr;
-        auto ptr = ItemMap.Find(itmIdx);
+        TWeakObjectPtr<UUserWidget>* ptr = ItemMap.Find(itmIdx);
         if (ptr == nullptr || !(*ptr).IsValid()) {
             curitem = NewItem();
             if (curitem) {
@@ -345,9 +345,11 @@ void UReusePageC::UpdateOffset()
             mar.Left = t;
             mar.Top = 0.f;
         }
-        auto cps = Cast<UCanvasPanelSlot>(curitem->Slot);
-        cps->SetAnchors(FAnchors(0, 0, 0, 0));
-        cps->SetOffsets(mar);
+        UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(curitem->Slot);
+        if (cps) {
+            cps->SetAnchors(FAnchors(0, 0, 0, 0));
+            cps->SetOffsets(mar);
+        }
     }
 }
 
