@@ -206,7 +206,7 @@ protected:
     EReuseListSpJumpStyle JumpStyle;
     bool NeedJump;
     bool NeedFillArrOffset;
-    bool NeedAdjustItem;
+    //bool NeedAdjustItem;
     bool NeedAdjustItemWidgetSize;
 
 };
