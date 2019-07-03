@@ -500,6 +500,7 @@ void UReuseListSp::OnWidgetRebuilt()
         wld->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([=]() {
             if (self.IsValid()) {
                 self->Reload(PreviewCount);
+                self->ScrollUpdate(self->ScrollBoxList->GetScrollOffset());
             }
         }));
     }
