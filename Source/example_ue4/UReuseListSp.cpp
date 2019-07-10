@@ -25,7 +25,7 @@ UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     , Style(EReuseListSpStyle::Vertical)
     , ItemSize(100)
     , JumpIdx(0)
-    , JumpStyle(EReuseListSpJumpStyle::Middle)
+    , CurJumpOffsetIdx(0)
     , NeedJump(false)
     , NeedFillArrOffset(false)
     , NeedAdjustItem(false)
@@ -87,7 +87,6 @@ void UReuseListSp::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     ScrollUpdate(ScrollBoxList->GetScrollOffset());
 
     if (NeedJump) {
-        NeedJump = false;
         DoJump();
     }
 
@@ -100,6 +99,7 @@ void UReuseListSp::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 void UReuseListSp::Reload(int32 __ItemCount)
 {
+    NeedJump = false;
     ItemCount = __ItemCount;
     ScrollBoxList->SetOrientation(IsVertical() ? Orient_Vertical : Orient_Horizontal);
     ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
@@ -115,6 +115,7 @@ void UReuseListSp::Reload(int32 __ItemCount)
 
 void UReuseListSp::Refresh()
 {
+    NeedJump = false;
     for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
         RefreshOne(iter->Key);
     }
@@ -122,6 +123,7 @@ void UReuseListSp::Refresh()
 
 void UReuseListSp::RefreshOne(int32 __Idx)
 {
+    NeedJump = false;
     TWeakObjectPtr<UUserWidget>* v = ItemMap.Find(__Idx);
     if (v) {
         OnUpdateItem.Broadcast(v->Get(), __Idx);
@@ -159,11 +161,10 @@ const FVector2D& UReuseListSp::GetContentSize() const
     return ContentSize;
 }
 
-// this jump function is not good!
-void UReuseListSp::JumpByIdxStyle(int32 __Idx, EReuseListSpJumpStyle __Style)
+void UReuseListSp::JumpByIdx(int32 __Idx)
 {
+    CurJumpOffsetIdx = 0;
     JumpIdx = __Idx;
-    JumpStyle = __Style;
     NeedJump = true;
 }
 
@@ -368,6 +369,7 @@ void UReuseListSp::DoJump()
 {
 
     if (JumpIdx < 0 || JumpIdx >= ItemCount) {
+        NeedJump = false;
         return;
     }
 
@@ -375,32 +377,43 @@ void UReuseListSp::DoJump()
     float sz_content = IsVertical() ? ContentSize.Y : ContentSize.X;
 
     if (sz_content < sz_view) {
+        NeedJump = false;
         return;
     }
 
-    float tmpScroll = 0;
-    int32 ItemSizeAndPad = GetItemSize(JumpIdx) + ItemPadding;
-    int32 tmpItemOffset = 0;
+    if (!ArrOffset.IsValidIndex(CurJumpOffsetIdx)) {
+        NeedJump = false;
+        return;
+    }
 
-    if (JumpStyle == EReuseListSpJumpStyle::Begin) {
-        tmpItemOffset = 0;
-    }
-    else if (JumpStyle == EReuseListSpJumpStyle::End) {
-        tmpItemOffset = (int32)sz_view - ItemSizeAndPad;
-    }
-    else {
-        tmpItemOffset = ((int32)sz_view - ItemSizeAndPad) / 2;
-    }
-    for (int32 i = 0; i < JumpIdx; i++) {
-        tmpScroll += (GetItemSize(i) + ItemPadding);
-    }
-    tmpScroll -= tmpItemOffset;
+    float tmpScroll = ArrOffset[CurJumpOffsetIdx++];
 
-    tmpScroll = UKismetMathLibrary::FMax(tmpScroll, 0);
-    tmpScroll = UKismetMathLibrary::FMin(tmpScroll, sz_content - sz_view);
+//     float tmpScroll = 0;
+//     int32 ItemSizeAndPad = GetItemSize(JumpIdx) + ItemPadding;
+//     int32 tmpItemOffset = 0;
+// 
+//     if (JumpStyle == EReuseListSpJumpStyle::Begin) {
+//         tmpItemOffset = 0;
+//     }
+//     else if (JumpStyle == EReuseListSpJumpStyle::End) {
+//         tmpItemOffset = (int32)sz_view - ItemSizeAndPad;
+//     }
+//     else {
+//         tmpItemOffset = ((int32)sz_view - ItemSizeAndPad) / 2;
+//     }
+//     for (int32 i = 0; i < JumpIdx; i++) {
+//         tmpScroll += (GetItemSize(i) + ItemPadding);
+//     }
+//     tmpScroll -= tmpItemOffset;
+
+    tmpScroll = UKismetMathLibrary::FClamp(tmpScroll, 0, sz_content - sz_view);
 
     ScrollBoxList->SetScrollOffset(tmpScroll);
     ScrollUpdate(tmpScroll);
+
+    if (CurJumpOffsetIdx >= JumpIdx) {
+        NeedJump = false;
+    }
 }
 
 TWeakObjectPtr<UUserWidget> UReuseListSp::NewItem()

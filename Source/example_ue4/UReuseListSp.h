@@ -28,14 +28,6 @@ enum class EReuseListSpStyle : uint8
 };
 
 UENUM(BlueprintType)
-enum class EReuseListSpJumpStyle : uint8
-{
-    Middle,
-    Begin,
-    End,
-};
-
-UENUM(BlueprintType)
 enum class EReuseListSpNotFullAlignStyle : uint8
 {
     Start,
@@ -89,10 +81,7 @@ public:
     const FVector2D& GetContentSize() const;
 
     UFUNCTION(BlueprintCallable)
-    void JumpByIdx(int32 __Idx) { JumpByIdxStyle(__Idx, EReuseListSpJumpStyle::Middle); }
-
-    UFUNCTION(BlueprintCallable)
-    void JumpByIdxStyle(int32 __Idx, EReuseListSpJumpStyle __Style);
+    void JumpByIdx(int32 __Idx);
 
     UFUNCTION(BlueprintCallable)
     void Clear();
@@ -195,7 +184,7 @@ protected:
     TArray<int32> ArrOffset;
     TMap<int32, int32> SpecialSizeMap;
     int32 JumpIdx;
-    EReuseListSpJumpStyle JumpStyle;
+    int32 CurJumpOffsetIdx;
     bool NeedJump;
     bool NeedFillArrOffset;
     bool NeedAdjustItem;
