@@ -388,24 +388,6 @@ void UReuseListSp::DoJump()
 
     float tmpScroll = ArrOffset[CurJumpOffsetIdx++];
 
-//     float tmpScroll = 0;
-//     int32 ItemSizeAndPad = GetItemSize(JumpIdx) + ItemPadding;
-//     int32 tmpItemOffset = 0;
-// 
-//     if (JumpStyle == EReuseListSpJumpStyle::Begin) {
-//         tmpItemOffset = 0;
-//     }
-//     else if (JumpStyle == EReuseListSpJumpStyle::End) {
-//         tmpItemOffset = (int32)sz_view - ItemSizeAndPad;
-//     }
-//     else {
-//         tmpItemOffset = ((int32)sz_view - ItemSizeAndPad) / 2;
-//     }
-//     for (int32 i = 0; i < JumpIdx; i++) {
-//         tmpScroll += (GetItemSize(i) + ItemPadding);
-//     }
-//     tmpScroll -= tmpItemOffset;
-
     tmpScroll = UKismetMathLibrary::FClamp(tmpScroll, 0, sz_content - sz_view);
 
     ScrollBoxList->SetScrollOffset(tmpScroll);
