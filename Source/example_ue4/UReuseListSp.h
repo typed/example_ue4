@@ -187,9 +187,9 @@ protected:
     int32 CurJumpOffsetIdx;
     bool NeedJump;
     bool NeedFillArrOffset;
-    bool NeedAdjustItem;
     bool NeedAdjustItemWidgetSize;
     bool NeedAdjustScrollOffset;
+    int32 NeedAdjustItem;
 
 };
 

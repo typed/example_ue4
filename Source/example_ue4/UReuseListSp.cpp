@@ -28,7 +28,7 @@ UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     , CurJumpOffsetIdx(0)
     , NeedJump(false)
     , NeedFillArrOffset(false)
-    , NeedAdjustItem(false)
+    , NeedAdjustItem(0)
     , NeedAdjustItemWidgetSize(false)
     , NeedAdjustScrollOffset(false)
     , PreviewCount(5)
@@ -66,8 +66,8 @@ void UReuseListSp::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     if (IsInvalidParam())
         return;
 
-    if (NeedAdjustItem) {
-        NeedAdjustItem = false;
+    if (NeedAdjustItem > 0) {
+        --NeedAdjustItem;
         AdjustItem();
     }
     if (NeedFillArrOffset) {
@@ -127,7 +127,7 @@ void UReuseListSp::RefreshOne(int32 __Idx)
     TWeakObjectPtr<UUserWidget>* v = ItemMap.Find(__Idx);
     if (v) {
         OnUpdateItem.Broadcast(v->Get(), __Idx);
-        NeedAdjustItem = true;
+        NeedAdjustItem = 5;
     }
 }
 
@@ -316,7 +316,7 @@ void UReuseListSp::ScrollUpdate(float __Offset)
                         cps->SetOffsets(FMargin(offset + AlignSpace, 0, sz_item, ViewSize.Y));
                     ItemMap.Add(i, w);
                     OnUpdateItem.Broadcast(w.Get(), i);
-                    NeedAdjustItem = true;
+                    NeedAdjustItem = 5;
                 }
             }
         }
