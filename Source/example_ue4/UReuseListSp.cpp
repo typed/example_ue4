@@ -66,10 +66,10 @@ void UReuseListSp::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     if (IsInvalidParam())
         return;
 
-    if (NeedAdjustItem > 0) {
-        --NeedAdjustItem;
+    //if (NeedAdjustItem > 0) {
+    //    --NeedAdjustItem;
         AdjustItem();
-    }
+    //}
     if (NeedFillArrOffset) {
         NeedFillArrOffset = false;
         FillArrOffset();
@@ -308,8 +308,8 @@ void UReuseListSp::ScrollUpdate(float __Offset)
                 UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(w->Slot);
                 if (cps) {
                     cps->SetAnchors(FAnchors(0, 0, 0, 0));
-                    int32 offset = (ArrOffset.IsValidIndex(i) ? ArrOffset[i] : 0);
                     int32 sz_item = GetItemSize(i);
+                    int32 offset = (ArrOffset.IsValidIndex(i) ? ArrOffset[i] : 0);
                     if (IsVertical())
                         cps->SetOffsets(FMargin(0, offset + AlignSpace, ViewSize.X, sz_item));
                     else
@@ -342,6 +342,14 @@ void UReuseListSp::RemoveNotUsed(int32 BIdx, int32 EIdx)
 {
     for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
         if (!UKismetMathLibrary::InRange_IntInt(iter->Key, BIdx, EIdx)) {
+            ReleaseItem(iter->Value);
+            iter.RemoveCurrent();
+        }
+    }
+    // size == 0 也是不用的
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
+        int32 sz_item = GetItemSize(iter->Key);
+        if (sz_item <= 0) {
             ReleaseItem(iter->Value);
             iter.RemoveCurrent();
         }
@@ -516,7 +524,7 @@ void UReuseListSp::AdjustItem()
 {
     if (!AutoAdjustItemSize)
         return;
-    //bool print_log = false;
+    bool print_log = false;
     for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
         TWeakObjectPtr<UUserWidget> wdg = iter->Value;
         if (wdg.IsValid()) {
@@ -526,16 +534,16 @@ void UReuseListSp::AdjustItem()
             int32 size_now = (IsVertical() ? sz.Y : sz.X);
             if (size_now != size) {
                 AddSpecialSize(idx, size_now);
-                //print_log = true;
+                print_log = true;
             }
         }
     }
-//     if (print_log) {
-//         for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
-//             FVector2D sz = iter->Value->GetDesiredSize();
-//             UE_LOG(LogUReuseListSp, Log, TEXT("AdjustItem idx=%d x=%f y=%f"), iter->Key, sz.X, sz.Y);
-//         }
-//     }
+    if (print_log) {
+        for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
+            FVector2D sz = iter->Value->GetDesiredSize();
+            UE_LOG(LogUReuseListSp, Log, TEXT("AdjustItem idx=%d x=%f y=%f"), iter->Key, sz.X, sz.Y);
+        }
+    }
 }
 
 void UReuseListSp::AdjustItemWidgetSize()
