@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UReuseListSp.h"
 #include "Runtime/UMG/Public/Components/SizeBox.h"
@@ -32,10 +32,12 @@ UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     , NeedAdjustItemWidgetSize(false)
     , NeedAdjustScrollOffset(false)
     , PreviewCount(5)
+    , ItemPoolMaxNum(100)
     , ScrollBarVisibility(ESlateVisibility::Collapsed)
     , NotFullAlignStyle(EReuseListSpNotFullAlignStyle::Start)
     , NotFullScrollBoxHitTestInvisible(false)
     , AutoAdjustItemSize(true)
+    , LastOffset(0)
 {
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
     ScrollBoxStyle.TopShadowBrush = FSlateNoResource();
@@ -66,10 +68,10 @@ void UReuseListSp::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     if (IsInvalidParam())
         return;
 
-    //if (NeedAdjustItem > 0) {
-    //    --NeedAdjustItem;
+    if (NeedAdjustItem > 0) {
+        --NeedAdjustItem;
         AdjustItem();
-    //}
+    }
     if (NeedFillArrOffset) {
         NeedFillArrOffset = false;
         FillArrOffset();
@@ -109,7 +111,6 @@ void UReuseListSp::Reload(int32 __ItemCount)
         ReleaseAllItem();
         return;
     }
-    FillArrOffset();
     DoReload();
 }
 
@@ -249,9 +250,14 @@ void UReuseListSp::FillArrOffset()
 {
     ArrOffset.Empty();
     int32 tmpOffset = 0;
+    int32 sz_item = 0;
     for (int32 i = 0; i < ItemCount; i++) {
         ArrOffset.Add(tmpOffset);
-        tmpOffset += (GetItemSize(i) + ItemPadding);
+        sz_item = GetItemSize(i);
+        if (sz_item > 0) {
+            sz_item += ItemPadding;
+        }
+        tmpOffset += sz_item;
     }
     MaxPos = tmpOffset;
     MaxPos -= ItemPadding;
@@ -302,13 +308,16 @@ void UReuseListSp::ScrollUpdate(float __Offset)
 
     float AlignSpace = GetAlignSpace();
     for (int32 i = BIdx; i <= EIdx; i++) {
+        int32 sz_item = GetItemSize(i);
+        if (sz_item <= 0) {
+            continue;
+        }
         if (!ItemMap.Contains(i)) {
             TWeakObjectPtr<UUserWidget> w = NewItem();
             if (w.IsValid()) {
                 UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(w->Slot);
                 if (cps) {
                     cps->SetAnchors(FAnchors(0, 0, 0, 0));
-                    int32 sz_item = GetItemSize(i);
                     int32 offset = (ArrOffset.IsValidIndex(i) ? ArrOffset[i] : 0);
                     if (IsVertical())
                         cps->SetOffsets(FMargin(0, offset + AlignSpace, ViewSize.X, sz_item));
@@ -321,6 +330,7 @@ void UReuseListSp::ScrollUpdate(float __Offset)
             }
         }
     }
+
 }
 
 void UReuseListSp::UpdateContentSize(TWeakObjectPtr<UWidget> widget)
@@ -361,6 +371,7 @@ void UReuseListSp::DoReload()
     if (IsInvalidParam())
         return;
     ViewSize = GetCachedGeometry().GetLocalSize();
+    SpecialSizeMap.Empty();
     FillArrOffset();
     ComputeScrollBoxHitTest();
     for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
@@ -487,6 +498,7 @@ void UReuseListSp::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
             ClearCache();
         }
         Reload(PreviewCount);
+        ScrollUpdate(ScrollBoxList->GetScrollOffset());
     }
 }
 #endif
@@ -524,7 +536,7 @@ void UReuseListSp::AdjustItem()
 {
     if (!AutoAdjustItemSize)
         return;
-    bool print_log = false;
+    //bool print_log = false;
     for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
         TWeakObjectPtr<UUserWidget> wdg = iter->Value;
         if (wdg.IsValid()) {
@@ -532,18 +544,26 @@ void UReuseListSp::AdjustItem()
             FVector2D sz = wdg->GetDesiredSize();
             int32 size = GetItemSize(idx);
             int32 size_now = (IsVertical() ? sz.Y : sz.X);
-            if (size_now != size) {
+            int32 delta_sz = size_now - size;
+            if (delta_sz != 0) {
                 AddSpecialSize(idx, size_now);
-                print_log = true;
+                //print_log = true;
+                float fOffset = ScrollBoxList->GetScrollOffset();
+                int32 Offset = fOffset;
+                if (LastOffset > Offset) {
+                    //向上或向左滑动，补差值
+                    ScrollBoxList->SetScrollOffset(fOffset + delta_sz);
+                }
+                LastOffset = Offset;
             }
         }
     }
-    if (print_log) {
-        for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
-            FVector2D sz = iter->Value->GetDesiredSize();
-            UE_LOG(LogUReuseListSp, Log, TEXT("AdjustItem idx=%d x=%f y=%f"), iter->Key, sz.X, sz.Y);
-        }
-    }
+    //if (print_log) {
+    //    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
+    //        FVector2D sz = iter->Value->GetDesiredSize();
+    //        UE_LOG(LogUReuseListSp, Log, TEXT("AdjustItem idx=%d x=%f y=%f"), iter->Key, sz.X, sz.Y);
+    //    }
+    //}
 }
 
 void UReuseListSp::AdjustItemWidgetSize()

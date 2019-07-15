@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 /**************************************************************************
 Author: levingong
@@ -135,6 +135,9 @@ protected:
     UPROPERTY(EditAnywhere, Category = Property)
     bool AutoAdjustItemSize;
 
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "1"))
+    int32 ItemPoolMaxNum;
+
     void NativeConstruct();
     void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 
@@ -185,6 +188,7 @@ protected:
     TMap<int32, int32> SpecialSizeMap;
     int32 JumpIdx;
     int32 CurJumpOffsetIdx;
+    int32 LastOffset;
     bool NeedJump;
     bool NeedFillArrOffset;
     bool NeedAdjustItemWidgetSize;
