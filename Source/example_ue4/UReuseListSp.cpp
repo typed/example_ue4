@@ -275,7 +275,7 @@ int32 UReuseListSp::GetItemSize(int32 idx)
 {
     const int32* pValue = SpecialSizeMap.Find(idx);
     if (pValue)
-        return (*pValue > 0 ? *pValue : 1);
+        return *pValue;
     else
         return ItemSize;
 }
@@ -293,7 +293,7 @@ void UReuseListSp::ScrollUpdate(float __Offset)
 
     BIdx = Algo::LowerBound(ArrOffset, Offset) - 1;
     BIdx = UKismetMathLibrary::Max(BIdx, 0);
-    EIdx = Algo::LowerBound(ArrOffset, OffsetEnd);
+    EIdx = Algo::UpperBound(ArrOffset, OffsetEnd);
     EIdx = UKismetMathLibrary::Min(EIdx, ItemCount - 1);
 
     //UE_LOG(LogUReuseListSp, Log, TEXT("UReuseListSp::ScrollUpdate Offset=%d BIdx=%d EIdx=%d"), Offset, BIdx, EIdx);

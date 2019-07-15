@@ -324,9 +324,7 @@ void UReuseListC::DoReload()
     ComputeAlignSpace();
     ComputeScrollBoxHitTest();
     ReleaseAllItem();
-    float TmpMaxOffset = 0.f;
-    ScrollBoxList->GetScrollOffset();
-    TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
+    float TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
     if (TmpMaxOffset <= 0.f) {
         ScrollBoxList->ScrollToStart();
     }

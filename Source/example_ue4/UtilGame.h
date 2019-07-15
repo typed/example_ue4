@@ -28,4 +28,9 @@ public:
     UFUNCTION(BlueprintCallable)
     static int Test_TCHAR_TO_UTF8();
 
+    UFUNCTION(BlueprintCallable)
+    static void TestLowerAndUpperBound();
+
 };
+
+DECLARE_LOG_CATEGORY_EXTERN(LogUtilGame, Verbose, All);

@@ -2,6 +2,8 @@
 
 #include "UtilGame.h"
 
+DEFINE_LOG_CATEGORY(LogUtilGame);
+
 UWorld* UUtilGame::GetMyWorld()
 {
 	return GWorld->GetWorld();
@@ -30,5 +32,59 @@ static int inl_Test_TCHAR_TO_UTF8(const char* text)
 
 int UUtilGame::Test_TCHAR_TO_UTF8()
 {
-    return inl_Test_TCHAR_TO_UTF8(TCHAR_TO_UTF8("ZZZZZZZZZZZ"));
+    return inl_Test_TCHAR_TO_UTF8(TCHAR_TO_UTF8(TEXT("ZZZZZZZZZZZ")));
+}
+
+void UUtilGame::TestLowerAndUpperBound()
+{
+    TArray<int32> ArrTmp;
+    ArrTmp.Add(12);
+    ArrTmp.Add(12);
+    ArrTmp.Add(12);
+    ArrTmp.Add(13);
+
+    {
+        int n = Algo::LowerBound(ArrTmp, 11);
+        UE_LOG(LogUtilGame, Log, TEXT("Algo::LowerBound(ArrTmp, 11) ret=%d"), n);
+    }
+    {
+        int n = Algo::LowerBound(ArrTmp, 12);
+        UE_LOG(LogUtilGame, Log, TEXT("Algo::LowerBound(ArrTmp, 12) ret=%d"), n);
+    }
+    {
+        int n = Algo::LowerBound(ArrTmp, 13);
+        UE_LOG(LogUtilGame, Log, TEXT("Algo::LowerBound(ArrTmp, 13) ret=%d"), n);
+    }
+    {
+        int n = Algo::LowerBound(ArrTmp, 14);
+        UE_LOG(LogUtilGame, Log, TEXT("Algo::LowerBound(ArrTmp, 14) ret=%d"), n);
+    }
+
+    {
+        int n = Algo::UpperBound(ArrTmp, 11);
+        UE_LOG(LogUtilGame, Log, TEXT("Algo::UpperBound(ArrTmp, 11) ret=%d"), n);
+    }
+    {
+        int n = Algo::UpperBound(ArrTmp, 12);
+        UE_LOG(LogUtilGame, Log, TEXT("Algo::UpperBound(ArrTmp, 12) ret=%d"), n);
+    }
+    {
+        int n = Algo::UpperBound(ArrTmp, 13);
+        UE_LOG(LogUtilGame, Log, TEXT("Algo::UpperBound(ArrTmp, 13) ret=%d"), n);
+    }
+    {
+        int n = Algo::UpperBound(ArrTmp, 14);
+        UE_LOG(LogUtilGame, Log, TEXT("Algo::UpperBound(ArrTmp, 14) ret=%d"), n);
+    }
+
+    /*
+    LogUtilGame: Algo::LowerBound(ArrTmp, 11) ret=0
+    LogUtilGame: Algo::LowerBound(ArrTmp, 12) ret=0
+    LogUtilGame: Algo::LowerBound(ArrTmp, 13) ret=3
+    LogUtilGame: Algo::LowerBound(ArrTmp, 14) ret=4
+    LogUtilGame: Algo::UpperBound(ArrTmp, 11) ret=0
+    LogUtilGame: Algo::UpperBound(ArrTmp, 12) ret=3
+    LogUtilGame: Algo::UpperBound(ArrTmp, 13) ret=4
+    LogUtilGame: Algo::UpperBound(ArrTmp, 14) ret=4
+    */
 }
