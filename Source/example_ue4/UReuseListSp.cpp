@@ -554,7 +554,7 @@ void UReuseListSp::AdjustItem()
                 float fOffset = ScrollBoxList->GetScrollOffset();
                 int32 Offset = fOffset;
                 if (LastOffset > Offset) {
-                    //向上或向左滑动，补差值
+                    //向上或向左滑动，需要补滑动差值
                     ScrollBoxList->SetScrollOffset(fOffset + delta_sz);
                 }
                 LastOffset = Offset;
