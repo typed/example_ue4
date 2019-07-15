@@ -286,15 +286,15 @@ void UReuseListSp::ScrollUpdate(float __Offset)
     int32 OffsetEnd = 0;
     int32 BIdx = 0;
     int32 EIdx = 0;
-    Offset = UKismetMathLibrary::Max(Offset, 0);
-    Offset = UKismetMathLibrary::Min(Offset, MaxPos);
+    Offset = UKismetMathLibrary::Clamp(Offset, 0, MaxPos);
     int32 vlen = (IsVertical() ? ViewSize.Y : ViewSize.X);
     OffsetEnd = Offset + vlen;
 
     BIdx = Algo::LowerBound(ArrOffset, Offset) - 1;
-    BIdx = UKismetMathLibrary::Max(BIdx, 0);
     EIdx = Algo::UpperBound(ArrOffset, OffsetEnd);
-    EIdx = UKismetMathLibrary::Min(EIdx, ItemCount - 1);
+
+    BIdx = UKismetMathLibrary::Clamp(BIdx, 0, ItemCount - 1);
+    EIdx = UKismetMathLibrary::Clamp(EIdx, 0, ItemCount - 1);
 
     //UE_LOG(LogUReuseListSp, Log, TEXT("UReuseListSp::ScrollUpdate Offset=%d BIdx=%d EIdx=%d"), Offset, BIdx, EIdx);
 
