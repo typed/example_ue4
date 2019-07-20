@@ -188,7 +188,7 @@ protected:
     TMap<int32, int32> SpecialSizeMap;
     int32 JumpIdx;
     int32 CurJumpOffsetIdx;
-    int32 LastOffset;
+    float LastOffset;
     bool NeedJump;
     bool NeedFillArrOffset;
     bool NeedAdjustItemWidgetSize;

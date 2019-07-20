@@ -37,7 +37,7 @@ UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     , NotFullAlignStyle(EReuseListSpNotFullAlignStyle::Start)
     , NotFullScrollBoxHitTestInvisible(false)
     , AutoAdjustItemSize(true)
-    , LastOffset(0)
+    , LastOffset(0.f)
 {
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
     ScrollBoxStyle.TopShadowBrush = FSlateNoResource();
@@ -548,12 +548,11 @@ void UReuseListSp::AdjustItem()
                 AddSpecialSize(idx, size_now);
                 //print_log = true;
                 float fOffset = ScrollBoxList->GetScrollOffset();
-                int32 Offset = fOffset;
-                if (LastOffset > Offset) {
+                if (LastOffset > fOffset) {
                     //向上或向左滑动，需要补滑动差值
                     ScrollBoxList->SetScrollOffset(fOffset + delta_sz);
                 }
-                LastOffset = Offset;
+                LastOffset = fOffset;
             }
         }
     }
