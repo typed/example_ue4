@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UReuseListSp.h"
 #include "Runtime/UMG/Public/Components/SizeBox.h"
@@ -224,12 +224,8 @@ void UReuseListSp::ComputeScrollBoxHitTest()
     if (NotFullScrollBoxHitTestInvisible) {
         float vlen = (IsVertical() ? ViewSize.Y : ViewSize.X);
         float clen = (IsVertical() ? ContentSize.Y : ContentSize.X);
-        if (vlen > clen) {
-            ScrollBoxList->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-            return;
-        }
+        ScrollBoxList->SetVisibility(vlen > clen ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Visible);
     }
-    ScrollBoxList->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UReuseListSp::ClearSpecialSize()
