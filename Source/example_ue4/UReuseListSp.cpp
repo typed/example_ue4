@@ -9,6 +9,7 @@
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 
 DEFINE_LOG_CATEGORY(LogUReuseListSp);
+static const float c_fLastOffsetInitValue = -9999.f;
 
 UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
@@ -37,7 +38,7 @@ UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     , NotFullAlignStyle(EReuseListSpNotFullAlignStyle::Start)
     , NotFullScrollBoxHitTestInvisible(false)
     , AutoAdjustItemSize(true)
-    , LastOffset(0.f)
+    , LastOffset(c_fLastOffsetInitValue)
 {
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
     ScrollBoxStyle.TopShadowBrush = FSlateNoResource();
@@ -86,7 +87,11 @@ void UReuseListSp::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
         DoReload();
     }
 
-    ScrollUpdate(ScrollBoxList->GetScrollOffset());
+    float fOffset = ScrollBoxList->GetScrollOffset();
+    if (!UKismetMathLibrary::EqualEqual_FloatFloat(LastOffset, fOffset)) {
+        ScrollUpdate(ScrollBoxList->GetScrollOffset());
+    }
+    LastOffset = fOffset;
 
     if (NeedJump) {
         DoJump();
@@ -101,6 +106,7 @@ void UReuseListSp::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 void UReuseListSp::Reload(int32 __ItemCount)
 {
+    LastOffset = c_fLastOffsetInitValue;
     NeedJump = false;
     ItemCount = __ItemCount;
     ScrollBoxList->SetOrientation(IsVertical() ? Orient_Vertical : Orient_Horizontal);
@@ -552,7 +558,7 @@ void UReuseListSp::AdjustItem()
                     //向上或向左滑动，需要补滑动差值
                     ScrollBoxList->SetScrollOffset(fOffset + delta_sz);
                 }
-                LastOffset = fOffset;
+                //LastOffset = fOffset;
             }
         }
     }
