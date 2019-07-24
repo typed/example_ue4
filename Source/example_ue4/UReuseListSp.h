@@ -43,7 +43,7 @@ class EXAMPLE_UE4_API UReuseListSp : public UUserWidget
 public:
 
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateItemDelegate, UUserWidget*, Widget, int32, Idx);
-    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCreateItemDelegate, UUserWidget*, widget);
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCreateItemDelegate, UUserWidget*, Widget);
 
     UReuseListSp(const FObjectInitializer& ObjectInitializer);
 
