@@ -149,8 +149,7 @@ void UTextBlockEx::BuildString()
         TextBlockMain->SetText(FText::FromString(TEXT("")));
         return;
     }
-    //...的大小
-    //这里最好用2分遍历，减少遍历次数
+    //顺序遍历
     //for (int32 i = 1; i <= Content.Len(); i++) {
     //    FString tmp2 = Content.Mid(0, i);
     //    TextBlockMain->SetText(FText::FromString(tmp2));
@@ -178,26 +177,27 @@ void UTextBlockEx::BuildString()
     //    }
     //    UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::SetText %d x=%f y=%f lx=%f ly=%f"), i, sz.X, sz.Y, lsz.X, lsz.Y);
     //}
+    //TextBlockMain->SetText(FText::FromString(Content));
 
     //2分遍历
-    int32 last_num = -1;
     int32 dir = 1;
     int32 last_dir = 0;
     int32 len = Content.Len();
     int32 step = len / 2;
     step = step == 0 ? 1 : step;
     int32 num = step;
+    int32 last_num = -1;
     for (int32 i = 1;;++i) {
         if (last_num == num) {
             if (num >= Content.Len()) {
                 //到尾了
                 TextBlockMain->SetText(FText::FromString(Content));
-                return;
+                break;
             }
             else if (num <= 1) {
                 //到头了
                 TextBlockMain->SetText(FText::FromString(TEXT("")));
-                return;
+                break;
             }
             else {
                 num += dir;
@@ -207,18 +207,13 @@ void UTextBlockEx::BuildString()
         TextBlockMain->SetText(FText::FromString(tmp2));
         ForceLayoutPrepass();
         FVector2D sz = GetDesiredSize();
-        if (sz.X > lsz.X) {
-            dir = -1;
-        }
-        else {
-            dir = 1;
-        }
+        dir = (sz.X + sz_dot.X > lsz.X) ? -1 : 1;
         if (last_dir != 0 && last_dir != dir && step == 1) {
             //变方向了
             FString tmp2 = Content.Mid(0, dir == 1 ? num : last_num);
             tmp2.Append(Ellipsis);
             TextBlockMain->SetText(FText::FromString(tmp2));
-            return;
+            break;
         }
         last_num = num;
         last_dir = dir;
@@ -227,7 +222,5 @@ void UTextBlockEx::BuildString()
         num = FMath::Clamp(num, 1, len);
         UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::SetText %d x=%f y=%f lx=%f ly=%f"), i, sz.X, sz.Y, lsz.X, lsz.Y);
     }
-
-    TextBlockMain->SetText(FText::FromString(Content));
 }
 
