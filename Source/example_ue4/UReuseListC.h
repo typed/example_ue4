@@ -143,18 +143,23 @@ protected:
     UPROPERTY(EditAnywhere, Category = Property)
     TSubclassOf<UUserWidget> ItemClass;
 
+    //预览个数
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PreviewCount;
 
+    //未满状态下Item是对齐样式
     UPROPERTY(EditAnywhere, Category = Property)
     EReuseListNotFullAlignStyle NotFullAlignStyle;
 
+    //未满状态下是否点击穿透
     UPROPERTY(EditAnywhere, Category = Property)
     bool NotFullScrollBoxHitTestInvisible;
 
+    //上下多绘的个数
     UPROPERTY(EditAnywhere, Category = Optimization, meta = (ClampMin = "0"))
     int32 ItemCacheNum;
 
+    //1帧最多花费多少时间处理（毫秒）
     UPROPERTY(EditAnywhere, Category = Optimization, meta = (ClampMin = "0"))
     int32 DelayUpdateTimeLimitMS;
 

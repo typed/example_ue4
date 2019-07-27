@@ -16,7 +16,7 @@ UTextBlockEx::UTextBlockEx(const FObjectInitializer& ObjectInitializer)
 
 bool UTextBlockEx::Initialize()
 {
-    UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::Initialize"));
+    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::Initialize"));
     if (!Super::Initialize())
         return false;
     InitWidgetPtr();
@@ -37,13 +37,13 @@ bool UTextBlockEx::Initialize()
 
 void UTextBlockEx::BeginDestroy()
 {
-    UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::BeginDestroy"));
+    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::BeginDestroy"));
     Super::BeginDestroy();
 }
 
 void UTextBlockEx::NativeConstruct()
 {
-    UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::NativeConstruct"));
+    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::NativeConstruct"));
     Super::NativeConstruct();
     InitWidgetPtr();
     SyncProp();
@@ -51,14 +51,13 @@ void UTextBlockEx::NativeConstruct()
 
 void UTextBlockEx::NativeDestruct()
 {
-    UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::NativeDestruct"));
+    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::NativeDestruct"));
     Super::NativeDestruct();
 }
 
 void UTextBlockEx::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
     Super::NativeTick(MyGeometry, InDeltaTime);
-    
     OnMyTick();
 }
 
@@ -69,7 +68,6 @@ void UTextBlockEx::OnMyTick()
         ViewSize = lzSz;
         NeedBuildString = true;
     }
-
     if (NeedBuildString) {
         NeedBuildString = false;
         BuildString();
@@ -78,7 +76,7 @@ void UTextBlockEx::OnMyTick()
 
 void UTextBlockEx::ReleaseSlateResources(bool bReleaseChildren)
 {
-    UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::ReleaseSlateResources"));
+    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::ReleaseSlateResources"));
     Super::ReleaseSlateResources(bReleaseChildren);
 #if WITH_EDITOR
     UWorld* wld = GetWorld();
@@ -92,7 +90,7 @@ void UTextBlockEx::ReleaseSlateResources(bool bReleaseChildren)
 
 void UTextBlockEx::SynchronizeProperties()
 {
-    UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::SynchronizeProperties"));
+    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::SynchronizeProperties"));
     Super::SynchronizeProperties();
     NeedBuildString = true;
 }
@@ -100,7 +98,7 @@ void UTextBlockEx::SynchronizeProperties()
 #if WITH_EDITOR
 void UTextBlockEx::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-    UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::PostEditChangeProperty"));
+    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::PostEditChangeProperty"));
     Super::PostEditChangeProperty(PropertyChangedEvent);
     SyncProp();
 }
@@ -108,7 +106,7 @@ void UTextBlockEx::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 
 void UTextBlockEx::OnWidgetRebuilt()
 {
-    UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::OnWidgetRebuilt"));
+    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::OnWidgetRebuilt"));
     Super::OnWidgetRebuilt();
     InitWidgetPtr();
     SyncProp();
@@ -220,7 +218,7 @@ void UTextBlockEx::BuildString()
         step = (step / 2 <= 0 ? 1 : step / 2);
         num += dir * step;
         num = FMath::Clamp(num, 1, len);
-        UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::SetText %d x=%f y=%f lx=%f ly=%f"), i, sz.X, sz.Y, lsz.X, lsz.Y);
+        //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::SetText %d x=%f y=%f lx=%f ly=%f"), i, sz.X, sz.Y, lsz.X, lsz.Y);
     }
 }
 
