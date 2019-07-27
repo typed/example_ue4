@@ -80,8 +80,10 @@ void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 void UReuseListC::Reload(int32 __ItemCount)
 {
     ItemCount = __ItemCount;
-    ScrollBoxList->SetOrientation(IsVertical() ? Orient_Vertical : Orient_Horizontal);
-    ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
+    if (ScrollBoxList.IsValid()) {
+        ScrollBoxList->SetOrientation(IsVertical() ? Orient_Vertical : Orient_Horizontal);
+        ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
+    }
     const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
     if (lzSz.Equals(FVector2D::ZeroVector, 0.0001f)) {
         ViewSize = lzSz;
@@ -108,22 +110,31 @@ void UReuseListC::RefreshOne(int32 __Idx)
 
 void UReuseListC::ScrollToStart()
 {
-    ScrollBoxList->ScrollToStart();
+    if (ScrollBoxList.IsValid()) {
+        ScrollBoxList->ScrollToStart();
+    }
 }
 
 void UReuseListC::ScrollToEnd()
 {
-    ScrollBoxList->ScrollToEnd();
+    if (ScrollBoxList.IsValid()) {
+        ScrollBoxList->ScrollToEnd();
+    }
 }
 
 void UReuseListC::SetScrollOffset(float NewScrollOffset)
 {
-    ScrollBoxList->SetScrollOffset(NewScrollOffset);
+    if (ScrollBoxList.IsValid()) {
+        ScrollBoxList->SetScrollOffset(NewScrollOffset);
+    }
 }
 
 float UReuseListC::GetScrollOffset() const
 {
-    return ScrollBoxList->GetScrollOffset();
+    if (ScrollBoxList.IsValid()) {
+        return ScrollBoxList->GetScrollOffset();
+    }
+    return 0.f;
 }
 
 const FVector2D& UReuseListC::GetViewSize() const
@@ -194,15 +205,11 @@ void UReuseListC::ComputeAlignSpace()
 
 void UReuseListC::ComputeScrollBoxHitTest()
 {
-    if (NotFullScrollBoxHitTestInvisible) {
+    if (NotFullScrollBoxHitTestInvisible && ScrollBoxList.IsValid()) {
         float vlen = (IsVertical() ? ViewSize.Y : ViewSize.X);
         float clen = (IsVertical() ? ContentSize.Y : ContentSize.X);
-        if (vlen > clen) {
-            ScrollBoxList->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-            return;
-        }
+        ScrollBoxList->SetVisibility(vlen > clen ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Visible);
     }
-    ScrollBoxList->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UReuseListC::ScrollUpdate(float __Offset)
@@ -319,25 +326,31 @@ void UReuseListC::DoReload()
         ContentSize.Y = ViewSize.Y;
         break;
     }
-    UpdateContentSize(SizeBoxBg.Get());
-    UpdateContentSize(CanvasPanelList.Get());
+    if (SizeBoxBg.IsValid()) {
+        UpdateContentSize(SizeBoxBg.Get());
+    }
+    if (CanvasPanelList.IsValid()) {
+        UpdateContentSize(CanvasPanelList.Get());
+    }
     ComputeAlignSpace();
     ComputeScrollBoxHitTest();
     ReleaseAllItem();
-    float TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
-    if (TmpMaxOffset <= 0.f) {
-        ScrollBoxList->ScrollToStart();
-    }
-    else {
-        float cur = ScrollBoxList->GetScrollOffset();
-        if (cur <= 0.f) {
+    if (ScrollBoxList.IsValid()) {
+        float TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
+        if (TmpMaxOffset <= 0.f) {
             ScrollBoxList->ScrollToStart();
         }
-        if (cur >= TmpMaxOffset) {
-            ScrollBoxList->ScrollToEnd();
+        else {
+            float cur = ScrollBoxList->GetScrollOffset();
+            if (cur <= 0.f) {
+                ScrollBoxList->ScrollToStart();
+            }
+            if (cur >= TmpMaxOffset) {
+                ScrollBoxList->ScrollToEnd();
+            }
         }
+        ScrollUpdate(ScrollBoxList->GetScrollOffset());
     }
-    ScrollUpdate(ScrollBoxList->GetScrollOffset());
 }
 
 void UReuseListC::DoJump()
@@ -410,7 +423,9 @@ void UReuseListC::DoJump()
     else {
         tmpScroll = UKismetMathLibrary::FMin(tmpScroll, ContentSize.X - ViewSize.X);
     }
-    ScrollBoxList->SetScrollOffset(tmpScroll);
+    if (ScrollBoxList.IsValid()) {
+        ScrollBoxList->SetScrollOffset(tmpScroll);
+    }
     ScrollUpdate(tmpScroll);
 }
 
@@ -425,7 +440,7 @@ TWeakObjectPtr<UUserWidget> UReuseListC::NewItem()
     }
     else {
         TWeakObjectPtr<UUserWidget> widget = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
-        if (widget.IsValid()) {
+        if (widget.IsValid() && CanvasPanelList.IsValid()) {
             CanvasPanelList->AddChild(widget.Get());
             widget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
             OnCreateItem.Broadcast(widget.Get());
@@ -456,24 +471,28 @@ void UReuseListC::ReleaseAllItem()
 
 void UReuseListC::Update()
 {
-    int32 tmpLine = 0;
-    float tmpOffset = ScrollBoxList->GetScrollOffset();
-    if (IsVertical()) {
-        tmpLine = (int32)tmpOffset / (ItemHeight + PaddingY);
-    }
-    else {
-        tmpLine = (int32)tmpOffset / (ItemWidth + PaddingX);
-    }
-    if (tmpLine != CurLine) {
-        CurLine = tmpLine;
-        ScrollUpdate(tmpOffset);
+    if (ScrollBoxList.IsValid()) {
+        int32 tmpLine = 0;
+        float tmpOffset = ScrollBoxList->GetScrollOffset();
+        if (IsVertical()) {
+            tmpLine = (int32)tmpOffset / (ItemHeight + PaddingY);
+        }
+        else {
+            tmpLine = (int32)tmpOffset / (ItemWidth + PaddingX);
+        }
+        if (tmpLine != CurLine) {
+            CurLine = tmpLine;
+            ScrollUpdate(tmpOffset);
+        }
     }
 }
 
 void UReuseListC::ClearCache()
 {
     ItemPool.Empty();
-    CanvasPanelList->ClearChildren();
+    if (CanvasPanelList.IsValid()) {
+        CanvasPanelList->ClearChildren();
+    }
 }
 
 bool UReuseListC::IsVertical() const
