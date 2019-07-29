@@ -126,7 +126,12 @@ void UTextBlockEx::SyncProp()
 void UTextBlockEx::SetString(FString InText)
 {
     Content = InText;
-    NeedBuildString = true;
+    FVector2D lsz = GetCachedGeometry().GetLocalSize();
+    if (lsz.Equals(FVector2D::ZeroVector, 0.0001f)) {
+        NeedBuildString = true;
+        return;
+    }
+    BuildString();
 }
 
 FString UTextBlockEx::GetString() const

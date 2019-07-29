@@ -147,7 +147,7 @@ protected:
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PreviewCount;
 
-    //未满状态下Item是对齐样式
+    //未满状态下Item的对齐样式
     UPROPERTY(EditAnywhere, Category = Property)
     EReuseListNotFullAlignStyle NotFullAlignStyle;
 
@@ -155,7 +155,7 @@ protected:
     UPROPERTY(EditAnywhere, Category = Property)
     bool NotFullScrollBoxHitTestInvisible;
 
-    //上下多绘的个数
+    //上下多绘的个数，Grid此参数无效
     UPROPERTY(EditAnywhere, Category = Optimization, meta = (ClampMin = "0"))
     int32 ItemCacheNum;
 
