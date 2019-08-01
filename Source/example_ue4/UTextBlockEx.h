@@ -73,6 +73,7 @@ protected:
     TWeakObjectPtr<UTextBlock> TextBlockMain;
     FVector2D ViewSize;
     bool NeedBuildString;
+    bool Ticked;
 
 };
 
