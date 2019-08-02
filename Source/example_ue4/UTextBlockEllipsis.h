@@ -10,7 +10,7 @@ Description: 文本
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "UTextBlockEx.generated.h"
+#include "UTextBlockEllipsis.generated.h"
 
 class UTextBlock;
 
@@ -20,12 +20,12 @@ class UTextBlock;
 * * No Children
 */
 UCLASS()
-class EXAMPLE_UE4_API UTextBlockEx : public UUserWidget
+class EXAMPLE_UE4_API UTextBlockEllipsis : public UUserWidget
 {
 	GENERATED_BODY()
 	
 public:
-    UTextBlockEx(const FObjectInitializer& ObjectInitializer);
+    UTextBlockEllipsis(const FObjectInitializer& ObjectInitializer);
 
     UFUNCTION(BlueprintCallable)
     virtual void SetString(FString InText);
@@ -46,22 +46,19 @@ public:
 
 protected:
 
-    bool Initialize();
+    virtual bool Initialize();
 
-    void BeginDestroy();
+    virtual void NativeConstruct();
 
-    void NativeConstruct();
-    void NativeDestruct();
-
-    void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
+    virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 
     void OnMyTick();
 
 #if WITH_EDITOR
-    void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
+    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
     FTimerHandle OnTickTimerHandle;
 #endif
-    void OnWidgetRebuilt();
+    virtual void OnWidgetRebuilt();
 
     void InitWidgetPtr();
 
@@ -77,4 +74,4 @@ protected:
 
 };
 
-DECLARE_LOG_CATEGORY_EXTERN(LogUTextBlockEx, Verbose, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogUTextBlockEllipsis, Verbose, All);

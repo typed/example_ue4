@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "UTextBlockEx.h"
+#include "UTextBlockEllipsis.h"
 #include "Runtime/UMG/Public/Components/TextBlock.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetBlueprintLibrary.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 
-DEFINE_LOG_CATEGORY(LogUTextBlockEx);
+DEFINE_LOG_CATEGORY(LogUTextBlockEllipsis);
 
-UTextBlockEx::UTextBlockEx(const FObjectInitializer& ObjectInitializer)
+UTextBlockEllipsis::UTextBlockEllipsis(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
     , NeedBuildString(false)
     , Ticked(false)
@@ -15,9 +15,9 @@ UTextBlockEx::UTextBlockEx(const FObjectInitializer& ObjectInitializer)
 
 }
 
-bool UTextBlockEx::Initialize()
+bool UTextBlockEllipsis::Initialize()
 {
-    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::Initialize"));
+    //UE_LOG(LogUTextBlockEllipsis, Log, TEXT("UTextBlockEllipsis::Initialize"));
     if (!Super::Initialize())
         return false;
     InitWidgetPtr();
@@ -25,7 +25,7 @@ bool UTextBlockEx::Initialize()
 #if WITH_EDITOR
     UWorld* wld = GetWorld();
     if (wld && !wld->IsGameWorld()) {
-        TWeakObjectPtr<UTextBlockEx> self = this;
+        TWeakObjectPtr<UTextBlockEllipsis> self = this;
         wld->GetTimerManager().SetTimer(OnTickTimerHandle, FTimerDelegate::CreateLambda([=]() {
             if (self.IsValid()) {
                 self->OnMyTick();
@@ -36,34 +36,22 @@ bool UTextBlockEx::Initialize()
     return true;
 }
 
-void UTextBlockEx::BeginDestroy()
+void UTextBlockEllipsis::NativeConstruct()
 {
-    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::BeginDestroy"));
-    Super::BeginDestroy();
-}
-
-void UTextBlockEx::NativeConstruct()
-{
-    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::NativeConstruct"));
+    //UE_LOG(LogUTextBlockEllipsis, Log, TEXT("UTextBlockEllipsis::NativeConstruct"));
     Super::NativeConstruct();
     InitWidgetPtr();
     SyncProp();
 }
 
-void UTextBlockEx::NativeDestruct()
-{
-    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::NativeDestruct"));
-    Super::NativeDestruct();
-}
-
-void UTextBlockEx::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+void UTextBlockEllipsis::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
     Super::NativeTick(MyGeometry, InDeltaTime);
     Ticked = true;
     OnMyTick();
 }
 
-void UTextBlockEx::OnMyTick()
+void UTextBlockEllipsis::OnMyTick()
 {
     const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
     if (!ViewSize.Equals(lzSz, 0.0001f)) {
@@ -76,9 +64,9 @@ void UTextBlockEx::OnMyTick()
     }
 }
 
-void UTextBlockEx::ReleaseSlateResources(bool bReleaseChildren)
+void UTextBlockEllipsis::ReleaseSlateResources(bool bReleaseChildren)
 {
-    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::ReleaseSlateResources"));
+    //UE_LOG(LogUTextBlockEllipsis, Log, TEXT("UTextBlockEllipsis::ReleaseSlateResources"));
     Super::ReleaseSlateResources(bReleaseChildren);
 #if WITH_EDITOR
     UWorld* wld = GetWorld();
@@ -90,42 +78,42 @@ void UTextBlockEx::ReleaseSlateResources(bool bReleaseChildren)
 #endif
 }
 
-void UTextBlockEx::SynchronizeProperties()
+void UTextBlockEllipsis::SynchronizeProperties()
 {
-    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::SynchronizeProperties"));
+    //UE_LOG(LogUTextBlockEllipsis, Log, TEXT("UTextBlockEllipsis::SynchronizeProperties"));
     Super::SynchronizeProperties();
     NeedBuildString = true;
 }
 
 #if WITH_EDITOR
-void UTextBlockEx::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UTextBlockEllipsis::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::PostEditChangeProperty"));
+    //UE_LOG(LogUTextBlockEllipsis, Log, TEXT("UTextBlockEllipsis::PostEditChangeProperty"));
     Super::PostEditChangeProperty(PropertyChangedEvent);
     SyncProp();
 }
 #endif
 
-void UTextBlockEx::OnWidgetRebuilt()
+void UTextBlockEllipsis::OnWidgetRebuilt()
 {
-    //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::OnWidgetRebuilt"));
+    //UE_LOG(LogUTextBlockEllipsis, Log, TEXT("UTextBlockEllipsis::OnWidgetRebuilt"));
     Super::OnWidgetRebuilt();
     InitWidgetPtr();
     SyncProp();
 }
 
-void UTextBlockEx::InitWidgetPtr()
+void UTextBlockEllipsis::InitWidgetPtr()
 {
     TextBlockMain = Cast<UTextBlock>(GetWidgetFromName(FName(TEXT("TextBlockMain"))));
     ensure(TextBlockMain.IsValid());
 }
 
-void UTextBlockEx::SyncProp()
+void UTextBlockEllipsis::SyncProp()
 {
     NeedBuildString = true;
 }
 
-void UTextBlockEx::SetString(FString InText)
+void UTextBlockEllipsis::SetString(FString InText)
 {
     Content = InText;
     if (!Ticked) {
@@ -135,12 +123,12 @@ void UTextBlockEx::SetString(FString InText)
     BuildString();
 }
 
-FString UTextBlockEx::GetString() const
+FString UTextBlockEllipsis::GetString() const
 {
     return Content;
 }
 
-void UTextBlockEx::BuildString()
+void UTextBlockEllipsis::BuildString()
 {
     if (!TextBlockMain.IsValid())
         return;
@@ -194,7 +182,7 @@ void UTextBlockEx::BuildString()
         step = (step / 2 <= 0 ? 1 : step / 2);
         num += dir * step;
         num = FMath::Clamp(num, 1, len);
-        //UE_LOG(LogUTextBlockEx, Log, TEXT("UTextBlockEx::SetText %d x=%f y=%f lx=%f ly=%f"), i, sz.X, sz.Y, lsz.X, lsz.Y);
+        //UE_LOG(LogUTextBlockEllipsis, Log, TEXT("UTextBlockEllipsis::SetText %d x=%f y=%f lx=%f ly=%f"), i, sz.X, sz.Y, lsz.X, lsz.Y);
     }
     if (compute_ellipsis) {
         bool done = false;
