@@ -18,5 +18,6 @@ public:
 	virtual void Init();
     virtual void Shutdown();
     slua::LuaState* State();
+    virtual void InitRichTextStyle();
 private:
 };

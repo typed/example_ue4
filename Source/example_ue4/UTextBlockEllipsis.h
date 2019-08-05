@@ -13,12 +13,22 @@ Description: 文本
 #include "UTextBlockEllipsis.generated.h"
 
 class UTextBlock;
+class UUTRichTextBlock;
 
 /**
 * 字符截断处理...
 *
 * * No Children
 */
+
+UENUM(BlueprintType)
+enum class ETextBlockEllipsisType : uint8
+{
+    Invalid,
+    Normal,
+    Rich,
+};
+
 UCLASS()
 class EXAMPLE_UE4_API UTextBlockEllipsis : public UUserWidget
 {
@@ -66,8 +76,12 @@ protected:
 
     void SyncProp();
 
-    
+    void BuildString_Normal();
+    void BuildString_Rich();
+
+    ETextBlockEllipsisType TextType;
     TWeakObjectPtr<UTextBlock> TextBlockMain;
+    TWeakObjectPtr<UUTRichTextBlock> RichTextBlockMain;
     FVector2D ViewSize;
     bool NeedBuildString;
     bool Ticked;

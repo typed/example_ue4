@@ -5,7 +5,7 @@
 #include "SHyperlink.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/Font.h"
-#if WITH_LUA_PLUGIN
+#ifdef WITH_LUA_PLUGIN
 #include "LuaStateWrapper.h"
 #endif
 

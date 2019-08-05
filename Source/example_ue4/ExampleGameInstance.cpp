@@ -6,7 +6,7 @@
 #include "GenericPlatformFile.h"
 #include "SluaFix.h"
 #include "MyUserWidget.h"
-
+#include "UAESlateStyle.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogExampleGameInstance, Verbose, All);
 DEFINE_LOG_CATEGORY(LogExampleGameInstance);
@@ -49,12 +49,13 @@ void UExampleGameInstance::Init()
         }
         return nullptr;
     });
-
     UMyUserWidget::bindLuaFunc();
+    InitRichTextStyle();
 }
 
 void UExampleGameInstance::Shutdown()
 {
+    STFSlateStyle::Shutdown();
     slua::SluaFix::releaseSluaState();
     //state.close();
     UGameInstance::Shutdown();
@@ -64,4 +65,10 @@ void UExampleGameInstance::Shutdown()
 slua::LuaState* UExampleGameInstance::State()
 {
     return slua::SluaFix::getSluaState();
+}
+
+void UExampleGameInstance::InitRichTextStyle()
+{
+    STFSlateStyle::Initialize();
+    STFSlateStyle::SetFontStyle("r", 24, "/Engine/EngineFonts/Roboto.Roboto", "255;0;0;255", false);
 }
