@@ -29,6 +29,16 @@ enum class ETextBlockEllipsisType : uint8
     Rich,
 };
 
+class FSeqementItem
+{
+public:
+    int32 Begin;
+    int32 End;
+    int32 Count;
+    FString Content;
+    bool IsLabel;
+};
+
 UCLASS()
 class EXAMPLE_UE4_API UTextBlockEllipsis : public UUserWidget
 {
@@ -45,6 +55,9 @@ public:
 
     UPROPERTY(EditAnywhere, Category = Property)
     FString Content;
+
+    UFUNCTION(BlueprintCallable)
+    void Test();
 
     //UVisual interface
     virtual void ReleaseSlateResources(bool bReleaseChildren) override;
@@ -78,6 +91,12 @@ protected:
 
     void BuildString_Normal();
     void BuildString_Rich();
+    int32 Len_Rich();
+    FString Mid_Rich(int32 count);
+    void DetachTextAndLabel();
+    FString GetString_Rich();
+    FString Content_Rich;
+    TArray<FSeqementItem> ArraySeqement;
 
     ETextBlockEllipsisType TextType;
     TWeakObjectPtr<UTextBlock> TextBlockMain;

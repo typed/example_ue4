@@ -71,4 +71,6 @@ void UExampleGameInstance::InitRichTextStyle()
 {
     STFSlateStyle::Initialize();
     STFSlateStyle::SetFontStyle("r", 24, "/Engine/EngineFonts/Roboto.Roboto", "255;0;0;255", false);
+    STFSlateStyle::SetFontStyle("g", 18, "/Engine/EngineFonts/Roboto.Roboto", "0;255;0;255", false);
+    STFSlateStyle::SetFontStyle("b", 30, "/Engine/EngineFonts/Roboto.Roboto", "0;0;255;255", false);
 }
