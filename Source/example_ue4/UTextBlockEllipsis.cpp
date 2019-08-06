@@ -10,7 +10,6 @@ DEFINE_LOG_CATEGORY(LogUTextBlockEllipsis);
 
 UTextBlockEllipsis::UTextBlockEllipsis(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
-    , TextType(ETextBlockEllipsisType::Invalid)
     , NeedBuildString(false)
     , Ticked(false)
 {
@@ -106,18 +105,11 @@ void UTextBlockEllipsis::OnWidgetRebuilt()
 
 void UTextBlockEllipsis::InitWidgetPtr()
 {
-    TextType = ETextBlockEllipsisType::Invalid;
     TextBlockMain = nullptr;
     RichTextBlockMain = nullptr;
     TextBlockMain = Cast<UTextBlock>(GetWidgetFromName(FName(TEXT("TextBlockMain"))));
-    if (TextBlockMain.IsValid()) {
-        TextType = ETextBlockEllipsisType::Normal;
-    }
-    else {
+    if (!TextBlockMain.IsValid()) {
         RichTextBlockMain = Cast<UUTRichTextBlock>(GetWidgetFromName(FName(TEXT("RichTextBlockMain"))));
-        if (RichTextBlockMain.IsValid()) {
-            TextType = ETextBlockEllipsisType::Rich;
-        }
     }
 }
 
@@ -241,7 +233,7 @@ FString UTextBlockEllipsis::Mid_Rich(int32 count)
             if (itm.IsLabel) {
                 ret.Append(itm.Content);
                 ret.Append(Content_Rich.Mid(itm.Begin + 1, FMath::Min(itm.End, EndIdx) - itm.Begin));
-                ret.Append("</>"); 
+                ret.Append("</>");
                 Offset = itm.Begin;
             }
             else {

@@ -21,14 +21,6 @@ class UUTRichTextBlock;
 * * No Children
 */
 
-UENUM(BlueprintType)
-enum class ETextBlockEllipsisType : uint8
-{
-    Invalid,
-    Normal,
-    Rich,
-};
-
 class FSeqementItem
 {
 public:
@@ -53,9 +45,6 @@ public:
     UFUNCTION(BlueprintCallable)
     virtual FString GetString() const;
 
-    UPROPERTY(EditAnywhere, Category = Property)
-    FString Content;
-
     UFUNCTION(BlueprintCallable)
     void Test();
 
@@ -68,6 +57,9 @@ public:
     //~ End UWidget Interface
 
 protected:
+
+    UPROPERTY(EditAnywhere, Category = Property)
+    FString Content;
 
     virtual bool Initialize();
 
@@ -98,7 +90,6 @@ protected:
     FString Content_Rich;
     TArray<FSeqementItem> ArraySeqement;
 
-    ETextBlockEllipsisType TextType;
     TWeakObjectPtr<UTextBlock> TextBlockMain;
     TWeakObjectPtr<UUTRichTextBlock> RichTextBlockMain;
     FVector2D ViewSize;
