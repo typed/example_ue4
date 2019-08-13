@@ -102,11 +102,9 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
 
     const FSlateRenderTransform& transform = AllottedGeometry.ToPaintGeometry().GetAccumulatedRenderTransform();
     float WedgeAngle = (2.f * PI) / SideCount;
-    float radius = FMath::Min(LocalSz.X / 2.f, LocalSz.Y / 2.f);
+    FVector2D PtCenter = LocalSz / 2.f;
+    float radius = FMath::Min(PtCenter.X, PtCenter.Y);
     float diameter = radius * 2.f;
-    FVector2D PtCenter;
-    PtCenter.X = LocalSz.X / 2.f;
-    PtCenter.Y = LocalSz.Y / 2.f;
     FSlateVertex v;
     FVector2D vec;
     FVector2D TexCoords(0.5f, 0.5f);

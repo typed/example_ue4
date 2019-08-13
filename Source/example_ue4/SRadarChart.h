@@ -13,8 +13,7 @@ Description: 多维图Slate
 #include "Runtime/SlateCore/Public/Rendering/RenderingCommon.h"
 #include "Runtime/Engine/Classes/Slate/SlateBrushAsset.h"
 
-class EXAMPLE_UE4_API SRadarChart
-    : public SLeafWidget
+class EXAMPLE_UE4_API SRadarChart : public SLeafWidget
 {
 public:
     SLATE_BEGIN_ARGS(SRadarChart)
