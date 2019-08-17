@@ -118,7 +118,7 @@ void UTextBlockEllipsis::SyncProp()
     NeedBuildString = true;
 }
 
-void UTextBlockEllipsis::SetString(FString InText)
+void UTextBlockEllipsis::SetText(FString InText)
 {
     Content = InText;
     if (!Ticked) {
@@ -128,7 +128,7 @@ void UTextBlockEllipsis::SetString(FString InText)
     BuildString();
 }
 
-FString UTextBlockEllipsis::GetString() const
+FString UTextBlockEllipsis::GetText() const
 {
     return Content;
 }
@@ -404,6 +404,6 @@ void UTextBlockEllipsis::BuildString_Rich()
 
 void UTextBlockEllipsis::Test()
 {
-    SetString(TEXT("阿萨<r a1=\"11\" a2=\"22\">小城之春</>\n萨<g>许昌</>任务德"));
+    SetText(TEXT("阿萨<r a1=\"11\" a2=\"22\">小城之春</>\n萨<g>许昌</>任务德"));
 }
 

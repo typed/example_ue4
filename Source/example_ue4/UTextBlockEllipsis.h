@@ -40,10 +40,10 @@ public:
     UTextBlockEllipsis(const FObjectInitializer& ObjectInitializer);
 
     UFUNCTION(BlueprintCallable)
-    virtual void SetString(FString InText);
+    virtual void SetText(FString InText);
 
     UFUNCTION(BlueprintCallable)
-    virtual FString GetString() const;
+    virtual FString GetText() const;
 
     UFUNCTION(BlueprintCallable)
     void Test();
