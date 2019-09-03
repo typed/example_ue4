@@ -28,7 +28,9 @@ void UAsycLoadMgr::OnAsycLoadFinish()
     RemoveFromRoot();
     UE_LOG(LogAsycLoadMgr, Log, TEXT("OnAsycLoadFinish"));
     UObject* obj = FindObject<UObject>(NULL, *m_path);
-    OnFinish.Broadcast(m_path, obj);
+    if (obj) {
+        OnFinish.Broadcast(obj->GetPathName(), obj);
+    }
 }
 
 UAsycLoadMgr* UAsycLoadMgr::Make()

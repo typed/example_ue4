@@ -425,6 +425,9 @@ TWeakObjectPtr<UUserWidget> UReuseListSp::NewItem()
         return widget;
     }
     else {
+        if (!CanvasPanelList.IsValid()) {
+            return nullptr;
+        }
         if (CanvasPanelList->GetChildrenCount() >= ItemPoolMaxNum) {
             return nullptr;
         }
