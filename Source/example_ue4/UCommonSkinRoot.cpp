@@ -68,10 +68,10 @@ TWeakObjectPtr<UUserWidget> UCommonSkinRoot::GetAndCreateWidgetFromPool(const FS
         return nullptr;
     UUserWidget* widget = CreateWidget<UUserWidget>(GetWorld(), uclass);
     if (widget == nullptr) {
-        UE_LOG(LogUCommonSkinRoot, Error, TEXT("UCommonSkinRoot CreateUserWidget Widget == nullptr"));
+        //UE_LOG(LogUCommonSkinRoot, Error, TEXT("UCommonSkinRoot CreateUserWidget Widget == nullptr"));
         return nullptr;
     }
-    UE_LOG(LogUCommonSkinRoot, Log, TEXT("UCommonSkinRoot CreateUserWidget Widget:%x Name: %s"), widget, *(widget->GetName()));
+    //UE_LOG(LogUCommonSkinRoot, Log, TEXT("UCommonSkinRoot CreateUserWidget Widget:%x Name: %s"), widget, *(widget->GetName()));
     SkinPool.Add(__WidgetPath, widget);
     return widget;
 }
