@@ -15,6 +15,7 @@
 
 UUserWidget* UUtilScript::CreateUserWidget(FString name)
 {
+    BeginCost(name);
 	TSubclassOf<UUserWidget> uclass = ::LoadClass<UUserWidget>(nullptr, *name);
 	if (uclass == nullptr)
 		return nullptr;
@@ -22,6 +23,7 @@ UUserWidget* UUtilScript::CreateUserWidget(FString name)
     if (wld == nullptr)
         return nullptr;
 	UUserWidget* widget = CreateWidget<UUserWidget>(UUtilGame::GetMyWorld(), uclass);
+    EndCost(name);
 	UE_LOG(LogUtil, Log, TEXT("UUtilScript::CreateUserWidget Widget:%x Name: %s"), widget, *(widget->GetName()));
 	return widget;
 }
@@ -155,4 +157,25 @@ bool UUtilScript::DeleteFileAbsPath(FString path)
 void UUtilScript::ScreenMessage(FString text)
 {
     GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, text);
+}
+
+//Output Cost Time
+TMap<FString, double> UUtilScript::s_mapCostTime;
+void UUtilScript::BeginCost(FString key)
+{
+    s_mapCostTime.Add(key, FPlatformTime::Seconds());
+}
+void UUtilScript::EndCost(FString key)
+{
+    double* p_v = s_mapCostTime.Find(key);
+    if (p_v) {
+        double delta = FPlatformTime::Seconds() - (*p_v);
+        s_mapCostTime.Remove(key);
+        TArray<FStringFormatArg> Args;
+        Args.Add(key);
+        Args.Add(delta);
+        FString str = FString::Format(TEXT("{0} cost {1} s."), Args);
+        UE_LOG(LogUtil, Log, TEXT("%s"), (*str));
+        ScreenMessage(str);
+    }
 }

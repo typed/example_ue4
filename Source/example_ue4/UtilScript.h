@@ -65,6 +65,12 @@ public:
     static bool DeleteFileAbsPath(FString path);
 
     UFUNCTION(BlueprintCallable)
-    void ScreenMessage(FString text);
+    static void ScreenMessage(FString text);
+
+    static TMap<FString, double> s_mapCostTime;
+    UFUNCTION(BlueprintCallable)
+    static void BeginCost(FString key);
+    UFUNCTION(BlueprintCallable)
+    static void EndCost(FString key);
 	
 };

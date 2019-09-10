@@ -48,7 +48,7 @@ UUserWidget* UCommonSkinRoot::LoadSkin(FString __WidgetPath)
         return widget_src.Get();
     CanvasPanelRoot->ClearChildren();
     CanvasPanelRoot->AddChild(widget.Get());
-    auto cps = Cast<UCanvasPanelSlot>(widget->Slot);
+    UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(widget->Slot);
     if (cps) {
         FMargin mar(0, 0, 0, 0);
         FAnchors ach(0, 0, 1, 1);

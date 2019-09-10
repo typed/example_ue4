@@ -117,6 +117,9 @@ protected:
     EWidgetClipping ScrollBoxClipping;
 
     UPROPERTY(EditAnywhere, Category = Property)
+    ESlateVisibility ScrollBoxVisibility;
+
+    UPROPERTY(EditAnywhere, Category = Property)
     FScrollBarStyle ScrollBarStyle;
 
 	UPROPERTY(EditAnywhere, Category = Property)

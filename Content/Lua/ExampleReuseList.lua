@@ -72,7 +72,7 @@ function TestReuseListItem:construct(parent)
     self.widget.ReuseList2.OnUpdateItem:Add(function(...) self:OnUpdateItem(...) end)
     self.widget.ReuseList2.OnCreateItem:Clear()
     self.widget.ReuseList2.OnCreateItem:Add(function(widget) TestReuseListItem3.bind(widget, self) end)
-    --self.widget.ReuseList2:Reload(math.random(10))
+    self.widget.ReuseList2:Reload(math.random(10))
 end
 function TestReuseListItem:destruct()
     self.widget.Button_BG.OnClicked:Clear()

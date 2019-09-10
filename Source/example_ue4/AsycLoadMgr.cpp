@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AsycLoadMgr.h"
+#include "UtilScript.h"
 
 DEFINE_LOG_CATEGORY(LogAsycLoadMgr);
 

@@ -35,6 +35,7 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , NeedJump(false)
     , PreviewCount(5)
     , ScrollBarVisibility(ESlateVisibility::Collapsed)
+    , ScrollBoxVisibility(ESlateVisibility::Visible)
     , NotFullAlignStyle(EReuseListNotFullAlignStyle::Start)
     , NotFullScrollBoxHitTestInvisible(false)
     , ScrollBoxClipping(EWidgetClipping::ClipToBounds)
@@ -655,6 +656,7 @@ void UReuseListC::OnWidgetRebuilt()
 void UReuseListC::SyncProp()
 {
     if (ScrollBoxList.IsValid()) {
+        ScrollBoxList->SetVisibility(ScrollBoxVisibility);
         ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
         ScrollBoxList->SetScrollbarThickness(ScrollBarThickness);
         ScrollBoxList->WidgetBarStyle = ScrollBarStyle;
