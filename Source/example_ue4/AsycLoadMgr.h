@@ -28,6 +28,9 @@ public:
 	void AsycLoadObject(FString _path);
 
     UFUNCTION(BlueprintCallable)
+    void AsycLoadArray(TArray<FString> arr_path);
+
+    UFUNCTION(BlueprintCallable)
     static UAsycLoadMgr* Make();
 
 private:
@@ -35,7 +38,7 @@ private:
     void OnAsycLoadFinish();
 
     FStreamableManager m_stmMgr;
-    FString m_path;
+    TArray<FString> m_arr_path;
 
 };
 

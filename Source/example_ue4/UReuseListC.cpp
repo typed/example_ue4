@@ -328,10 +328,10 @@ void UReuseListC::DoReload()
         break;
     }
     if (SizeBoxBg.IsValid()) {
-        UpdateContentSize(SizeBoxBg.Get());
+        UpdateContentSize(SizeBoxBg);
     }
     if (CanvasPanelList.IsValid()) {
-        UpdateContentSize(CanvasPanelList.Get());
+        UpdateContentSize(CanvasPanelList);
     }
     ComputeAlignSpace();
     ComputeScrollBoxHitTest();
