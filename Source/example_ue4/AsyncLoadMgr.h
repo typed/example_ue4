@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Engine/StreamableManager.h"
-#include "AsycLoadMgr.generated.h"
+#include "AsyncLoadMgr.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class EXAMPLE_UE4_API UAsycLoadMgr : public UObject
+class EXAMPLE_UE4_API UAsyncLoadMgr : public UObject
 {
 	GENERATED_BODY()
 	
@@ -21,25 +21,25 @@ public:
 	UPROPERTY(BlueprintAssignable)
     FAsycLoadMgrFinishDelegate OnFinish;
 
-    UAsycLoadMgr();
-	~UAsycLoadMgr();
+    UAsyncLoadMgr();
+	~UAsyncLoadMgr();
 
 	UFUNCTION(BlueprintCallable)
-	void AsycLoadObject(FString _path);
+	void LoadObject(FString _path);
 
     UFUNCTION(BlueprintCallable)
-    void AsycLoadArray(TArray<FString> arr_path);
+    void LoadArray(TArray<FString> arr_path);
 
     UFUNCTION(BlueprintCallable)
-    static UAsycLoadMgr* Make();
+    static UAsyncLoadMgr* Make();
 
 private:
 
-    void OnAsycLoadFinish();
+    void OnLoadFinish();
 
     FStreamableManager m_stmMgr;
     TArray<FString> m_arr_path;
 
 };
 
-DECLARE_LOG_CATEGORY_EXTERN(LogAsycLoadMgr, Verbose, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogAsyncLoadMgr, Verbose, All);
