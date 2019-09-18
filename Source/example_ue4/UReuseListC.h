@@ -194,7 +194,7 @@ protected:
     bool IsVertical() const;
     bool IsInvalidParam() const;
 
-    
+    void OnEditReload();
 
     void ClearCache();
 

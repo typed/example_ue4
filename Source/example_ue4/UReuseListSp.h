@@ -172,6 +172,8 @@ protected:
 
     void SyncProp();
 
+    void OnEditReload();
+
     TWeakObjectPtr<UScrollBox> ScrollBoxList;
     TWeakObjectPtr<UCanvasPanel> CanvasPanelBg;
     TWeakObjectPtr<USizeBox> SizeBoxBg;

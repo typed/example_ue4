@@ -506,6 +506,14 @@ void UReuseListSp::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 }
 #endif
 
+void UReuseListSp::OnEditReload()
+{
+    Reload(PreviewCount);
+    if (ScrollBoxList.IsValid()) {
+        ScrollUpdate(ScrollBoxList->GetScrollOffset());
+    }
+}
+
 void UReuseListSp::OnWidgetRebuilt()
 {
     Super::OnWidgetRebuilt();
@@ -514,13 +522,7 @@ void UReuseListSp::OnWidgetRebuilt()
 #if WITH_EDITOR
     UWorld* wld = GetWorld();
     if (wld && !wld->IsGameWorld()) {
-        TWeakObjectPtr<UReuseListSp> self = this;
-        wld->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([=]() {
-            if (self.IsValid()) {
-                self->Reload(PreviewCount);
-                self->ScrollUpdate(self->ScrollBoxList->GetScrollOffset());
-            }
-        }));
+        wld->GetTimerManager().SetTimerForNextTick(this, &UReuseListSp::OnEditReload);
     }
 #endif
 }

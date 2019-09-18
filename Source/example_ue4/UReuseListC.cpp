@@ -635,6 +635,11 @@ void UReuseListC::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedE
 }
 #endif
 
+void UReuseListC::OnEditReload()
+{
+    Reload(PreviewCount);
+}
+
 void UReuseListC::OnWidgetRebuilt()
 {
     Super::OnWidgetRebuilt();
@@ -643,12 +648,7 @@ void UReuseListC::OnWidgetRebuilt()
 #if WITH_EDITOR
     UWorld* wld = GetWorld();
     if (wld && !wld->IsGameWorld()) {
-        TWeakObjectPtr<UReuseListC> self = this;
-        wld->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([=]() {
-            if (self.IsValid()) {
-                self->Reload(PreviewCount);
-            }
-        }));
+        wld->GetTimerManager().SetTimerForNextTick(this, &UReuseListC::OnEditReload);
     }
 #endif
 }
