@@ -40,6 +40,8 @@ void UCommonSkinRoot::OnWidgetRebuilt()
 
 UUserWidget* UCommonSkinRoot::LoadSkin(FString __WidgetPath)
 {
+    if (!CanvasPanelRoot.IsValid())
+        return nullptr;
     TWeakObjectPtr<UUserWidget> widget = GetAndCreateWidgetFromPool(__WidgetPath);
     if (!widget.IsValid())
         return nullptr;

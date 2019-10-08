@@ -40,7 +40,7 @@ protected:
 
     void InitWidgetPtr();
 
-    TWeakObjectPtr<UUserWidget> UCommonSkinRoot::GetAndCreateWidgetFromPool(const FString& __WidgetPath);
+    TWeakObjectPtr<UUserWidget> GetAndCreateWidgetFromPool(const FString& __WidgetPath);
 
     TWeakObjectPtr<UCanvasPanel> CanvasPanelRoot;
 
