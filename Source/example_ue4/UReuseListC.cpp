@@ -42,6 +42,7 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , AlignSpace(0.f)
     , DelayUpdateTimeLimitMS(0)
     , LastOffset(0)
+    , UpdateForceLayoutPrepass(false)
 {
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
     ScrollBoxStyle.TopShadowBrush = FSlateNoResource();
@@ -593,6 +594,9 @@ void UReuseListC::DoDelayUpdate()
                 }
                 ItemMap.Add(idx, w);
                 OnUpdateItem.Broadcast(w.Get(), idx);
+                if (UpdateForceLayoutPrepass) {
+                    w->ForceLayoutPrepass();
+                }
             }
         }
         //time limit
