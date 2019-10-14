@@ -110,6 +110,24 @@ void UReuseListC::RefreshOne(int32 __Idx)
     }
 }
 
+void UReuseListC::RefreshParam(FString _Param)
+{
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
+        RefreshOneParam(iter->Key, _Param);
+    }
+}
+
+void UReuseListC::RefreshOneParam(int32 __Idx, FString _Param)
+{
+    TWeakObjectPtr<UUserWidget>* v = ItemMap.Find(__Idx);
+    if (v && (*v).IsValid()) {
+        OnUpdateItemParam.Broadcast((*v).Get(), __Idx, _Param);
+        if (UpdateForceLayoutPrepass) {
+            (*v)->ForceLayoutPrepass();
+        }
+    }
+}
+
 void UReuseListC::ScrollToStart()
 {
     if (ScrollBoxList.IsValid()) {
