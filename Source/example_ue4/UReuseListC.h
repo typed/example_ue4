@@ -52,7 +52,7 @@ class EXAMPLE_UE4_API UReuseListC : public UUserWidget
 	
 public:
 
-    DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUpdateItemParamDelegate, UUserWidget*, Widget, int32, Idx, FString, _Param);
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUpdateItemParamDelegate, UUserWidget*, Widget, int32, Idx, FString, Param);
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateItemDelegate, UUserWidget*, Widget, int32, Idx);
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnScrollItemDelegate, int32, BeginIdx, int32, EndIdx);
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCreateItemDelegate, UUserWidget*, widget);
