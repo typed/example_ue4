@@ -105,6 +105,24 @@ public:
     const FVector2D& GetContentSize() const;
 
     UFUNCTION(BlueprintCallable)
+    int32 GetItemWidth() const { return ItemWidth; }
+
+    UFUNCTION(BlueprintCallable)
+    int32 GetItemHeight() const { return ItemHeight; }
+
+    UFUNCTION(BlueprintCallable)
+    int32 GetPaddingX() const { return PaddingX; }
+
+    UFUNCTION(BlueprintCallable)
+    int32 GetPaddingY() const { return PaddingY; }
+
+    UFUNCTION(BlueprintCallable)
+    int32 GetItemWidthAndPaddingX() const { return ItemWidth + PaddingX; }
+
+    UFUNCTION(BlueprintCallable)
+    int32 GetItemHeightAndPaddingY() const { return ItemHeight + PaddingY; }
+
+    UFUNCTION(BlueprintCallable)
     void JumpByIdx(int32 __Idx) { JumpByIdxStyle(__Idx, EReuseListJumpStyle::Middle); }
 
     UFUNCTION(BlueprintCallable)
