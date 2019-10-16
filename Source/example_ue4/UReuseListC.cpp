@@ -5,6 +5,7 @@
 #include "Runtime/UMG/Public/Components/CanvasPanel.h"
 #include "Runtime/UMG/Public/Components/CanvasPanelSlot.h"
 #include "Runtime/UMG/Public/Components/ScrollBox.h"
+#include "Runtime/UMG/Public/Components/NamedSlot.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetBlueprintGeneratedClass.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 
@@ -72,11 +73,26 @@ void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     if (IsInvalidParam())
         return;
     const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
-    if (!ViewSize.Equals(lzSz, 0.0001f))
+    if (!ViewSize.Equals(lzSz, 0.0001f)) {
         DoReload();
+        //UE_LOG(LogUReuseListC, Log, TEXT("NativeTick ViewSize=%f,%f"), ViewSize.X, ViewSize.Y);
+    }
     DoDelayUpdate();
     Update();
     DoJump();
+}
+
+float UReuseListC::GetTitleSize()
+{
+    if (!NamedSlotTitle.IsValid())
+        return 0.f;
+    UWidget* w = NamedSlotTitle->GetChildAt(0);
+    if (w) {
+        FVector2D sz = w->GetCachedGeometry().GetLocalSize();
+        //UE_LOG(LogUReuseListC, Log, TEXT("NamedSlotTitle size=%f,%f"), sz.X, sz.Y);
+        return (IsVertical() ? sz.Y : sz.X);
+    }
+    return 0.f;
 }
 
 void UReuseListC::Reload(int32 __ItemCount)
@@ -192,6 +208,9 @@ void UReuseListC::InitWidgetPtr()
 
     CanvasPanelList = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelList"))));
     ensure(CanvasPanelList.IsValid());
+
+    NamedSlotTitle = Cast<UNamedSlot>(GetWidgetFromName(FName(TEXT("NamedSlotTitle"))));
+    ensure(NamedSlotTitle.IsValid());
 }
 
 void UReuseListC::ComputeAlignSpace()
@@ -236,33 +255,34 @@ void UReuseListC::ScrollUpdate(float __Offset)
 {
     int32 ItemWidthAndPad = ItemWidth + PaddingX;
     int32 ItemHeightAndPad = ItemHeight + PaddingY;
-    int32 Offset = __Offset;
+    int32 title_size = GetTitleSize();
+    int32 Offset = __Offset - title_size;
     int32 OffsetEnd = 0;
     int32 BIdx = 0;
     int32 EIdx = 0;
-    Offset = UKismetMathLibrary::Max(Offset, 0);
-    Offset = UKismetMathLibrary::Min(Offset, MaxPos);
+    int32 _MaxPos = MaxPos - title_size;
+    Offset = FMath::Clamp(Offset, 0, _MaxPos);
     if (Style == EReuseListStyle::Vertical) {
-        OffsetEnd = UKismetMathLibrary::Min((Offset + (int32)ViewSize.Y), MaxPos);
-        BIdx = UKismetMathLibrary::Max(Offset / ItemHeightAndPad - ItemCacheNum, 0);
-        EIdx = UKismetMathLibrary::Min(OffsetEnd / ItemHeightAndPad + ItemCacheNum, ItemCount-1);
+        OffsetEnd = FMath::Min((Offset + (int32)ViewSize.Y), _MaxPos);
+        BIdx = FMath::Max(Offset / ItemHeightAndPad - ItemCacheNum, 0);
+        EIdx = FMath::Min(OffsetEnd / ItemHeightAndPad + ItemCacheNum, ItemCount - 1);
     }
     else if (Style == EReuseListStyle::Horizontal) {
-        OffsetEnd = UKismetMathLibrary::Min((Offset + (int32)ViewSize.X), MaxPos);
-        BIdx = UKismetMathLibrary::Max(Offset / ItemWidthAndPad - ItemCacheNum, 0);
-        EIdx = UKismetMathLibrary::Min(OffsetEnd / ItemWidthAndPad + ItemCacheNum, ItemCount-1);
+        OffsetEnd = FMath::Min((Offset + (int32)ViewSize.X), _MaxPos);
+        BIdx = FMath::Max(Offset / ItemWidthAndPad - ItemCacheNum, 0);
+        EIdx = FMath::Min(OffsetEnd / ItemWidthAndPad + ItemCacheNum, ItemCount - 1);
     }
     else if (Style == EReuseListStyle::VerticalGrid) {
-        OffsetEnd = UKismetMathLibrary::Min((Offset + (int32)ViewSize.Y), MaxPos);
-        BIdx = UKismetMathLibrary::Max( (Offset / ItemHeightAndPad ) * ColNum, 0);
-        int32 tmp = UKismetMathLibrary::FCeil((float)OffsetEnd / ItemHeightAndPad) + 1;
-        EIdx = UKismetMathLibrary::Min(tmp * ColNum - 1, ItemCount - 1);
+        OffsetEnd = FMath::Min((Offset + (int32)ViewSize.Y), _MaxPos);
+        BIdx = FMath::Max((Offset / ItemHeightAndPad) * ColNum, 0);
+        int32 tmp = FMath::CeilToFloat((float)OffsetEnd / ItemHeightAndPad) + 1;
+        EIdx = FMath::Min(tmp * ColNum - 1, ItemCount - 1);
     }
     else if (Style == EReuseListStyle::HorizontalGrid) {
-        OffsetEnd = UKismetMathLibrary::Min((Offset + (int32)ViewSize.X), MaxPos);
-        BIdx = UKismetMathLibrary::Max((Offset / ItemWidthAndPad) * RowNum, 0);
-        int32 tmp = UKismetMathLibrary::FCeil((float)OffsetEnd / ItemWidthAndPad) + 1;
-        EIdx = UKismetMathLibrary::Min(tmp * RowNum - 1, ItemCount - 1);
+        OffsetEnd = FMath::Min((Offset + (int32)ViewSize.X), _MaxPos);
+        BIdx = FMath::Max((Offset / ItemWidthAndPad) * RowNum, 0);
+        int32 tmp = FMath::CeilToFloat((float)OffsetEnd / ItemWidthAndPad) + 1;
+        EIdx = FMath::Min(tmp * RowNum - 1, ItemCount - 1);
     }
     RemoveNotUsed(BIdx, EIdx);
     if (LastOffset <= Offset) {
@@ -322,26 +342,30 @@ void UReuseListC::DoReload()
     switch (Style)
     {
     case EReuseListStyle::Vertical:
-        MaxPos = (ItemHeight + PaddingY) * ItemCount - PaddingY;
+        MaxPos = (ItemHeight + PaddingY) * ItemCount - PaddingY + GetTitleSize();
+        MaxPos = FMath::Max(MaxPos, 0);
         ContentSize.X = ViewSize.X;
         ContentSize.Y = MaxPos;
         break;
     case EReuseListStyle::Horizontal:
-        MaxPos = (ItemWidth + PaddingX) * ItemCount - PaddingX;
+        MaxPos = (ItemWidth + PaddingX) * ItemCount - PaddingX + GetTitleSize();
+        MaxPos = FMath::Max(MaxPos, 0);
         ContentSize.X = MaxPos;
         ContentSize.Y = ViewSize.Y;
         break;
     case EReuseListStyle::VerticalGrid:
-        ColNum = UKismetMathLibrary::Max((PaddingX + (int32)ViewSize.X) / (ItemWidth + PaddingX), 1);
-        RowNum = UKismetMathLibrary::FCeil((float)ItemCount / ColNum);
-        MaxPos = (ItemHeight + PaddingY) * RowNum - PaddingY;
+        ColNum = FMath::Max((PaddingX + (int32)ViewSize.X) / (ItemWidth + PaddingX), 1);
+        RowNum = FMath::CeilToFloat((float)ItemCount / ColNum);
+        MaxPos = (ItemHeight + PaddingY) * RowNum - PaddingY + GetTitleSize();
+        MaxPos = FMath::Max(MaxPos, 0);
         ContentSize.X = ViewSize.X;
         ContentSize.Y = MaxPos;
         break;
     case EReuseListStyle::HorizontalGrid:
-        RowNum = UKismetMathLibrary::Max((PaddingY + (int32)ViewSize.Y) / (ItemHeight + PaddingY), 1);
-        ColNum = UKismetMathLibrary::FCeil((float)ItemCount / RowNum);
-        MaxPos = (ItemWidth + PaddingX) * ColNum - PaddingX;
+        RowNum = FMath::Max((PaddingY + (int32)ViewSize.Y) / (ItemHeight + PaddingY), 1);
+        ColNum = FMath::CeilToFloat((float)ItemCount / RowNum);
+        MaxPos = (ItemWidth + PaddingX) * ColNum - PaddingX + GetTitleSize();
+        MaxPos = FMath::Max(MaxPos, 0);
         ContentSize.X = MaxPos;
         ContentSize.Y = ViewSize.Y;
         break;
@@ -352,11 +376,12 @@ void UReuseListC::DoReload()
     if (CanvasPanelList.IsValid()) {
         UpdateContentSize(CanvasPanelList);
     }
+    UpdateNamedSlotTitleSize();
     ComputeAlignSpace();
     ComputeScrollBoxHitTest();
     ReleaseAllItem();
     if (ScrollBoxList.IsValid()) {
-        float TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
+        float TmpMaxOffset = FMath::Max((float)MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
         if (TmpMaxOffset <= 0.f) {
             ScrollBoxList->ScrollToStart();
         }
@@ -436,12 +461,13 @@ void UReuseListC::DoJump()
         tmpScroll = ItemWidthAndPad * (JumpIdx / RowNum) - tmpItemOffset;
     }
 
-    tmpScroll = UKismetMathLibrary::FMax(tmpScroll, 0);
+    tmpScroll += GetTitleSize();
+    tmpScroll = FMath::Max(tmpScroll, 0.f);
     if (IsVertical()) {
-        tmpScroll = UKismetMathLibrary::FMin(tmpScroll, ContentSize.Y - ViewSize.Y);
+        tmpScroll = FMath::Min(tmpScroll, ContentSize.Y - ViewSize.Y);
     }
     else {
-        tmpScroll = UKismetMathLibrary::FMin(tmpScroll, ContentSize.X - ViewSize.X);
+        tmpScroll = FMath::Min(tmpScroll, ContentSize.X - ViewSize.X);
     }
     if (ScrollBoxList.IsValid()) {
         ScrollBoxList->SetScrollOffset(tmpScroll);
@@ -573,19 +599,19 @@ void UReuseListC::DoDelayUpdate()
         else {
             if (Style == EReuseListStyle::Vertical) {
                 mar.Left = 0;
-                mar.Top = idx * ItemHeightAndPad + AlignSpace;
+                mar.Top = idx * ItemHeightAndPad + AlignSpace + GetTitleSize();
                 mar.Right = ViewSize.X;
                 mar.Bottom = ItemHeight;
             }
             else if (Style == EReuseListStyle::Horizontal) {
                 if (ItemHeight <= 0) {
-                    mar.Left = idx * ItemWidthAndPad + AlignSpace;
+                    mar.Left = idx * ItemWidthAndPad + AlignSpace + GetTitleSize();
                     mar.Top = 0;
                     mar.Right = ItemWidth;
                     mar.Bottom = ViewSize.Y;
                 }
                 else {
-                    mar.Left = idx * ItemWidthAndPad + AlignSpace;
+                    mar.Left = idx * ItemWidthAndPad + AlignSpace + GetTitleSize();
                     mar.Top = (ViewSize.Y - ItemHeight) / 2.f;
                     mar.Right = ItemWidth;
                     mar.Bottom = ItemHeight;
@@ -593,12 +619,12 @@ void UReuseListC::DoDelayUpdate()
             }
             else if (Style == EReuseListStyle::VerticalGrid) {
                 mar.Left = (idx % ColNum) * ItemWidthAndPad;
-                mar.Top = (idx / ColNum) * ItemHeightAndPad + AlignSpace;
+                mar.Top = (idx / ColNum) * ItemHeightAndPad + AlignSpace + GetTitleSize();
                 mar.Right = ItemWidth;
                 mar.Bottom = ItemHeight;
             }
             else if (Style == EReuseListStyle::HorizontalGrid) {
-                mar.Left = (idx / RowNum) * ItemWidthAndPad + AlignSpace;
+                mar.Left = (idx / RowNum) * ItemWidthAndPad + AlignSpace + GetTitleSize();
                 mar.Top = (idx % RowNum) * ItemHeightAndPad;
                 mar.Right = ItemWidth;
                 mar.Bottom = ItemHeight;
@@ -685,4 +711,24 @@ void UReuseListC::SyncProp()
         ScrollBoxList->WidgetStyle = ScrollBoxStyle;
         ScrollBoxList->SetClipping(ScrollBoxClipping);
     }
+    UpdateNamedSlotTitleSize();
+}
+
+void UReuseListC::UpdateNamedSlotTitleSize()
+{
+    if (NamedSlotTitle.IsValid()) {
+        UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(NamedSlotTitle->Slot);
+        if (cps) {
+            if (IsVertical()) {
+                cps->SetAnchors(FAnchors(0, 0, 1, 0));
+                cps->SetOffsets(FMargin(0, 0, 0, 0));
+            }
+            else {
+                cps->SetAnchors(FAnchors(0, 0, 0, 1));
+                cps->SetOffsets(FMargin(0, 0, 0, 0));
+            }
+        }
+    }
+    //static int32 s_num = 1;
+    //UE_LOG(LogUReuseListC, Log, TEXT("UpdateNamedSlotTitleSize num=%d"), s_num++);
 }

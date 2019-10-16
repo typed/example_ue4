@@ -29,7 +29,7 @@ function ExampleReuseList:destruct()
 end
 
 function ExampleReuseList:OnJumpByIdx()
-    self.widget.ReuseList2:JumpByIdx(220,0)
+    self.widget.ReuseList2:JumpByIdx(22,0)
 end
 
 function ExampleReuseList:OnClickItem1()

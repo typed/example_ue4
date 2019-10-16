@@ -19,6 +19,7 @@ Description: 重用列表
 class UScrollBox;
 class USizeBox;
 class UCanvasPanel;
+class UNamedSlot;
 
 UENUM(BlueprintType)
 enum class EReuseListStyle : uint8
@@ -219,6 +220,9 @@ protected:
     void ComputeAlignSpace();
     void ComputeScrollBoxHitTest();
 
+    float GetTitleSize();
+    void UpdateNamedSlotTitleSize();
+
     int32 GetDelayUpdateTimeLimitMS();
     void AddDelayUpdate(int32 idx);
     void DoDelayUpdate();
@@ -236,6 +240,7 @@ protected:
     TWeakObjectPtr<UCanvasPanel> CanvasPanelBg;
     TWeakObjectPtr<USizeBox> SizeBoxBg;
     TWeakObjectPtr<UCanvasPanel> CanvasPanelList;
+    TWeakObjectPtr<UNamedSlot> NamedSlotTitle;
     
     FVector2D ViewSize;
     FVector2D ContentSize;
