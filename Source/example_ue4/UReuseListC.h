@@ -221,7 +221,7 @@ protected:
     void ComputeScrollBoxHitTest();
 
     float GetTitleSize();
-    void UpdateNamedSlotTitleSize();
+    void UpdateNamedSlotTitleAnchors();
 
     int32 GetDelayUpdateTimeLimitMS();
     void AddDelayUpdate(int32 idx);

@@ -376,7 +376,7 @@ void UReuseListC::DoReload()
     if (CanvasPanelList.IsValid()) {
         UpdateContentSize(CanvasPanelList);
     }
-    UpdateNamedSlotTitleSize();
+    UpdateNamedSlotTitleAnchors();
     ComputeAlignSpace();
     ComputeScrollBoxHitTest();
     ReleaseAllItem();
@@ -711,10 +711,10 @@ void UReuseListC::SyncProp()
         ScrollBoxList->WidgetStyle = ScrollBoxStyle;
         ScrollBoxList->SetClipping(ScrollBoxClipping);
     }
-    UpdateNamedSlotTitleSize();
+    UpdateNamedSlotTitleAnchors();
 }
 
-void UReuseListC::UpdateNamedSlotTitleSize()
+void UReuseListC::UpdateNamedSlotTitleAnchors()
 {
     if (NamedSlotTitle.IsValid()) {
         UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(NamedSlotTitle->Slot);
@@ -730,5 +730,5 @@ void UReuseListC::UpdateNamedSlotTitleSize()
         }
     }
     //static int32 s_num = 1;
-    //UE_LOG(LogUReuseListC, Log, TEXT("UpdateNamedSlotTitleSize num=%d"), s_num++);
+    //UE_LOG(LogUReuseListC, Log, TEXT("UpdateNamedSlotTitleAnchors num=%d"), s_num++);
 }
