@@ -44,6 +44,7 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , DelayUpdateTimeLimitMS(0)
     , LastOffset(0)
     , UpdateForceLayoutPrepass(false)
+    , TitlePadding(0)
 {
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
     ScrollBoxStyle.TopShadowBrush = FSlateNoResource();
@@ -90,7 +91,7 @@ float UReuseListC::GetTitleSize()
     if (w) {
         FVector2D sz = w->GetCachedGeometry().GetLocalSize();
         //UE_LOG(LogUReuseListC, Log, TEXT("NamedSlotTitle size=%f,%f"), sz.X, sz.Y);
-        return (IsVertical() ? sz.Y : sz.X);
+        return (IsVertical() ? sz.Y : sz.X) + TitlePadding;
     }
     return 0.f;
 }

@@ -169,6 +169,9 @@ protected:
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PaddingY;
 
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
+    int32 TitlePadding;
+
     UPROPERTY(EditAnywhere, Category = Property)
     EReuseListStyle Style;
 
