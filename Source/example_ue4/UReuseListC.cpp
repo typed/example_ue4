@@ -561,6 +561,7 @@ void UReuseListC::DoDelayUpdate()
     }
     int32 ItemWidthAndPad = ItemWidth + PaddingX;
     int32 ItemHeightAndPad = ItemHeight + PaddingY;
+    float title_size = GetTitleSize();
     FMargin mar;
     FAnchors ach(0, 0, 0, 0);
     //test
@@ -579,19 +580,19 @@ void UReuseListC::DoDelayUpdate()
         else {
             if (Style == EReuseListStyle::Vertical) {
                 mar.Left = 0;
-                mar.Top = idx * ItemHeightAndPad + AlignSpace + GetTitleSize();
+                mar.Top = idx * ItemHeightAndPad + AlignSpace + title_size;
                 mar.Right = ViewSize.X;
                 mar.Bottom = ItemHeight;
             }
             else if (Style == EReuseListStyle::Horizontal) {
                 if (ItemHeight <= 0) {
-                    mar.Left = idx * ItemWidthAndPad + AlignSpace + GetTitleSize();
+                    mar.Left = idx * ItemWidthAndPad + AlignSpace + title_size;
                     mar.Top = 0;
                     mar.Right = ItemWidth;
                     mar.Bottom = ViewSize.Y;
                 }
                 else {
-                    mar.Left = idx * ItemWidthAndPad + AlignSpace + GetTitleSize();
+                    mar.Left = idx * ItemWidthAndPad + AlignSpace + title_size;
                     mar.Top = (ViewSize.Y - ItemHeight) / 2.f;
                     mar.Right = ItemWidth;
                     mar.Bottom = ItemHeight;
@@ -599,12 +600,12 @@ void UReuseListC::DoDelayUpdate()
             }
             else if (Style == EReuseListStyle::VerticalGrid) {
                 mar.Left = (idx % ColNum) * ItemWidthAndPad;
-                mar.Top = (idx / ColNum) * ItemHeightAndPad + AlignSpace + GetTitleSize();
+                mar.Top = (idx / ColNum) * ItemHeightAndPad + AlignSpace + title_size;
                 mar.Right = ItemWidth;
                 mar.Bottom = ItemHeight;
             }
             else if (Style == EReuseListStyle::HorizontalGrid) {
-                mar.Left = (idx / RowNum) * ItemWidthAndPad + AlignSpace + GetTitleSize();
+                mar.Left = (idx / RowNum) * ItemWidthAndPad + AlignSpace + title_size;
                 mar.Top = (idx % RowNum) * ItemHeightAndPad;
                 mar.Right = ItemWidth;
                 mar.Bottom = ItemHeight;
