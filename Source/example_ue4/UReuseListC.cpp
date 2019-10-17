@@ -17,6 +17,7 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , CanvasPanelBg(nullptr)
     , SizeBoxBg(nullptr)
     , CanvasPanelList(nullptr)
+    , NamedSlotTitle(nullptr)
     , ViewSize(FVector2D::ZeroVector)
     , ContentSize(FVector2D::ZeroVector)
     , ItemClass(nullptr)
@@ -45,6 +46,8 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , LastOffset(0)
     , UpdateForceLayoutPrepass(false)
     , TitlePadding(0)
+    , TitleSize(0)
+    , AutoTitleSize(true)
 {
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
     ScrollBoxStyle.TopShadowBrush = FSlateNoResource();
@@ -75,8 +78,9 @@ void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
         return;
     const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
     if (!ViewSize.Equals(lzSz, 0.0001f)) {
+        //UE_LOG(LogUReuseListC, Log, TEXT("NativeTick1 ViewSize=%f,%f"), ViewSize.X, ViewSize.Y);
         DoReload();
-        //UE_LOG(LogUReuseListC, Log, TEXT("NativeTick ViewSize=%f,%f"), ViewSize.X, ViewSize.Y);
+        //UE_LOG(LogUReuseListC, Log, TEXT("NativeTick2 ViewSize=%f,%f"), ViewSize.X, ViewSize.Y);
     }
     DoDelayUpdate();
     Update();
@@ -106,6 +110,7 @@ void UReuseListC::Reload(int32 __ItemCount)
     const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
     if (lzSz.Equals(FVector2D::ZeroVector, 0.0001f)) {
         ViewSize = lzSz;
+        //UE_LOG(LogUReuseListC, Log, TEXT("Reload ViewSize=%f,%f"), ViewSize.X, ViewSize.Y);
         ReleaseAllItem();
         return;
     }
@@ -114,6 +119,7 @@ void UReuseListC::Reload(int32 __ItemCount)
 
 void UReuseListC::Refresh()
 {
+    //UE_LOG(LogUReuseListC, Log, TEXT("Refresh"));
     for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
         AddDelayUpdate(iter->Key);
     }
@@ -196,22 +202,30 @@ void UReuseListC::Clear()
     Reload(0);
 }
 
+void UReuseListC::SetTitleSize(int32 sz)
+{
+    TitleSize = sz;
+    UpdateNamedSlotTitleAnchors();
+}
+
+void UReuseListC::SetTitleSlotAutoSize(bool as)
+{
+    if (NamedSlotTitle.IsValid()) {
+        UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(NamedSlotTitle->Slot);
+        if (cps) {
+            cps->SetAutoSize(as);
+            UpdateNamedSlotTitleAnchors();
+        }
+    }
+}
+
 void UReuseListC::InitWidgetPtr()
 {
     ScrollBoxList = Cast<UScrollBox>(GetWidgetFromName(FName(TEXT("ScrollBoxList"))));
-    ensure(ScrollBoxList.IsValid());
-
     CanvasPanelBg = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelBg"))));
-    ensure(CanvasPanelBg.IsValid());
-
     SizeBoxBg = Cast<USizeBox>(GetWidgetFromName(FName(TEXT("SizeBoxBg"))));
-    ensure(SizeBoxBg.IsValid());
-
     CanvasPanelList = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelList"))));
-    ensure(CanvasPanelList.IsValid());
-
     NamedSlotTitle = Cast<UNamedSlot>(GetWidgetFromName(FName(TEXT("NamedSlotTitle"))));
-    ensure(NamedSlotTitle.IsValid());
 }
 
 void UReuseListC::ComputeAlignSpace()
@@ -687,6 +701,7 @@ void UReuseListC::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedE
 void UReuseListC::OnEditReload()
 {
     Reload(PreviewCount);
+    //UE_LOG(LogUReuseListC, Log, TEXT("UReuseListC::OnEditReload"));
 }
 
 void UReuseListC::OnWidgetRebuilt()
@@ -720,13 +735,26 @@ void UReuseListC::UpdateNamedSlotTitleAnchors()
     if (NamedSlotTitle.IsValid()) {
         UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(NamedSlotTitle->Slot);
         if (cps) {
-            if (IsVertical()) {
-                cps->SetAnchors(FAnchors(0, 0, 1, 0));
-                cps->SetOffsets(FMargin(0, 0, 0, 0));
+            cps->SetAutoSize(AutoTitleSize);
+            if (AutoTitleSize) {
+                if (IsVertical()) {
+                    cps->SetAnchors(FAnchors(0, 0, 1, 0));
+                    cps->SetOffsets(FMargin(0, 0, 0, TitleSize));
+                }
+                else {
+                    cps->SetAnchors(FAnchors(0, 0, 0, 1));
+                    cps->SetOffsets(FMargin(0, 0, TitleSize, 0));
+                }
             }
             else {
-                cps->SetAnchors(FAnchors(0, 0, 0, 1));
-                cps->SetOffsets(FMargin(0, 0, 0, 0));
+                if (IsVertical()) {
+                    cps->SetAnchors(FAnchors(0, 0, 0, 0));
+                    cps->SetOffsets(FMargin(0, 0, ViewSize.X, TitleSize));
+                }
+                else {
+                    cps->SetAnchors(FAnchors(0, 0, 0, 0));
+                    cps->SetOffsets(FMargin(0, 0, TitleSize, ViewSize.Y));
+                }
             }
         }
     }

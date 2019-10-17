@@ -130,6 +130,12 @@ public:
     void JumpByIdxStyle(int32 __Idx, EReuseListJumpStyle __Style);
 
     UFUNCTION(BlueprintCallable)
+    void SetTitleSize(int32 sz);
+
+    UFUNCTION(BlueprintCallable)
+    void SetTitleSlotAutoSize(bool as);
+
+    UFUNCTION(BlueprintCallable)
     void Clear();
 
     UFUNCTION(BlueprintCallable)
@@ -170,7 +176,13 @@ protected:
     int32 PaddingY;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
+    int32 TitleSize;
+
+    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 TitlePadding;
+
+    UPROPERTY(EditAnywhere, Category = Property)
+    bool AutoTitleSize;
 
     UPROPERTY(EditAnywhere, Category = Property)
     EReuseListStyle Style;
