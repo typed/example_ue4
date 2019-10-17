@@ -77,11 +77,8 @@ void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     if (IsInvalidParam())
         return;
     const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
-    if (!ViewSize.Equals(lzSz, 0.0001f)) {
-        //UE_LOG(LogUReuseListC, Log, TEXT("NativeTick1 ViewSize=%f,%f"), ViewSize.X, ViewSize.Y);
+    if (!ViewSize.Equals(lzSz, 0.0001f))
         DoReload();
-        //UE_LOG(LogUReuseListC, Log, TEXT("NativeTick2 ViewSize=%f,%f"), ViewSize.X, ViewSize.Y);
-    }
     DoDelayUpdate();
     Update();
     DoJump();
@@ -94,7 +91,6 @@ float UReuseListC::GetTitleSize()
     UWidget* w = NamedSlotTitle->GetChildAt(0);
     if (w) {
         FVector2D sz = w->GetCachedGeometry().GetLocalSize();
-        //UE_LOG(LogUReuseListC, Log, TEXT("NamedSlotTitle size=%f,%f"), sz.X, sz.Y);
         return (IsVertical() ? sz.Y : sz.X) + TitlePadding;
     }
     return 0.f;
@@ -110,7 +106,6 @@ void UReuseListC::Reload(int32 __ItemCount)
     const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
     if (lzSz.Equals(FVector2D::ZeroVector, 0.0001f)) {
         ViewSize = lzSz;
-        //UE_LOG(LogUReuseListC, Log, TEXT("Reload ViewSize=%f,%f"), ViewSize.X, ViewSize.Y);
         ReleaseAllItem();
         return;
     }
@@ -119,7 +114,6 @@ void UReuseListC::Reload(int32 __ItemCount)
 
 void UReuseListC::Refresh()
 {
-    //UE_LOG(LogUReuseListC, Log, TEXT("Refresh"));
     for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
         AddDelayUpdate(iter->Key);
     }
@@ -672,7 +666,6 @@ void UReuseListC::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedE
 void UReuseListC::OnEditReload()
 {
     Reload(PreviewCount);
-    //UE_LOG(LogUReuseListC, Log, TEXT("UReuseListC::OnEditReload"));
 }
 
 void UReuseListC::OnWidgetRebuilt()
