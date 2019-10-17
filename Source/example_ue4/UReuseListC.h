@@ -245,6 +245,13 @@ protected:
     bool IsVertical() const;
     bool IsInvalidParam() const;
 
+    float GetViewSpan() const {
+        return (IsVertical() ? ViewSize.Y : ViewSize.X);
+    }
+    float GetContentSpan() const {
+        return (IsVertical() ? ContentSize.Y : ContentSize.X);
+    }
+
     void OnEditReload();
 
     void ClearCache();

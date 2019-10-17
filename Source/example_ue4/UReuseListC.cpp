@@ -231,16 +231,8 @@ void UReuseListC::InitWidgetPtr()
 void UReuseListC::ComputeAlignSpace()
 {
     AlignSpace = 0.f;
-    float content = 0.f;
-    float view = 0.f;
-    if (IsVertical()) {
-        content = ContentSize.Y;
-        view = ViewSize.Y;
-    }
-    else {
-        content = ContentSize.X;
-        view = ViewSize.X;
-    }
+    float content = GetContentSpan();
+    float view = GetViewSpan();
     if (content < view) {
         switch (NotFullAlignStyle)
         {
@@ -260,9 +252,7 @@ void UReuseListC::ComputeAlignSpace()
 void UReuseListC::ComputeScrollBoxHitTest()
 {
     if (NotFullScrollBoxHitTestInvisible && ScrollBoxList.IsValid()) {
-        float vlen = (IsVertical() ? ViewSize.Y : ViewSize.X);
-        float clen = (IsVertical() ? ContentSize.Y : ContentSize.X);
-        ScrollBoxList->SetVisibility(vlen > clen ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Visible);
+        ScrollBoxList->SetVisibility(GetViewSpan() > GetContentSpan() ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Visible);
     }
 }
 
@@ -270,31 +260,30 @@ void UReuseListC::ScrollUpdate(float __Offset)
 {
     int32 ItemWidthAndPad = ItemWidth + PaddingX;
     int32 ItemHeightAndPad = ItemHeight + PaddingY;
-    int32 title_size = GetTitleSize();
+    float title_size = GetTitleSize();
     int32 Offset = __Offset - title_size;
     int32 OffsetEnd = 0;
     int32 BIdx = 0;
     int32 EIdx = 0;
     int32 _MaxPos = MaxPos - title_size;
+    float vs = GetViewSpan();
+    int32 span = FMath::Clamp(vs - FMath::Clamp(title_size - __Offset, 0.f, title_size), 0.f, vs);
     Offset = FMath::Clamp(Offset, 0, _MaxPos);
+    OffsetEnd = FMath::Min(Offset + span, _MaxPos);
     if (Style == EReuseListStyle::Vertical) {
-        OffsetEnd = FMath::Min((Offset + (int32)ViewSize.Y), _MaxPos);
         BIdx = FMath::Max(Offset / ItemHeightAndPad - ItemCacheNum, 0);
         EIdx = FMath::Min(OffsetEnd / ItemHeightAndPad + ItemCacheNum, ItemCount - 1);
     }
     else if (Style == EReuseListStyle::Horizontal) {
-        OffsetEnd = FMath::Min((Offset + (int32)ViewSize.X), _MaxPos);
         BIdx = FMath::Max(Offset / ItemWidthAndPad - ItemCacheNum, 0);
         EIdx = FMath::Min(OffsetEnd / ItemWidthAndPad + ItemCacheNum, ItemCount - 1);
     }
     else if (Style == EReuseListStyle::VerticalGrid) {
-        OffsetEnd = FMath::Min((Offset + (int32)ViewSize.Y), _MaxPos);
         BIdx = FMath::Max((Offset / ItemHeightAndPad) * ColNum, 0);
         int32 tmp = FMath::CeilToFloat((float)OffsetEnd / ItemHeightAndPad) + 1;
         EIdx = FMath::Min(tmp * ColNum - 1, ItemCount - 1);
     }
     else if (Style == EReuseListStyle::HorizontalGrid) {
-        OffsetEnd = FMath::Min((Offset + (int32)ViewSize.X), _MaxPos);
         BIdx = FMath::Max((Offset / ItemWidthAndPad) * RowNum, 0);
         int32 tmp = FMath::CeilToFloat((float)OffsetEnd / ItemWidthAndPad) + 1;
         EIdx = FMath::Min(tmp * RowNum - 1, ItemCount - 1);
@@ -396,7 +385,7 @@ void UReuseListC::DoReload()
     ComputeScrollBoxHitTest();
     ReleaseAllItem();
     if (ScrollBoxList.IsValid()) {
-        float TmpMaxOffset = FMath::Max((float)MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
+        float TmpMaxOffset = FMath::Max((float)MaxPos - GetViewSpan(), 0.f);
         if (TmpMaxOffset <= 0.f) {
             ScrollBoxList->ScrollToStart();
         }
@@ -422,28 +411,17 @@ void UReuseListC::DoJump()
     int32 ItemWidthAndPad = ItemWidth + PaddingX;
     int32 ItemHeightAndPad = ItemHeight + PaddingY;
     int32 tmpItemOffset = 0;
+    float content_span = GetContentSpan();
+    float view_span = GetViewSpan();
 
-    if (IsVertical()) {
-        if (JumpStyle == EReuseListJumpStyle::Begin) {
-            tmpItemOffset = 0;
-        }
-        else if (JumpStyle == EReuseListJumpStyle::End) {
-            tmpItemOffset = (int32)ViewSize.Y - ItemHeightAndPad;
-        }
-        else {
-            tmpItemOffset = ((int32)ViewSize.Y - ItemHeightAndPad)/2;
-        }
+    if (JumpStyle == EReuseListJumpStyle::Begin) {
+        tmpItemOffset = 0;
+    }
+    else if (JumpStyle == EReuseListJumpStyle::End) {
+        tmpItemOffset = (int32)view_span - ItemHeightAndPad;
     }
     else {
-        if (JumpStyle == EReuseListJumpStyle::Begin) {
-            tmpItemOffset = 0;
-        }
-        else if (JumpStyle == EReuseListJumpStyle::End) {
-            tmpItemOffset = (int32)ViewSize.X - ItemWidthAndPad;
-        }
-        else {
-            tmpItemOffset = ((int32)ViewSize.X - ItemWidthAndPad) / 2;
-        }
+        tmpItemOffset = ((int32)view_span - ItemHeightAndPad) / 2;
     }
 
     if (Style == EReuseListStyle::Vertical) {
@@ -476,14 +454,7 @@ void UReuseListC::DoJump()
         tmpScroll = ItemWidthAndPad * (JumpIdx / RowNum) - tmpItemOffset;
     }
 
-    tmpScroll += GetTitleSize();
-    tmpScroll = FMath::Max(tmpScroll, 0.f);
-    if (IsVertical()) {
-        tmpScroll = FMath::Min(tmpScroll, ContentSize.Y - ViewSize.Y);
-    }
-    else {
-        tmpScroll = FMath::Min(tmpScroll, ContentSize.X - ViewSize.X);
-    }
+    tmpScroll = FMath::Clamp(tmpScroll + GetTitleSize(), 0.f, content_span - view_span);
     if (ScrollBoxList.IsValid()) {
         ScrollBoxList->SetScrollOffset(tmpScroll);
     }
