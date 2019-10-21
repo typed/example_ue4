@@ -48,6 +48,7 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , TitlePadding(0)
     , TitleSize(0)
     , AutoTitleSize(true)
+    , LastTitleSize(0.f)
 {
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
     ScrollBoxStyle.TopShadowBrush = FSlateNoResource();
@@ -76,9 +77,12 @@ void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     Super::NativeTick(MyGeometry, InDeltaTime);
     if (IsInvalidParam())
         return;
+    float title_size = GetTitleSize();
     const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
-    if (!ViewSize.Equals(lzSz, 0.0001f))
+    if (!ViewSize.Equals(lzSz, 0.0001f) || FMath::Abs(title_size - LastTitleSize) > 0.0001f) {
+        LastTitleSize = title_size;
         DoReload();
+    }
     DoDelayUpdate();
     Update();
     DoJump();
@@ -337,16 +341,17 @@ void UReuseListC::DoReload()
     if (IsInvalidParam())
         return;
     ViewSize = GetCachedGeometry().GetLocalSize();
+    float title_size = GetTitleSize();
     switch (Style)
     {
     case EReuseListStyle::Vertical:
-        MaxPos = (ItemHeight + PaddingY) * ItemCount - PaddingY + GetTitleSize();
+        MaxPos = (ItemHeight + PaddingY) * ItemCount - PaddingY + title_size;
         MaxPos = FMath::Max(MaxPos, 0);
         ContentSize.X = ViewSize.X;
         ContentSize.Y = MaxPos;
         break;
     case EReuseListStyle::Horizontal:
-        MaxPos = (ItemWidth + PaddingX) * ItemCount - PaddingX + GetTitleSize();
+        MaxPos = (ItemWidth + PaddingX) * ItemCount - PaddingX + title_size;
         MaxPos = FMath::Max(MaxPos, 0);
         ContentSize.X = MaxPos;
         ContentSize.Y = ViewSize.Y;
@@ -354,7 +359,7 @@ void UReuseListC::DoReload()
     case EReuseListStyle::VerticalGrid:
         ColNum = FMath::Max((PaddingX + (int32)ViewSize.X) / (ItemWidth + PaddingX), 1);
         RowNum = FMath::CeilToFloat((float)ItemCount / ColNum);
-        MaxPos = (ItemHeight + PaddingY) * RowNum - PaddingY + GetTitleSize();
+        MaxPos = (ItemHeight + PaddingY) * RowNum - PaddingY + title_size;
         MaxPos = FMath::Max(MaxPos, 0);
         ContentSize.X = ViewSize.X;
         ContentSize.Y = MaxPos;
@@ -362,7 +367,7 @@ void UReuseListC::DoReload()
     case EReuseListStyle::HorizontalGrid:
         RowNum = FMath::Max((PaddingY + (int32)ViewSize.Y) / (ItemHeight + PaddingY), 1);
         ColNum = FMath::CeilToFloat((float)ItemCount / RowNum);
-        MaxPos = (ItemWidth + PaddingX) * ColNum - PaddingX + GetTitleSize();
+        MaxPos = (ItemWidth + PaddingX) * ColNum - PaddingX + title_size;
         MaxPos = FMath::Max(MaxPos, 0);
         ContentSize.X = MaxPos;
         ContentSize.Y = ViewSize.Y;
