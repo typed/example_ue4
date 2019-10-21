@@ -48,7 +48,7 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , TitlePadding(0)
     , TitleSize(0)
     , AutoTitleSize(true)
-    , LastTitleSize(0.f)
+    , CacheTitleSize(0.f)
 {
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
     ScrollBoxStyle.TopShadowBrush = FSlateNoResource();
@@ -77,12 +77,9 @@ void UReuseListC::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     Super::NativeTick(MyGeometry, InDeltaTime);
     if (IsInvalidParam())
         return;
-    float title_size = GetTitleSize();
     const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
-    if (!ViewSize.Equals(lzSz, 0.0001f) || FMath::Abs(title_size - LastTitleSize) > 0.0001f) {
-        LastTitleSize = title_size;
+    if (!ViewSize.Equals(lzSz, 0.0001f) || FMath::Abs(GetTitleSize() - CacheTitleSize) > 0.0001f)
         DoReload();
-    }
     DoDelayUpdate();
     Update();
     DoJump();
@@ -258,14 +255,13 @@ void UReuseListC::ScrollUpdate(float __Offset)
 {
     int32 ItemWidthAndPad = ItemWidth + PaddingX;
     int32 ItemHeightAndPad = ItemHeight + PaddingY;
-    float title_size = GetTitleSize();
-    int32 Offset = __Offset - title_size;
+    int32 Offset = __Offset - CacheTitleSize;
     int32 OffsetEnd = 0;
     int32 BIdx = 0;
     int32 EIdx = 0;
-    int32 _MaxPos = MaxPos - title_size;
+    int32 _MaxPos = MaxPos - CacheTitleSize;
     float vs = GetViewSpan();
-    int32 span = FMath::Clamp(vs - FMath::Clamp(title_size - __Offset, 0.f, title_size), 0.f, vs);
+    int32 span = FMath::Clamp(vs - FMath::Clamp(CacheTitleSize - __Offset, 0.f, CacheTitleSize), 0.f, vs);
     Offset = FMath::Clamp(Offset, 0, _MaxPos);
     OffsetEnd = FMath::Min(Offset + span, _MaxPos);
     if (Style == EReuseListStyle::Vertical) {
@@ -341,17 +337,17 @@ void UReuseListC::DoReload()
     if (IsInvalidParam())
         return;
     ViewSize = GetCachedGeometry().GetLocalSize();
-    float title_size = GetTitleSize();
+    CacheTitleSize = GetTitleSize();
     switch (Style)
     {
     case EReuseListStyle::Vertical:
-        MaxPos = (ItemHeight + PaddingY) * ItemCount - PaddingY + title_size;
+        MaxPos = (ItemHeight + PaddingY) * ItemCount - PaddingY + CacheTitleSize;
         MaxPos = FMath::Max(MaxPos, 0);
         ContentSize.X = ViewSize.X;
         ContentSize.Y = MaxPos;
         break;
     case EReuseListStyle::Horizontal:
-        MaxPos = (ItemWidth + PaddingX) * ItemCount - PaddingX + title_size;
+        MaxPos = (ItemWidth + PaddingX) * ItemCount - PaddingX + CacheTitleSize;
         MaxPos = FMath::Max(MaxPos, 0);
         ContentSize.X = MaxPos;
         ContentSize.Y = ViewSize.Y;
@@ -359,7 +355,7 @@ void UReuseListC::DoReload()
     case EReuseListStyle::VerticalGrid:
         ColNum = FMath::Max((PaddingX + (int32)ViewSize.X) / (ItemWidth + PaddingX), 1);
         RowNum = FMath::CeilToFloat((float)ItemCount / ColNum);
-        MaxPos = (ItemHeight + PaddingY) * RowNum - PaddingY + title_size;
+        MaxPos = (ItemHeight + PaddingY) * RowNum - PaddingY + CacheTitleSize;
         MaxPos = FMath::Max(MaxPos, 0);
         ContentSize.X = ViewSize.X;
         ContentSize.Y = MaxPos;
@@ -367,7 +363,7 @@ void UReuseListC::DoReload()
     case EReuseListStyle::HorizontalGrid:
         RowNum = FMath::Max((PaddingY + (int32)ViewSize.Y) / (ItemHeight + PaddingY), 1);
         ColNum = FMath::CeilToFloat((float)ItemCount / RowNum);
-        MaxPos = (ItemWidth + PaddingX) * ColNum - PaddingX + title_size;
+        MaxPos = (ItemWidth + PaddingX) * ColNum - PaddingX + CacheTitleSize;
         MaxPos = FMath::Max(MaxPos, 0);
         ContentSize.X = MaxPos;
         ContentSize.Y = ViewSize.Y;
@@ -453,7 +449,7 @@ void UReuseListC::DoJump()
         tmpScroll = ItemWidthAndPad * (JumpIdx / RowNum) - tmpItemOffset;
     }
 
-    tmpScroll = FMath::Clamp(tmpScroll + GetTitleSize(), 0.f, content_span - view_span);
+    tmpScroll = FMath::Clamp(tmpScroll + CacheTitleSize, 0.f, content_span - view_span);
     if (ScrollBoxList.IsValid()) {
         ScrollBoxList->SetScrollOffset(tmpScroll);
     }
@@ -566,7 +562,6 @@ void UReuseListC::DoDelayUpdate()
     }
     int32 ItemWidthAndPad = ItemWidth + PaddingX;
     int32 ItemHeightAndPad = ItemHeight + PaddingY;
-    float title_size = GetTitleSize();
     FMargin mar;
     FAnchors ach(0, 0, 0, 0);
     //test
@@ -585,19 +580,19 @@ void UReuseListC::DoDelayUpdate()
         else {
             if (Style == EReuseListStyle::Vertical) {
                 mar.Left = 0;
-                mar.Top = idx * ItemHeightAndPad + AlignSpace + title_size;
+                mar.Top = idx * ItemHeightAndPad + AlignSpace + CacheTitleSize;
                 mar.Right = ViewSize.X;
                 mar.Bottom = ItemHeight;
             }
             else if (Style == EReuseListStyle::Horizontal) {
                 if (ItemHeight <= 0) {
-                    mar.Left = idx * ItemWidthAndPad + AlignSpace + title_size;
+                    mar.Left = idx * ItemWidthAndPad + AlignSpace + CacheTitleSize;
                     mar.Top = 0;
                     mar.Right = ItemWidth;
                     mar.Bottom = ViewSize.Y;
                 }
                 else {
-                    mar.Left = idx * ItemWidthAndPad + AlignSpace + title_size;
+                    mar.Left = idx * ItemWidthAndPad + AlignSpace + CacheTitleSize;
                     mar.Top = (ViewSize.Y - ItemHeight) / 2.f;
                     mar.Right = ItemWidth;
                     mar.Bottom = ItemHeight;
@@ -605,12 +600,12 @@ void UReuseListC::DoDelayUpdate()
             }
             else if (Style == EReuseListStyle::VerticalGrid) {
                 mar.Left = (idx % ColNum) * ItemWidthAndPad;
-                mar.Top = (idx / ColNum) * ItemHeightAndPad + AlignSpace + title_size;
+                mar.Top = (idx / ColNum) * ItemHeightAndPad + AlignSpace + CacheTitleSize;
                 mar.Right = ItemWidth;
                 mar.Bottom = ItemHeight;
             }
             else if (Style == EReuseListStyle::HorizontalGrid) {
-                mar.Left = (idx / RowNum) * ItemWidthAndPad + AlignSpace + title_size;
+                mar.Left = (idx / RowNum) * ItemWidthAndPad + AlignSpace + CacheTitleSize;
                 mar.Top = (idx % RowNum) * ItemHeightAndPad;
                 mar.Right = ItemWidth;
                 mar.Bottom = ItemHeight;

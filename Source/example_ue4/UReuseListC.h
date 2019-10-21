@@ -279,7 +279,7 @@ protected:
     EReuseListJumpStyle JumpStyle;
     float AlignSpace;
     int32 LastOffset;
-    float LastTitleSize;
+    float CacheTitleSize;
     bool NeedJump;
 
 };
