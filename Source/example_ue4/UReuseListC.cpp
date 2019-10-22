@@ -91,7 +91,7 @@ float UReuseListC::GetTitleSize()
         return 0.f;
     UWidget* w = NamedSlotTitle->GetChildAt(0);
     if (w) {
-        FVector2D sz = w->GetCachedGeometry().GetLocalSize();
+        const FVector2D& sz = w->GetCachedGeometry().GetLocalSize();
         return (IsVertical() ? sz.Y : sz.X) + TitlePadding;
     }
     return 0.f;
@@ -100,10 +100,6 @@ float UReuseListC::GetTitleSize()
 void UReuseListC::Reload(int32 __ItemCount)
 {
     ItemCount = __ItemCount;
-    if (ScrollBoxList.IsValid()) {
-        ScrollBoxList->SetOrientation(IsVertical() ? Orient_Vertical : Orient_Horizontal);
-        ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
-    }
     const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
     if (lzSz.Equals(FVector2D::ZeroVector, 0.0001f)) {
         ViewSize = lzSz;
@@ -685,6 +681,7 @@ void UReuseListC::OnWidgetRebuilt()
 void UReuseListC::SyncProp()
 {
     if (ScrollBoxList.IsValid()) {
+        ScrollBoxList->SetOrientation(IsVertical() ? Orient_Vertical : Orient_Horizontal);
         ScrollBoxList->SetVisibility(ScrollBoxVisibility);
         ScrollBoxList->SetScrollBarVisibility(ScrollBarVisibility);
         ScrollBoxList->SetScrollbarThickness(ScrollBarThickness);
