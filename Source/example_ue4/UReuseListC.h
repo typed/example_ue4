@@ -100,10 +100,10 @@ public:
     float GetScrollOffset() const;
 
     UFUNCTION(BlueprintCallable)
-    const FVector2D& GetViewSize() const;
+    const FVector2D& GetViewSize() const { return ViewSize; }
 
     UFUNCTION(BlueprintCallable)
-    const FVector2D& GetContentSize() const;
+    const FVector2D& GetContentSize() const { return ContentSize; }
 
     UFUNCTION(BlueprintCallable)
     int32 GetItemWidth() const { return ItemWidth; }

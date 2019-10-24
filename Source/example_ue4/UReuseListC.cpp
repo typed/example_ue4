@@ -171,16 +171,6 @@ float UReuseListC::GetScrollOffset() const
     return 0.f;
 }
 
-const FVector2D& UReuseListC::GetViewSize() const
-{
-    return ViewSize;
-}
-
-const FVector2D& UReuseListC::GetContentSize() const
-{
-    return ContentSize;
-}
-
 void UReuseListC::JumpByIdxStyle(int32 __Idx, EReuseListJumpStyle __Style)
 {
     JumpIdx = __Idx;
