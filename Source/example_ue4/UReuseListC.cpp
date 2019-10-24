@@ -178,11 +178,6 @@ void UReuseListC::JumpByIdxStyle(int32 __Idx, EReuseListJumpStyle __Style)
     NeedJump = true;
 }
 
-void UReuseListC::Clear()
-{
-    Reload(0);
-}
-
 void UReuseListC::SetTitleSize(int32 sz)
 {
     TitleSize = sz;

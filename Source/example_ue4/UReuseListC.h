@@ -136,7 +136,7 @@ public:
     void SetTitleSlotAutoSize(bool as);
 
     UFUNCTION(BlueprintCallable)
-    void Clear();
+    void Clear() { Reload(0); }
 
     UFUNCTION(BlueprintCallable)
     void Reset(TSubclassOf<UUserWidget> __ItemClass, EReuseListStyle __Style, int32 __ItemWidth, int32 __ItemHeight, int32 __PaddingX, int32 __PaddingY);
