@@ -75,16 +75,16 @@ public:
     float GetScrollOffset() const;
 
     UFUNCTION(BlueprintCallable)
-    const FVector2D& GetViewSize() const;
+    const FVector2D& GetViewSize() const { return ViewSize; }
 
     UFUNCTION(BlueprintCallable)
-    const FVector2D& GetContentSize() const;
+    const FVector2D& GetContentSize() const { return ContentSize; }
 
     UFUNCTION(BlueprintCallable)
     void JumpByIdx(int32 __Idx);
 
     UFUNCTION(BlueprintCallable)
-    void Clear();
+    void Clear() { Reload(0); }
 
     UFUNCTION(BlueprintCallable)
     void Reset(TSubclassOf<UUserWidget> __ItemClass, EReuseListSpStyle __Style, int32 __ItemSize, int32 __ItemPadding);

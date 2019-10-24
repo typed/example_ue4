@@ -135,32 +135,27 @@ void UReuseListSp::RefreshOne(int32 __Idx)
 
 void UReuseListSp::ScrollToStart()
 {
-    ScrollBoxList->ScrollToStart();
+    if (ScrollBoxList.IsValid())
+        ScrollBoxList->ScrollToStart();
 }
 
 void UReuseListSp::ScrollToEnd()
 {
-    ScrollBoxList->ScrollToEnd();
+    if (ScrollBoxList.IsValid())
+        ScrollBoxList->ScrollToEnd();
 }
 
 void UReuseListSp::SetScrollOffset(float NewScrollOffset)
 {
-    ScrollBoxList->SetScrollOffset(NewScrollOffset);
+    if (ScrollBoxList.IsValid())
+        ScrollBoxList->SetScrollOffset(NewScrollOffset);
 }
 
 float UReuseListSp::GetScrollOffset() const
 {
-    return ScrollBoxList->GetScrollOffset();
-}
-
-const FVector2D& UReuseListSp::GetViewSize() const
-{
-    return ViewSize;
-}
-
-const FVector2D& UReuseListSp::GetContentSize() const
-{
-    return ContentSize;
+    if (ScrollBoxList.IsValid())
+        return ScrollBoxList->GetScrollOffset();
+    return 0.f;
 }
 
 void UReuseListSp::JumpByIdx(int32 __Idx)
@@ -168,11 +163,6 @@ void UReuseListSp::JumpByIdx(int32 __Idx)
     CurJumpOffsetIdx = 0;
     JumpIdx = __Idx;
     NeedJump = true;
-}
-
-void UReuseListSp::Clear()
-{
-    Reload(0);
 }
 
 void UReuseListSp::InitWidgetPtr()
