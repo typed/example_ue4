@@ -124,14 +124,14 @@ void UReuseListC::RefreshOne(int32 __Idx)
     }
 }
 
-void UReuseListC::RefreshParam(FString _Param)
+void UReuseListC::RefreshParam(const FString& _Param)
 {
     for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
         RefreshOneParam(iter->Key, _Param);
     }
 }
 
-void UReuseListC::RefreshOneParam(int32 __Idx, FString _Param)
+void UReuseListC::RefreshOneParam(int32 __Idx, const FString& _Param)
 {
     TWeakObjectPtr<UUserWidget>* v = ItemMap.Find(__Idx);
     if (v && (*v).IsValid()) {
@@ -201,13 +201,8 @@ void UReuseListC::SetTitleSize(int32 sz)
 
 void UReuseListC::SetTitleSlotAutoSize(bool as)
 {
-    if (NamedSlotTitle.IsValid()) {
-        UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(NamedSlotTitle->Slot);
-        if (cps) {
-            cps->SetAutoSize(as);
-            UpdateNamedSlotTitleAnchors();
-        }
-    }
+    AutoTitleSize = as;
+    UpdateNamedSlotTitleAnchors();
 }
 
 void UReuseListC::InitWidgetPtr()
@@ -371,7 +366,6 @@ void UReuseListC::DoReload()
     if (CanvasPanelList.IsValid()) {
         UpdateContentSize(CanvasPanelList);
     }
-    UpdateNamedSlotTitleAnchors();
     ComputeAlignSpace();
     ComputeScrollBoxHitTest();
     ReleaseAllItem();
@@ -720,6 +714,4 @@ void UReuseListC::UpdateNamedSlotTitleAnchors()
             }
         }
     }
-    //static int32 s_num = 1;
-    //UE_LOG(LogUReuseListC, Log, TEXT("UpdateNamedSlotTitleAnchors num=%d"), s_num++);
 }

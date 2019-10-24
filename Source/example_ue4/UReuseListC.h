@@ -82,10 +82,10 @@ public:
     void RefreshOne(int32 __Idx);
 
     UFUNCTION(BlueprintCallable)
-    void RefreshParam(FString _Param);
+    void RefreshParam(const FString& _Param);
 
     UFUNCTION(BlueprintCallable)
-    void RefreshOneParam(int32 __Idx, FString _Param);
+    void RefreshOneParam(int32 __Idx, const FString& _Param);
 
     UFUNCTION(BlueprintCallable)
     void ScrollToStart();
