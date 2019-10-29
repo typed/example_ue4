@@ -147,8 +147,14 @@ void UReuseListSp::ScrollToEnd()
 
 void UReuseListSp::SetScrollOffset(float NewScrollOffset)
 {
-    if (ScrollBoxList.IsValid())
-        ScrollBoxList->SetScrollOffset(NewScrollOffset);
+    if (!ScrollBoxList.IsValid())
+        return;
+    float vlen = GetViewSpan();
+    float clen = GetContentSpan();
+    if (vlen > clen)
+        ScrollBoxList->SetScrollOffset(0.f);
+    else
+        ScrollBoxList->SetScrollOffset(FMath::Clamp(NewScrollOffset, 0.f, vlen - clen));
 }
 
 float UReuseListSp::GetScrollOffset() const
@@ -168,31 +174,16 @@ void UReuseListSp::JumpByIdx(int32 __Idx)
 void UReuseListSp::InitWidgetPtr()
 {
     ScrollBoxList = Cast<UScrollBox>(GetWidgetFromName(FName(TEXT("ScrollBoxList"))));
-    ensure(ScrollBoxList.IsValid());
-
     CanvasPanelBg = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelBg"))));
-    ensure(CanvasPanelBg.IsValid());
-
     SizeBoxBg = Cast<USizeBox>(GetWidgetFromName(FName(TEXT("SizeBoxBg"))));
-    ensure(SizeBoxBg.IsValid());
-
     CanvasPanelList = Cast<UCanvasPanel>(GetWidgetFromName(FName(TEXT("CanvasPanelList"))));
-    ensure(CanvasPanelList.IsValid());
 }
 
 float UReuseListSp::GetAlignSpace()
 {
     float AlignSpace = 0.f;
-    float content = 0.f;
-    float view = 0.f;
-    if (IsVertical()) {
-        content = ContentSize.Y;
-        view = ViewSize.Y;
-    }
-    else {
-        content = ContentSize.X;
-        view = ViewSize.X;
-    }
+    float content = GetContentSpan();
+    float view = GetViewSpan();
     if (content < view) {
         switch (NotFullAlignStyle)
         {
@@ -213,9 +204,7 @@ float UReuseListSp::GetAlignSpace()
 void UReuseListSp::ComputeScrollBoxHitTest()
 {
     if (NotFullScrollBoxHitTestInvisible) {
-        float vlen = (IsVertical() ? ViewSize.Y : ViewSize.X);
-        float clen = (IsVertical() ? ContentSize.Y : ContentSize.X);
-        ScrollBoxList->SetVisibility(vlen > clen ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Visible);
+        ScrollBoxList->SetVisibility(GetViewSpan() > GetContentSpan() ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Visible);
     }
 }
 
@@ -279,15 +268,15 @@ void UReuseListSp::ScrollUpdate(float __Offset)
     int32 OffsetEnd = 0;
     int32 BIdx = 0;
     int32 EIdx = 0;
-    Offset = UKismetMathLibrary::Clamp(Offset, 0, MaxPos);
-    int32 vlen = (IsVertical() ? ViewSize.Y : ViewSize.X);
+    Offset = FMath::Clamp(Offset, 0, MaxPos);
+    int32 vlen = GetViewSpan();
     OffsetEnd = Offset + vlen;
 
     BIdx = Algo::LowerBound(ArrOffset, Offset) - 1;
     EIdx = Algo::UpperBound(ArrOffset, OffsetEnd);
 
-    BIdx = UKismetMathLibrary::Clamp(BIdx, 0, ItemCount - 1);
-    EIdx = UKismetMathLibrary::Clamp(EIdx, 0, ItemCount - 1);
+    BIdx = FMath::Clamp(BIdx, 0, ItemCount - 1);
+    EIdx = FMath::Clamp(EIdx, 0, ItemCount - 1);
 
     //UE_LOG(LogUReuseListSp, Log, TEXT("UReuseListSp::ScrollUpdate Offset=%d BIdx=%d EIdx=%d"), Offset, BIdx, EIdx);
 
@@ -379,8 +368,8 @@ void UReuseListSp::DoJump()
         return;
     }
 
-    float sz_view = IsVertical() ? ViewSize.Y : ViewSize.X;
-    float sz_content = IsVertical() ? ContentSize.Y : ContentSize.X;
+    float sz_view = GetViewSpan();
+    float sz_content = GetContentSpan();
 
     if (sz_content < sz_view) {
         NeedJump = false;
@@ -394,7 +383,7 @@ void UReuseListSp::DoJump()
 
     float tmpScroll = ArrOffset[CurJumpOffsetIdx++];
 
-    tmpScroll = UKismetMathLibrary::FClamp(tmpScroll, 0, sz_content - sz_view);
+    tmpScroll = FMath::Clamp(tmpScroll, 0.f, sz_content - sz_view);
 
     ScrollBoxList->SetScrollOffset(tmpScroll);
     ScrollUpdate(tmpScroll);
@@ -546,7 +535,7 @@ void UReuseListSp::AdjustItem()
                 float fOffset = ScrollBoxList->GetScrollOffset();
                 if (LastOffset > fOffset) {
                     //向上或向左滑动，需要补滑动差值
-                    ScrollBoxList->SetScrollOffset(fOffset + delta_sz);
+                    //SetScrollOffset(fOffset + delta_sz);
                 }
                 LastOffset = fOffset;
             }
@@ -582,7 +571,7 @@ void UReuseListSp::AdjustItemWidgetSize()
 
 void UReuseListSp::AdjustScrollOffset()
 {
-    float TmpMaxOffset = UKismetMathLibrary::FMax(MaxPos - (IsVertical() ? ViewSize.Y : ViewSize.X), 0.f);
+    float TmpMaxOffset = FMath::Max(MaxPos - GetViewSpan(), 0.f);
     if (TmpMaxOffset <= 0.f) {
         ScrollBoxList->ScrollToStart();
     }
