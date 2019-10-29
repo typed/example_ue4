@@ -201,7 +201,10 @@ protected:
     bool NeedJump;
     bool NeedFillArrOffset;
     bool NeedAdjustItemWidgetSize;
-    bool NeedAdjustScrollOffset;
+    int32 NeedAdjustScrollOffset;
+    int32 NeedReloadAdjustScrollOffset;
+    int32 ReloadAdjustBIdx;
+    int32 ReloadAdjustBIdxOffset;
     int32 NeedAdjustItem;
 
 };

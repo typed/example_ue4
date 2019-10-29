@@ -31,7 +31,10 @@ UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     , NeedFillArrOffset(false)
     , NeedAdjustItem(0)
     , NeedAdjustItemWidgetSize(false)
-    , NeedAdjustScrollOffset(false)
+    , NeedAdjustScrollOffset(0)
+    , ReloadAdjustBIdx(0)
+    , ReloadAdjustBIdxOffset(0)
+    , NeedReloadAdjustScrollOffset(0)
     , PreviewCount(5)
     , ItemPoolMaxNum(100)
     , ScrollBarVisibility(ESlateVisibility::Collapsed)
@@ -89,12 +92,20 @@ void UReuseListSp::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
     ScrollUpdate(ScrollBoxList->GetScrollOffset());
 
+    if (NeedReloadAdjustScrollOffset > 0) {
+        --NeedReloadAdjustScrollOffset;
+        int32 new_offset = 0;
+        if (ArrOffset.IsValidIndex(ReloadAdjustBIdx))
+            new_offset = ArrOffset[ReloadAdjustBIdx] + ReloadAdjustBIdxOffset;
+        SetScrollOffset(new_offset);
+    }
+
     if (NeedJump) {
         DoJump();
     }
 
-    if (NeedAdjustScrollOffset) {
-        NeedAdjustScrollOffset = false;
+    if (NeedAdjustScrollOffset > 0) {
+        --NeedAdjustScrollOffset;
         AdjustScrollOffset();
     }
 
@@ -129,7 +140,7 @@ void UReuseListSp::RefreshOne(int32 __Idx)
     TWeakObjectPtr<UUserWidget>* v = ItemMap.Find(__Idx);
     if (v) {
         OnUpdateItem.Broadcast(v->Get(), __Idx);
-        NeedAdjustItem = 5;
+        NeedAdjustItem = 2;
     }
 }
 
@@ -154,7 +165,7 @@ void UReuseListSp::SetScrollOffset(float NewScrollOffset)
     if (vlen > clen)
         ScrollBoxList->SetScrollOffset(0.f);
     else
-        ScrollBoxList->SetScrollOffset(FMath::Clamp(NewScrollOffset, 0.f, vlen - clen));
+        ScrollBoxList->SetScrollOffset(FMath::Clamp(NewScrollOffset, 0.f, clen - vlen));
 }
 
 float UReuseListSp::GetScrollOffset() const
@@ -301,7 +312,7 @@ void UReuseListSp::ScrollUpdate(float __Offset)
                         cps->SetOffsets(FMargin(offset + AlignSpace, 0, sz_item, ViewSize.Y));
                     ItemMap.Add(i, w);
                     OnUpdateItem.Broadcast(w.Get(), i);
-                    NeedAdjustItem = 5;
+                    NeedAdjustItem = 2;
                 }
             }
         }
@@ -348,16 +359,17 @@ void UReuseListSp::DoReload()
         return;
     ViewSize = GetCachedGeometry().GetLocalSize();
     SpecialSizeMap.Empty();
+    int32 v = ScrollBoxList->GetScrollOffset();
+    ReloadAdjustBIdx = Algo::LowerBound(ArrOffset, v);
+    ReloadAdjustBIdx = FMath::Clamp(ReloadAdjustBIdx, 0, ItemCount - 1);
+    ReloadAdjustBIdxOffset = 0;
+    if (ArrOffset.IsValidIndex(ReloadAdjustBIdx))
+        ReloadAdjustBIdxOffset = v - ArrOffset[ReloadAdjustBIdx];
     FillArrOffset();
     ComputeScrollBoxHitTest();
-    for (int32 i = 0; i < CanvasPanelList->GetChildrenCount(); i++) {
-        UUserWidget* uw = Cast<UUserWidget>(CanvasPanelList->GetChildAt(i));
-        if (uw) {
-            ReleaseItem(uw);
-        }
-    }
-    ItemMap.Empty();
-    NeedAdjustScrollOffset = true;
+    ReleaseAllItem();
+    NeedAdjustScrollOffset = 6;
+    NeedReloadAdjustScrollOffset = 5;
 }
 
 void UReuseListSp::DoJump()
@@ -382,11 +394,9 @@ void UReuseListSp::DoJump()
     }
 
     float tmpScroll = ArrOffset[CurJumpOffsetIdx++];
-
-    tmpScroll = FMath::Clamp(tmpScroll, 0.f, sz_content - sz_view);
-
-    ScrollBoxList->SetScrollOffset(tmpScroll);
-    ScrollUpdate(tmpScroll);
+    SetScrollOffset(tmpScroll);
+    if (ScrollBoxList.IsValid())
+        ScrollUpdate(ScrollBoxList->GetScrollOffset());
 
     if (CurJumpOffsetIdx >= JumpIdx) {
         NeedJump = false;
@@ -535,7 +545,7 @@ void UReuseListSp::AdjustItem()
                 float fOffset = ScrollBoxList->GetScrollOffset();
                 if (LastOffset > fOffset) {
                     //向上或向左滑动，需要补滑动差值
-                    //SetScrollOffset(fOffset + delta_sz);
+                    SetScrollOffset(fOffset + delta_sz);
                 }
                 LastOffset = fOffset;
             }
