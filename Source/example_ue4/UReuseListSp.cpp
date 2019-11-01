@@ -268,7 +268,7 @@ void UReuseListSp::SetCurItemClass(const FString& StrName)
         CurItemClass = *p;
 }
 
-void UReuseListSp::ResetCurItemClassByDefault()
+void UReuseListSp::ResetCurItemClassToDefault()
 {
     CurItemClass = ItemClass;
 }

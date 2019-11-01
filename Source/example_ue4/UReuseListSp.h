@@ -103,7 +103,7 @@ public:
     void SetCurItemClass(const FString& StrName);
 
     UFUNCTION(BlueprintCallable)
-    void ResetCurItemClassByDefault();
+    void ResetCurItemClassToDefault();
 
 protected:
 
