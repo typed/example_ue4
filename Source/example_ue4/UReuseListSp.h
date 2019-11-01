@@ -43,12 +43,16 @@ class EXAMPLE_UE4_API UReuseListSp : public UUserWidget
 public:
 
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateItemDelegate, UUserWidget*, Widget, int32, Idx);
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPreUpdateItemDelegate, int32, Idx);
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCreateItemDelegate, UUserWidget*, Widget);
 
     UReuseListSp(const FObjectInitializer& ObjectInitializer);
 
     UPROPERTY(BlueprintAssignable)
     FOnUpdateItemDelegate OnUpdateItem;
+
+    UPROPERTY(BlueprintAssignable)
+    FOnPreUpdateItemDelegate OnPreUpdateItem;
 
     UPROPERTY(BlueprintAssignable)
     FOnCreateItemDelegate OnCreateItem;
@@ -94,6 +98,12 @@ public:
 
     UFUNCTION(BlueprintCallable)
     void AddSpecialSize(int32 __Idx, int32 __Size);
+
+    UFUNCTION(BlueprintCallable)
+    void SetCurItemClass(TSubclassOf<UUserWidget> __ItemClass);
+
+    UFUNCTION(BlueprintCallable)
+    void ResetCurItemClassByDefault();
 
 protected:
 
@@ -191,8 +201,9 @@ protected:
 
     int32 ItemCount;
     int32 MaxPos;
+    TSubclassOf<UUserWidget> CurItemClass;
     TMap<int32, TWeakObjectPtr<UUserWidget> > ItemMap;
-    TArray<TWeakObjectPtr<UUserWidget> > ItemPool;
+    TMap<TSubclassOf<UUserWidget>, TArray<TWeakObjectPtr<UUserWidget> > > ItemPool;
     TArray<int32> ArrOffset;
     TMap<int32, int32> SpecialSizeMap;
     int32 JumpIdx;

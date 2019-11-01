@@ -20,6 +20,7 @@ UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     , ViewSize(FVector2D::ZeroVector)
     , ContentSize(FVector2D::ZeroVector)
     , ItemClass(nullptr)
+    , CurItemClass(nullptr)
     , ItemPadding(0)
     , ItemCount(0)
     , MaxPos(0)
@@ -129,18 +130,45 @@ void UReuseListSp::Reload(int32 __ItemCount)
 void UReuseListSp::Refresh()
 {
     NeedJump = false;
+    TArray<int32> tmp;
     for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
-        RefreshOne(iter->Key);
+        tmp.Add(iter->Key);
+        //RefreshOne(iter->Key);
+    }
+    for (int32 i = 0; i < tmp.Num(); ++i) {
+        RefreshOne(tmp[i]);
     }
 }
 
 void UReuseListSp::RefreshOne(int32 __Idx)
 {
     NeedJump = false;
-    TWeakObjectPtr<UUserWidget>* v = ItemMap.Find(__Idx);
-    if (v) {
-        OnUpdateItem.Broadcast(v->Get(), __Idx);
-        NeedAdjustItem = 2;
+    //TWeakObjectPtr<UUserWidget>* v = ItemMap.Find(__Idx);
+    //if (v) {
+    //    OnUpdateItem.Broadcast(v->Get(), __Idx);
+    //    NeedAdjustItem = 2;
+    //}
+    if (ItemMap.Contains(__Idx)) {
+        float AlignSpace = GetAlignSpace();
+        int32 sz_item = GetItemSize(__Idx);
+        ReleaseItem(ItemMap[__Idx]);
+        ItemMap.Remove(__Idx);
+        OnPreUpdateItem.Broadcast(__Idx);
+        TWeakObjectPtr<UUserWidget> w = NewItem();
+        if (w.IsValid()) {
+            UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(w->Slot);
+            if (cps) {
+                cps->SetAnchors(FAnchors(0, 0, 0, 0));
+                int32 offset = (ArrOffset.IsValidIndex(__Idx) ? ArrOffset[__Idx] : 0);
+                if (IsVertical())
+                    cps->SetOffsets(FMargin(0, offset + AlignSpace, ViewSize.X, sz_item));
+                else
+                    cps->SetOffsets(FMargin(offset + AlignSpace, 0, sz_item, ViewSize.Y));
+                ItemMap.Add(__Idx, w);
+                OnUpdateItem.Broadcast(w.Get(), __Idx);
+                NeedAdjustItem = 2;
+            }
+        }
     }
 }
 
@@ -233,6 +261,16 @@ void UReuseListSp::AddSpecialSize(int32 __Idx, int32 __Size)
     NeedAdjustItemWidgetSize = true;
 }
 
+void UReuseListSp::SetCurItemClass(TSubclassOf<UUserWidget> __ItemClass)
+{
+    CurItemClass = __ItemClass;
+}
+
+void UReuseListSp::ResetCurItemClassByDefault()
+{
+    CurItemClass = ItemClass;
+}
+
 void UReuseListSp::FillArrOffset()
 {
     ArrOffset.Empty();
@@ -300,6 +338,7 @@ void UReuseListSp::ScrollUpdate(float __Offset)
             continue;
         }
         if (!ItemMap.Contains(i)) {
+            OnPreUpdateItem.Broadcast(i);
             TWeakObjectPtr<UUserWidget> w = NewItem();
             if (w.IsValid()) {
                 UCanvasPanelSlot* cps = Cast<UCanvasPanelSlot>(w->Slot);
@@ -405,9 +444,10 @@ void UReuseListSp::DoJump()
 
 TWeakObjectPtr<UUserWidget> UReuseListSp::NewItem()
 {
-    if (ItemPool.IsValidIndex(0)) {
-        TWeakObjectPtr<UUserWidget> widget = ItemPool[0];
-        ItemPool.RemoveAt(0);
+    TArray<TWeakObjectPtr<UUserWidget> >& pool = ItemPool.FindOrAdd(CurItemClass);
+    if (pool.IsValidIndex(0)) {
+        TWeakObjectPtr<UUserWidget> widget = pool[0];
+        pool.RemoveAt(0);
         if (widget.IsValid()) {
             widget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
         }
@@ -420,7 +460,7 @@ TWeakObjectPtr<UUserWidget> UReuseListSp::NewItem()
         if (CanvasPanelList->GetChildrenCount() >= ItemPoolMaxNum) {
             return nullptr;
         }
-        TWeakObjectPtr<UUserWidget> widget = CreateWidget<UUserWidget>(GetWorld(), ItemClass);
+        TWeakObjectPtr<UUserWidget> widget = CreateWidget<UUserWidget>(GetWorld(), CurItemClass);
         if (!widget.IsValid()) {
             return nullptr;
         }
@@ -434,7 +474,7 @@ TWeakObjectPtr<UUserWidget> UReuseListSp::NewItem()
 void UReuseListSp::ReleaseItem(TWeakObjectPtr<UUserWidget> __Item)
 {
     __Item->SetVisibility(ESlateVisibility::Collapsed);
-    ItemPool.AddUnique(__Item);
+    ItemPool.FindOrAdd(__Item->GetClass()).AddUnique(__Item);
 }
 
 void UReuseListSp::ReleaseAllItem()
@@ -524,6 +564,7 @@ void UReuseListSp::SyncProp()
         ScrollBoxList->WidgetBarStyle = ScrollBarStyle;
         ScrollBoxList->WidgetStyle = ScrollBoxStyle;
     }
+    CurItemClass = ItemClass;
 }
 
 void UReuseListSp::AdjustItem()
