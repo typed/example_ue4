@@ -100,7 +100,7 @@ public:
     void AddSpecialSize(int32 __Idx, int32 __Size);
 
     UFUNCTION(BlueprintCallable)
-    void SetCurItemClass(TSubclassOf<UUserWidget> __ItemClass);
+    void SetCurItemClass(const FString& StrName);
 
     UFUNCTION(BlueprintCallable)
     void ResetCurItemClassByDefault();
@@ -132,6 +132,9 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = Property)
     TSubclassOf<UUserWidget> ItemClass;
+
+    UPROPERTY(EditAnywhere, Category = Property)
+    TMap<FString, TSubclassOf<UUserWidget> > OtherItemClass;
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     int32 PreviewCount;

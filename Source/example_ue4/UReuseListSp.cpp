@@ -261,9 +261,11 @@ void UReuseListSp::AddSpecialSize(int32 __Idx, int32 __Size)
     NeedAdjustItemWidgetSize = true;
 }
 
-void UReuseListSp::SetCurItemClass(TSubclassOf<UUserWidget> __ItemClass)
+void UReuseListSp::SetCurItemClass(const FString& StrName)
 {
-    CurItemClass = __ItemClass;
+    TSubclassOf<UUserWidget>* p = OtherItemClass.Find(StrName);
+    if (p)
+        CurItemClass = *p;
 }
 
 void UReuseListSp::ResetCurItemClassByDefault()
