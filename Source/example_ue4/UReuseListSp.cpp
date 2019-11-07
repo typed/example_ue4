@@ -515,6 +515,7 @@ void UReuseListSp::Reset(TSubclassOf<UUserWidget> __ItemClass, EReuseListSpStyle
     Clear();
     ClearCache();
     ItemClass = __ItemClass;
+    CurItemClass = __ItemClass;
     Style = __Style;
     ItemSize = __ItemSize;
     ItemPadding = __ItemPadding;
