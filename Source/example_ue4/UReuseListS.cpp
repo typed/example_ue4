@@ -174,6 +174,11 @@ void UReuseListS::FillArrOffset()
         float lineHeight = 0.f;
         for (int32 i = 0; i < ItemCount; i++) {
             FVector2D sz_item = GetItemSize(i);
+            if (Offset.X + sz_item.X + ItemPaddingX > ViewSize.X) {
+                Offset.X = 0;
+                Offset.Y += lineHeight + ItemPaddingY;
+                lineHeight = 0.f;
+            }
             if (sz_item.Y > lineHeight) {
                 lineHeight = sz_item.Y;
             }
@@ -185,11 +190,6 @@ void UReuseListS::FillArrOffset()
             box.Max.Y = box.Min.Y + lineHeight;
             if (Offset.X + sz_item.X + ItemPaddingX <= ViewSize.X) {
                 Offset.X += sz_item.X + ItemPaddingX;
-                if (Offset.X + sz_item.X + ItemPaddingX > ViewSize.X) {
-                    Offset.X = 0;
-                    Offset.Y += lineHeight + ItemPaddingY;
-                    lineHeight = 0.f;
-                }
             }
             ArrOffset.Insert(i, box);
             TransMap.Add(i, box);
