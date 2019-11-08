@@ -196,20 +196,25 @@ void UReuseListS::FillArrOffset()
         }
     }
     else {
+        float lineWidth = 0.f;
         for (int32 i = 0; i < ItemCount; i++) {
             FVector2D sz_item = GetItemSize(i);
+            if (Offset.Y + sz_item.Y + ItemPaddingY > ViewSize.Y) {
+                Offset.Y = 0;
+                Offset.X += lineWidth + ItemPaddingX;
+                lineWidth = 0.f;
+            }
+            if (sz_item.X > lineWidth) {
+                lineWidth = sz_item.X;
+            }
             box.bIsValid = true;
             MaxPos = Offset.X + sz_item.X;
             box.Min.X = Offset.X;
             box.Min.Y = Offset.Y;
-            box.Max.X = box.Min.X + sz_item.X;
+            box.Max.X = box.Min.X + lineWidth;
             box.Max.Y = box.Min.Y + sz_item.Y;
             if (Offset.Y + sz_item.Y + ItemPaddingY <= ViewSize.Y) {
                 Offset.Y += sz_item.Y + ItemPaddingY;
-                if (Offset.Y + sz_item.Y + ItemPaddingY > ViewSize.Y) {
-                    Offset.Y = 0;
-                    Offset.X += sz_item.X + ItemPaddingX;
-                }
             }
             ArrOffset.Insert(i, box);
             TransMap.Add(i, box);
