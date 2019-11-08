@@ -30,6 +30,7 @@ UReuseListS::UReuseListS(const FObjectInitializer& ObjectInitializer)
     , PreviewCount(5)
     , ItemPoolMaxNum(100)
     , ScrollBarVisibility(ESlateVisibility::Collapsed)
+    , LastOffset(0.f)
     , NeedFillArrOffset(0)
     , NeedAdjustItemWidgetSize(0)
     , NeedAdjustItem(0)
@@ -467,31 +468,25 @@ void UReuseListS::SyncProp()
 
 void UReuseListS::AdjustItem()
 {
-    //bool print_log = false;
     for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
         TWeakObjectPtr<UUserWidget> wdg = iter->Value;
         if (wdg.IsValid()) {
             int32 idx = iter->Key;
-            FVector2D sz_now = wdg->GetDesiredSize();
+            FVector2D size_now = wdg->GetDesiredSize();
             FVector2D size = GetItemSize(idx);
-            if (!size.Equals(sz_now)) {
-                AddSpecialSize(idx, sz_now);
-                //print_log = true;
-                //float fOffset = ScrollBoxList->GetScrollOffset();
-                //if (LastOffset > fOffset) {
+            if (!size.Equals(size_now)) {
+                AddSpecialSize(idx, size_now);
+                //int32 delta_sz = size_now - size;
+                FVector2D delta_sz = size_now - size;
+                float fOffset = ScrollBoxList->GetScrollOffset();
+                if (LastOffset > fOffset) {
                     //向上或向左滑动，需要补滑动差值
-                //    SetScrollOffset(fOffset + delta_sz);
-                //}
-                //LastOffset = fOffset;
+                    SetScrollOffset(IsVertical() ? fOffset + delta_sz.Y : fOffset + delta_sz.X);
+                }
+                LastOffset = fOffset;
             }
         }
     }
-    //if (print_log) {
-    //    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
-    //        FVector2D sz = iter->Value->GetDesiredSize();
-    //        UE_LOG(LogUReuseListSp, Log, TEXT("AdjustItem idx=%d x=%f y=%f"), iter->Key, sz.X, sz.Y);
-    //    }
-    //}
 }
 
 void UReuseListS::AdjustItemWidgetSize()

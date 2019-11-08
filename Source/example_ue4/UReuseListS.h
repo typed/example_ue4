@@ -175,6 +175,7 @@ protected:
     TQuadTree<int32> ArrOffset;
     TMap<int32, FBox2D> TransMap;
     TMap<int32, FVector2D> SpecialSizeMap;
+    float LastOffset;
     int32 NeedFillArrOffset;
     int32 NeedAdjustItemWidgetSize;
     int32 NeedAdjustItem;
