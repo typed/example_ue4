@@ -29,6 +29,15 @@ enum class EReuseListSStyle : uint8
     Horizontal,
 };
 
+enum EReuseListSMsgType
+{
+    AdjustItem,
+    FillArrOffset,
+    AdjustItemWidgetSize,
+    DoReload,
+    Num,
+};
+
 UCLASS()
 class EXAMPLE_UE4_API UReuseListS : public UUserWidget
 {
@@ -176,9 +185,7 @@ protected:
     TMap<int32, FBox2D> TransMap;
     TMap<int32, FVector2D> SpecialSizeMap;
     float LastOffset;
-    int32 NeedFillArrOffset;
-    int32 NeedAdjustItemWidgetSize;
-    int32 NeedAdjustItem;
+    int8 MsgMap[EReuseListSMsgType::Num];
 };
 
 DECLARE_LOG_CATEGORY_EXTERN(LogUReuseListS, Verbose, All);

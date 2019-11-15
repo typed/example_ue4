@@ -31,11 +31,11 @@ UReuseListS::UReuseListS(const FObjectInitializer& ObjectInitializer)
     , ItemPoolMaxNum(100)
     , ScrollBarVisibility(ESlateVisibility::Collapsed)
     , LastOffset(0.f)
-    , NeedFillArrOffset(0)
-    , NeedAdjustItemWidgetSize(0)
-    , NeedAdjustItem(0)
     , ArrOffset(FBox2D(FVector2D::ZeroVector, FVector2D(99999.f,99999.f)))
 {
+    for (int32 i = 0; i < EReuseListSMsgType::Num; ++i) {
+        MsgMap[i] = 0;
+    }
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
     ScrollBoxStyle.TopShadowBrush = FSlateNoResource();
     ScrollBoxStyle.RightShadowBrush = FSlateNoResource();
@@ -65,22 +65,28 @@ void UReuseListS::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     if (IsInvalidParam())
         return;
 
-    if (NeedAdjustItem > 0) {
-        --NeedAdjustItem;
-        AdjustItem();
-    }
-    if (NeedFillArrOffset > 0) {
-        --NeedFillArrOffset;
-        FillArrOffset();
-    }
-    if (NeedAdjustItemWidgetSize > 0) {
-        --NeedAdjustItemWidgetSize;
-        AdjustItemWidgetSize();
-    }
-
-    const FVector2D& lzSz = GetCachedGeometry().GetLocalSize();
-    if (!ViewSize.Equals(lzSz, 0.0001f)) {
-        DoReload();
+    for (int32 i = 0; i < EReuseListSMsgType::Num; ++i) {
+        if (MsgMap[i] > 0) {
+            --MsgMap[i];
+            switch (i) {
+            case EReuseListSMsgType::AdjustItem: {
+                AdjustItem();
+                break;
+            }
+            case EReuseListSMsgType::FillArrOffset: {
+                FillArrOffset();
+                break;
+            }
+            case EReuseListSMsgType::AdjustItemWidgetSize: {
+                AdjustItemWidgetSize();
+                break;
+            }
+            case EReuseListSMsgType::DoReload: {
+                DoReload();
+                break;
+            }
+            }
+        }
     }
 
     ScrollUpdate(ScrollBoxList->GetScrollOffset());
@@ -94,6 +100,7 @@ void UReuseListS::Reload(int32 __ItemCount)
     if (lzSz.Equals(FVector2D::ZeroVector, 0.0001f)) {
         ViewSize = lzSz;
         ReleaseAllItem();
+        MsgMap[EReuseListSMsgType::DoReload] = 1;
         return;
     }
     DoReload();
@@ -150,15 +157,15 @@ void UReuseListS::InitWidgetPtr()
 void UReuseListS::ClearSpecialSize()
 {
     SpecialSizeMap.Empty();
-    NeedFillArrOffset = 1;
-    NeedAdjustItemWidgetSize = 1;
+    MsgMap[EReuseListSMsgType::FillArrOffset] = 1;
+    MsgMap[EReuseListSMsgType::AdjustItemWidgetSize] = 1;
 }
 
 void UReuseListS::AddSpecialSize(int32 __Idx, const FVector2D& __Size)
 {
     SpecialSizeMap.Add(__Idx, __Size);
-    NeedFillArrOffset = 1;
-    NeedAdjustItemWidgetSize = 1;
+    MsgMap[EReuseListSMsgType::FillArrOffset] = 1;
+    MsgMap[EReuseListSMsgType::AdjustItemWidgetSize] = 1;
 }
 
 void UReuseListS::FillArrOffset()
@@ -293,7 +300,7 @@ void UReuseListS::ScrollUpdate(float __Offset)
                     cps->SetOffsets(FMargin(box.Min.X, box.Min.Y, box.Max.X - box.Min.X, box.Max.Y - box.Min.Y));
                     ItemMap.Add(i, w);
                     OnUpdateItem.Broadcast(w.Get(), i);
-                    NeedAdjustItem = 5;
+                    MsgMap[EReuseListSMsgType::AdjustItem] = 5;
                 }
             }
         }
@@ -318,7 +325,7 @@ void UReuseListS::UpdateContentSize(TWeakObjectPtr<UWidget> widget)
 
 void UReuseListS::RemoveNotUsed(const TArray<int32>& items)
 {
-    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter(ItemMap); iter; ++iter) {
         int32 idx_found = items.Find(iter->Key);
         if (idx_found == INDEX_NONE) {
             ReleaseItem(iter->Value);
@@ -326,7 +333,7 @@ void UReuseListS::RemoveNotUsed(const TArray<int32>& items)
         }
     }
     // size == 0 也是不用的
-    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter(ItemMap); iter; ++iter) {
         FVector2D sz_item = GetItemSize(iter->Key);
         if (sz_item.X <= 0.f || sz_item.Y <= 0.f) {
             ReleaseItem(iter->Value);
@@ -468,7 +475,7 @@ void UReuseListS::SyncProp()
 
 void UReuseListS::AdjustItem()
 {
-    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter(ItemMap); iter; ++iter) {
         TWeakObjectPtr<UUserWidget> wdg = iter->Value;
         if (wdg.IsValid()) {
             int32 idx = iter->Key;
@@ -491,7 +498,7 @@ void UReuseListS::AdjustItem()
 
 void UReuseListS::AdjustItemWidgetSize()
 {
-    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter = ItemMap.CreateIterator(); iter; ++iter) {
+    for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TIterator iter(ItemMap); iter; ++iter) {
         int32 idx = iter->Key;
         TWeakObjectPtr<UUserWidget> wdg = iter->Value;
         if (wdg.IsValid()) {
