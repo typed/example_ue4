@@ -6,7 +6,6 @@ SRadarChart::SRadarChart()
 {
     SideCount = 3;
     Antialias = 2.f;
-    AntialiasHighParam = 5.f;
     MinProgress = 0.1f;
     bCanTick = false;
     bCanSupportFocus = false;
@@ -22,10 +21,9 @@ void SRadarChart::SetSideCount(int32 __SideCount)
     SideCount = __SideCount;
 }
 
-void SRadarChart::SetAntialias(float __Antialias, float __AntialiasHighParam)
+void SRadarChart::SetAntialias(float __Antialias)
 {
     Antialias = __Antialias;
-    AntialiasHighParam = __AntialiasHighParam;
 }
 
 void SRadarChart::SetMinProgress(float __MinProgress)
@@ -80,17 +78,6 @@ void SRadarChart::ResetProgress()
     Progress.Empty();
 }
 
-#define ComputeSlateVertex(ant, col) {\
-    float Theta = i * WedgeAngle;\
-    float tmp = radius * GetProgress(i) + ant;\
-    FVector2D pt_offset = GetPosOffset(i);\
-    vec.X = PtCenter.X + tmp * FMath::Cos(Theta) + pt_offset.X;\
-    vec.Y = PtCenter.Y - tmp * FMath::Sin(Theta) + pt_offset.Y;\
-    TexCoords.X = 0.5f + (vec.X - PtCenter.X) / diameter;\
-    TexCoords.Y = 0.5f + (vec.Y - PtCenter.Y) / diameter;\
-    v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, vec, TexCoords, col);\
-}
-
 int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,
     const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements,
     int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
@@ -111,12 +98,23 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
     float diameter = radius * 2.f;
     FSlateVertex v;
     FVector2D vec;
+    TArray<FVector2D> vec_s;
+    vec_s.Reserve(SideCount);
     FVector2D TexCoords(0.5f, 0.5f);
     v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, PtCenter, TexCoords, GetPosColor(0));
     av.Add(v);
+    vec_s.Add(vec);
     for (int32 i = 0; i < SideCount; i++) {
-        ComputeSlateVertex(0.f, GetPosColor(i + 1))
+        float Theta = i * WedgeAngle;
+        float tmp = radius * GetProgress(i);
+        FVector2D pt_offset = GetPosOffset(i);
+        vec.X = PtCenter.X + tmp * FMath::Cos(Theta) + pt_offset.X;
+        vec.Y = PtCenter.Y - tmp * FMath::Sin(Theta) + pt_offset.Y;
+        TexCoords.X = 0.5f + (vec.X - PtCenter.X) / diameter;
+        TexCoords.Y = 0.5f + (vec.Y - PtCenter.Y) / diameter;
+        v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, vec, TexCoords, GetPosColor(i + 1));
         av.Add(v);
+        vec_s.Add(vec);
     }
     for (int32 i = 1; i <= SideCount; i++) {
         int32 next = i == SideCount ? 1 : i + 1;
@@ -129,7 +127,28 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
         for (int32 i = 0; i < SideCount; i++) {
             FColor BdCol = GetPosColor(i + 1);
             BdCol.A = 0.f;
-            ComputeSlateVertex(Antialias + (GetProgress(i) * AntialiasHighParam), BdCol)
+            int32 idxA = i + 1 - 1;
+            if (idxA <= 0) {
+                idxA = SideCount;
+            }
+            int32 idxB = i + 1 + 1;
+            if (idxB >= SideCount) {
+                idxB = 1;
+            }
+            const FVector2D& svA = vec_s[idxA];
+            const FVector2D& svO = vec_s[i + 1];
+            const FVector2D& svB = vec_s[idxB];
+            FVector2D vA = svA - svO;
+            vA.Normalize();
+            FVector2D vB = svB - svO;
+            vB.Normalize();
+            FVector2D vC = (-(vA + vB));
+            vC.Normalize();
+            FVector2D pt_offset = GetPosOffset(i);
+            vec = svO + vC * Antialias + pt_offset;
+            TexCoords.X = 0.5f + (vec.X - PtCenter.X) / diameter;
+            TexCoords.Y = 0.5f + (vec.Y - PtCenter.Y) / diameter;
+            v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, vec, TexCoords, BdCol);
             av.Add(v);
         }
         int32 next, next_border;

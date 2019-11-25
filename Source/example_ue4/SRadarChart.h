@@ -26,7 +26,7 @@ public:
 
     void SetSideCount(int32 __SideCount);
 
-    void SetAntialias(float __Antialias, float __AntialiasHighParam);
+    void SetAntialias(float __Antialias);
 
     void SetMinProgress(float __MinProgress);
 
@@ -55,7 +55,6 @@ protected:
     int32 SideCount;
     
     float Antialias;
-    float AntialiasHighParam;
     
     FSlateBrush Brush;
 

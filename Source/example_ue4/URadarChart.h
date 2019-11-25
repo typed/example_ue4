@@ -31,7 +31,7 @@ public:
     void SetSideCount(int32 __SideCount);
     
     UFUNCTION(BlueprintCallable, Category = Property)
-    void SetAntialias(float __Antialias, float __AntialiasHighParam);
+    void SetAntialias(float __Antialias);
     
     UFUNCTION(BlueprintCallable, Category = Property)
     void SetBrush(const FSlateBrush& __Brush);
@@ -55,9 +55,6 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
     float Antialias;
-
-    UPROPERTY(EditAnywhere, Category = Property, meta = (ClampMin = "0"))
-    float AntialiasHighParam;
 
     UPROPERTY(EditAnywhere, Category = Property)
     FSlateBrush Brush;
