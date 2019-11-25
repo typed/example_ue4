@@ -7,7 +7,8 @@ URadarChart::URadarChart(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
     SideCount = 3;
-    Antialias = 2;
+    Antialias = 2.f;
+    AntialiasHighParam = 5.f;
     MinProgress = 0.1f;
     Visibility = ESlateVisibility::HitTestInvisible;
 }
@@ -20,11 +21,12 @@ void URadarChart::SetSideCount(int32 __SideCount)
     }
 }
 
-void URadarChart::SetAntialias(float __Antialias)
+void URadarChart::SetAntialias(float __Antialias, float __AntialiasHighParam)
 {
     Antialias = __Antialias;
+    AntialiasHighParam = __AntialiasHighParam;
     if (MyRadarChart.IsValid()) {
-        MyRadarChart->SetAntialias(Antialias);
+        MyRadarChart->SetAntialias(Antialias, __AntialiasHighParam);
     }
 }
 
@@ -74,7 +76,7 @@ void URadarChart::SynchronizeProperties()
 
     if (MyRadarChart.IsValid()) {
         MyRadarChart->SetSideCount(SideCount);
-        MyRadarChart->SetAntialias(Antialias);
+        MyRadarChart->SetAntialias(Antialias, AntialiasHighParam);
         MyRadarChart->SetBrush(Brush);
         MyRadarChart->SetMinProgress(MinProgress);
         MyRadarChart->SetPosOffset(PosOffset);

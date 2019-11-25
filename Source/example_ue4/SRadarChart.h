@@ -26,7 +26,7 @@ public:
 
     void SetSideCount(int32 __SideCount);
 
-    void SetAntialias(float __Antialias);
+    void SetAntialias(float __Antialias, float __AntialiasHighParam);
 
     void SetMinProgress(float __MinProgress);
 
@@ -42,7 +42,9 @@ public:
     float GetProgress(int32 i) const;
     void ResetProgress();
 
-    virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const;
+    virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,
+        const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements,
+        int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const;
 
 protected:
 
@@ -53,6 +55,7 @@ protected:
     int32 SideCount;
     
     float Antialias;
+    float AntialiasHighParam;
     
     FSlateBrush Brush;
 
