@@ -127,11 +127,11 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
         for (int32 i = 0; i < SideCount; i++) {
             FColor BdCol = GetPosColor(i + 1);
             BdCol.A = 0.f;
-            int32 idxA = i + 1 - 1;
+            int32 idxA = i;
             if (idxA <= 0) {
                 idxA = SideCount;
             }
-            int32 idxB = i + 1 + 1;
+            int32 idxB = i + 2;
             if (idxB >= SideCount) {
                 idxB = 1;
             }
@@ -142,7 +142,7 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
             vA.Normalize();
             FVector2D vB = svB - svO;
             vB.Normalize();
-            FVector2D vC = (-(vA + vB));
+            FVector2D vC = -(vA + vB);
             vC.Normalize();
             FVector2D pt_offset = GetPosOffset(i);
             vec = svO + vC * Antialias + pt_offset;
