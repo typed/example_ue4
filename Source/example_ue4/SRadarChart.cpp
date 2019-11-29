@@ -49,7 +49,7 @@ void SRadarChart::SetPosColor(const TArray<FColor>& __PosColor)
     PosColor = __PosColor;
 }
 
-FColor SRadarChart::GetPosColor(int32 __idx) const
+const FColor& SRadarChart::GetPosColor(int32 __idx) const
 {
     if (PosColor.IsValidIndex(__idx)) {
         return PosColor[__idx];
@@ -69,7 +69,7 @@ void SRadarChart::SetProgress(int32 i, float prg)
 
 float SRadarChart::GetProgress(int32 i) const
 {
-    auto pf = Progress.Find(i);
+    const float* pf = Progress.Find(i);
     return pf ? *pf : MinProgress;
 }
 

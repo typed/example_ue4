@@ -34,7 +34,7 @@ public:
     FVector2D GetPosOffset(int32 __idx) const;
 
     void SetPosColor(const TArray<FColor>& __PosColor);
-    FColor GetPosColor(int32 __idx) const;
+    const FColor& GetPosColor(int32 __idx) const;
 
     void SetBrush(const FSlateBrush& __Brush);
 
