@@ -36,7 +36,7 @@ void SRadarChart::SetPosOffset(const TArray<FVector2D>& __PosOffset)
     PosOffset = __PosOffset;
 }
 
-FVector2D SRadarChart::GetPosOffset(int32 __idx) const
+const FVector2D& SRadarChart::GetPosOffset(int32 __idx) const
 {
     if (PosOffset.IsValidIndex(__idx)) {
         return PosOffset[__idx];
@@ -107,7 +107,7 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
     for (int32 i = 0; i < SideCount; i++) {
         float Theta = i * WedgeAngle;
         float tmp = radius * GetProgress(i);
-        FVector2D pt_offset = GetPosOffset(i);
+        const FVector2D& pt_offset = GetPosOffset(i);
         vec.X = PtCenter.X + tmp * FMath::Cos(Theta) + pt_offset.X;
         vec.Y = PtCenter.Y - tmp * FMath::Sin(Theta) + pt_offset.Y;
         TexCoords.X = 0.5f + (vec.X - PtCenter.X) / diameter;
@@ -144,7 +144,7 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
             vB.Normalize();
             FVector2D vC = -(vA + vB);
             vC.Normalize();
-            FVector2D pt_offset = GetPosOffset(i);
+            const FVector2D& pt_offset = GetPosOffset(i);
             vec = svO + vC * Antialias + pt_offset;
             TexCoords.X = 0.5f + (vec.X - PtCenter.X) / diameter;
             TexCoords.Y = 0.5f + (vec.Y - PtCenter.Y) / diameter;
