@@ -91,7 +91,8 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
     av.Reserve(SideCount * 2 + 1);
     ai.Reserve(SideCount * 3 * 3);
 
-    const FSlateRenderTransform& transform = AllottedGeometry.ToPaintGeometry().GetAccumulatedRenderTransform();
+    const FSlateRenderTransform& transform = AllottedGeometry.ToPaintGeometry(
+        ).GetAccumulatedRenderTransform();
     float WedgeAngle = (2.f * PI) / SideCount;
     FVector2D PtCenter = LocalSz / 2.f;
     float radius = FMath::Min(PtCenter.X, PtCenter.Y);
@@ -101,7 +102,8 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
     TArray<FVector2D> vec_s;
     vec_s.Reserve(SideCount);
     FVector2D TexCoords(0.5f, 0.5f);
-    v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, PtCenter, TexCoords, GetPosColor(0));
+    v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(
+        transform, PtCenter, TexCoords, GetPosColor(0));
     av.Add(v);
     vec_s.Add(vec);
     for (int32 i = 0; i < SideCount; i++) {
@@ -112,7 +114,8 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
         vec.Y = PtCenter.Y - tmp * FMath::Sin(Theta) + pt_offset.Y;
         TexCoords.X = 0.5f + (vec.X - PtCenter.X) / diameter;
         TexCoords.Y = 0.5f + (vec.Y - PtCenter.Y) / diameter;
-        v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, vec, TexCoords, GetPosColor(i + 1));
+        v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(
+            transform, vec, TexCoords, GetPosColor(i + 1));
         av.Add(v);
         vec_s.Add(vec);
     }
@@ -148,7 +151,8 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
             vec = svO + vC * Antialias + pt_offset;
             TexCoords.X = 0.5f + (vec.X - PtCenter.X) / diameter;
             TexCoords.Y = 0.5f + (vec.Y - PtCenter.Y) / diameter;
-            v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(transform, vec, TexCoords, BdCol);
+            v = FSlateVertex::Make<ESlateVertexRounding::Disabled>(
+                transform, vec, TexCoords, BdCol);
             av.Add(v);
         }
         int32 next, next_border;
@@ -170,7 +174,8 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
         }
     }
 
-    FSlateResourceHandle handle = FSlateApplication::Get().GetRenderer()->GetResourceHandle(Brush);
+    FSlateResourceHandle handle = FSlateApplication::Get(
+        ).GetRenderer()->GetResourceHandle(Brush);
     if (handle.IsValid()) {
         FSlateDrawElement::MakeCustomVerts(
             OutDrawElements,
