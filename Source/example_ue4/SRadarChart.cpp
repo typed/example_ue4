@@ -141,12 +141,9 @@ int32 SRadarChart::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
             const FVector2D& svA = vec_s[idxA];
             const FVector2D& svO = vec_s[i + 1];
             const FVector2D& svB = vec_s[idxB];
-            FVector2D vA = svA - svO;
-            vA.Normalize();
-            FVector2D vB = svB - svO;
-            vB.Normalize();
-            FVector2D vC = -(vA + vB);
-            vC.Normalize();
+            FVector2D vA = svA - svO; vA.Normalize();
+            FVector2D vB = svB - svO; vB.Normalize();
+            FVector2D vC = -(vA + vB); vC.Normalize();
             const FVector2D& pt_offset = GetPosOffset(i);
             vec = svO + vC * Antialias + pt_offset;
             TexCoords.X = 0.5f + (vec.X - PtCenter.X) / diameter;
