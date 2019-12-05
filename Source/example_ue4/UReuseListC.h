@@ -10,6 +10,7 @@ Description: 重用列表
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Runtime/SlateCore/Public/Styling/SlateTypes.h"
 #include "UReuseListC.generated.h"
 
 /**

@@ -21,7 +21,7 @@ bool UImageDownloaderAsync::s_bCheckDiskFile = true;
 TMap<FString, int32> UImageDownloaderAsync::s_mapInvalidFormatTryCount;
 int32 UImageDownloaderAsync::s_nInvalidFormatTryMaxCount = 5;
 
-static TWeakObjectPtr<UTexture2D> GetTexture2DFromArray(const TArray<uint8>& OutArray, bool& InvalidImageFormat)
+inline TWeakObjectPtr<UTexture2D> GetTexture2DFromArray(const TArray<uint8>& OutArray, bool& InvalidImageFormat)
 {
 	InvalidImageFormat = false;
 	IImageWrapperModule& imageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
@@ -47,7 +47,7 @@ static TWeakObjectPtr<UTexture2D> GetTexture2DFromArray(const TArray<uint8>& Out
 	return OutTex;
 }
 
-static TWeakObjectPtr<UTexture2D> GetTexture2DFromDisk(FString PathName, bool& InvalidImageFormat)
+inline TWeakObjectPtr<UTexture2D> GetTexture2DFromDisk(FString PathName, bool& InvalidImageFormat)
 {
 	InvalidImageFormat = false;
 	if (!FPaths::FileExists(PathName)) {

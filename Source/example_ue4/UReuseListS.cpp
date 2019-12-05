@@ -6,10 +6,10 @@
 #include "Runtime/UMG/Public/Components/CanvasPanelSlot.h"
 #include "Runtime/UMG/Public/Components/ScrollBox.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetBlueprintGeneratedClass.h"
+#include "Runtime/Engine/Public/TimerManager.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 
 DEFINE_LOG_CATEGORY(LogUReuseListS);
-static const float c_fLastOffsetInitValue = 0.f;
 
 UReuseListS::UReuseListS(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
@@ -173,7 +173,6 @@ void UReuseListS::FillArrOffset()
     ArrOffset.Empty();
     TransMap.Empty();
     int32 tmpOffset = 0;
-    int32 sz_item = 0;
     //ViewSize.X
     FVector2D Offset = FVector2D::ZeroVector;
     FBox2D box;

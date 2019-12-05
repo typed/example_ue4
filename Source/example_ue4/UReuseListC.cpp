@@ -7,6 +7,7 @@
 #include "Runtime/UMG/Public/Components/ScrollBox.h"
 #include "Runtime/UMG/Public/Components/NamedSlot.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetBlueprintGeneratedClass.h"
+#include "Runtime/Engine/Public/TimerManager.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 
 DEFINE_LOG_CATEGORY(LogUReuseListC);

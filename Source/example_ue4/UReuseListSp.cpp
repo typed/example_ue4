@@ -6,10 +6,10 @@
 #include "Runtime/UMG/Public/Components/CanvasPanelSlot.h"
 #include "Runtime/UMG/Public/Components/ScrollBox.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetBlueprintGeneratedClass.h"
+#include "Runtime/Engine/Public/TimerManager.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 
 DEFINE_LOG_CATEGORY(LogUReuseListSp);
-static const float c_fLastOffsetInitValue = 0.f;
 
 UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
@@ -42,7 +42,7 @@ UReuseListSp::UReuseListSp(const FObjectInitializer& ObjectInitializer)
     , NotFullAlignStyle(EReuseListSpNotFullAlignStyle::Start)
     , NotFullScrollBoxHitTestInvisible(false)
     , AutoAdjustItemSize(true)
-    , LastOffset(c_fLastOffsetInitValue)
+    , LastOffset(0.f)
 {
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
     ScrollBoxStyle.TopShadowBrush = FSlateNoResource();

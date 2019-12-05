@@ -10,6 +10,7 @@ Description: 支持item任意大小的重用列表
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Runtime/SlateCore/Public/Styling/SlateTypes.h"
 #include "UReuseListSp.generated.h"
 
 /**
