@@ -91,7 +91,10 @@ float UReuseListC::GetTitleSize()
         return 0.f;
     UWidget* w = NamedSlotTitle->GetChildAt(0);
     if (w) {
-        const FVector2D& sz = w->GetCachedGeometry().GetLocalSize();
+        if (!AutoTitleSize) {
+            return TitleSize + TitlePadding;
+        }
+        const FVector2D& sz = w->GetDesiredSize();
         return (IsVertical() ? sz.Y : sz.X) + TitlePadding;
     }
     return 0.f;

@@ -12,7 +12,7 @@ function ExampleReuseList:construct()
     self.widget.Button_0.OnClicked:Add(function() self:OnJumpByIdx() end)
     self.widget.ButtonRefresh.OnClicked:Add(function() self.widget.ReuseList2:Refresh() end)
     self.widget.ButtonRefreshOne.OnClicked:Add(function() self.widget.ReuseList2:RefreshOne(5) end)
-    --self:OnClickItem1()
+    self:OnClickItem1()
 end
 
 function ExampleReuseList:destruct()
