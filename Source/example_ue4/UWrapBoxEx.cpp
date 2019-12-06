@@ -40,11 +40,9 @@ void UWrapBoxEx::Reload(int32 __ItemCount)
 
 void UWrapBoxEx::Reset(TSubclassOf<UUserWidget> __ItemClass)
 {
+    ClearChildren();
     ItemClass = __ItemClass;
-    if (LastItemClass != ItemClass) {
-        LastItemClass = ItemClass;
-        ClearChildren();
-    }
+    LastItemClass = __ItemClass;
 }
 
 void UWrapBoxEx::SynchronizeProperties()
