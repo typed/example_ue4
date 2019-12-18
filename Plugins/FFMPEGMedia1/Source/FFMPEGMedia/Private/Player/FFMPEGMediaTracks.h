@@ -16,6 +16,7 @@
 #include "IMediaSamples.h"
 #include "IMediaTracks.h"
 #include "IMediaControls.h"
+#include "IMediaEventSink.h"
 #include "Math/IntPoint.h"
 #include "MediaSampleQueue.h"
 #include "Templates/SharedPointer.h"
@@ -26,6 +27,7 @@
 class FFFMPEGMediaAudioSamplePool;
 class FFFMPEGMediaTextureSamplePool;
 
+struct AVStream;
 struct AVFormatContext;
 struct AVCodec;
 struct AVBufferRef;

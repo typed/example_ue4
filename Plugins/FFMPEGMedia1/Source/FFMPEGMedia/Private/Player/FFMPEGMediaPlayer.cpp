@@ -226,7 +226,6 @@ bool FFFMPEGMediaPlayer::InitializePlayer(const TSharedPtr<FArchive, ESPMode::Th
 
 	const auto Settings = GetDefault<UFFMPEGMediaSettings>();
 	check(Settings != nullptr);
-
 	
 	MediaUrl = Url;
 

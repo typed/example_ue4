@@ -1,0 +1,4 @@
+ffmpeg插件问题
+1.部分视频不能循环播放
+
+2.只支持windows，需要支持mac、android、ios
