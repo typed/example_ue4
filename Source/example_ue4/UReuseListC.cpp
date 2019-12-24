@@ -258,7 +258,6 @@ void UReuseListC::ScrollUpdate(float __Offset)
         BIdx = FMath::Max((Offset / ItemHeightAndPad) * ColNum, 0);
         int32 tmp = FMath::CeilToFloat((float)OffsetEnd / ItemHeightAndPad);
         EIdx = FMath::Min(tmp * ColNum - 1, ItemCount - 1);
-        //UE_LOG(LogUReuseListC, Log, TEXT("BIdx=%d EIdx=%d __Offset=%f"), BIdx, EIdx, __Offset);
     }
     else if (Style == EReuseListStyle::HorizontalGrid) {
         BIdx = FMath::Max((Offset / ItemWidthAndPad) * RowNum, 0);
@@ -284,7 +283,6 @@ void UReuseListC::ScrollUpdate(float __Offset)
         LastBIdx = BIdx;
         LastEIdx = EIdx;
         OnScrollItem.Broadcast(BIdx, EIdx);
-        //UE_LOG(LogUReuseListC, Log, TEXT("OnScrollItem BIdx=%d EIdx=%d"), BIdx, EIdx, CacheTitleSize, __Offset);
     }
     LastOffset = Offset;
 }
