@@ -276,6 +276,8 @@ protected:
     int32 ColNum;
     int32 RowNum;
     int32 CurLine;
+    int32 LastBIdx;
+    int32 LastEIdx;
     int32 JumpIdx;
     EReuseListJumpStyle JumpStyle;
     float AlignSpace;

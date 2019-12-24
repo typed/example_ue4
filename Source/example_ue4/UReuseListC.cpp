@@ -28,11 +28,13 @@ UReuseListC::UReuseListC(const FObjectInitializer& ObjectInitializer)
     , ItemHeight(100)
     , MaxPos(0)
     , Style(EReuseListStyle::Vertical)
-    , ItemCacheNum(2)
+    , ItemCacheNum(1)
     , ItemWidth(100)
     , ColNum(0)
     , RowNum(0)
     , CurLine(-999)
+    , LastBIdx(-1)
+    , LastEIdx(-1)
     , JumpIdx(0)
     , JumpStyle(EReuseListJumpStyle::Middle)
     , NeedJump(false)
@@ -254,8 +256,9 @@ void UReuseListC::ScrollUpdate(float __Offset)
     }
     else if (Style == EReuseListStyle::VerticalGrid) {
         BIdx = FMath::Max((Offset / ItemHeightAndPad) * ColNum, 0);
-        int32 tmp = FMath::CeilToFloat((float)OffsetEnd / ItemHeightAndPad) + 1;
+        int32 tmp = FMath::CeilToFloat((float)OffsetEnd / ItemHeightAndPad);
         EIdx = FMath::Min(tmp * ColNum - 1, ItemCount - 1);
+        //UE_LOG(LogUReuseListC, Log, TEXT("BIdx=%d EIdx=%d __Offset=%f"), BIdx, EIdx, __Offset);
     }
     else if (Style == EReuseListStyle::HorizontalGrid) {
         BIdx = FMath::Max((Offset / ItemWidthAndPad) * RowNum, 0);
@@ -277,7 +280,12 @@ void UReuseListC::ScrollUpdate(float __Offset)
             }
         }
     }
-    OnScrollItem.Broadcast(BIdx, EIdx);
+    if (BIdx != LastBIdx || EIdx != LastEIdx) {
+        LastBIdx = BIdx;
+        LastEIdx = EIdx;
+        OnScrollItem.Broadcast(BIdx, EIdx);
+        //UE_LOG(LogUReuseListC, Log, TEXT("OnScrollItem BIdx=%d EIdx=%d"), BIdx, EIdx, CacheTitleSize, __Offset);
+    }
     LastOffset = Offset;
 }
 
@@ -372,6 +380,7 @@ void UReuseListC::DoReload()
                 ScrollBoxList->ScrollToEnd();
             }
         }
+        LastBIdx = LastEIdx = -1;
         ScrollUpdate(ScrollBoxList->GetScrollOffset());
     }
 }
@@ -432,6 +441,7 @@ void UReuseListC::DoJump()
     if (ScrollBoxList.IsValid()) {
         ScrollBoxList->SetScrollOffset(tmpScroll);
     }
+    LastBIdx = LastEIdx = -1;
     ScrollUpdate(tmpScroll);
 }
 
@@ -480,12 +490,7 @@ void UReuseListC::Update()
     if (ScrollBoxList.IsValid()) {
         int32 tmpLine = 0;
         float tmpOffset = ScrollBoxList->GetScrollOffset();
-        if (IsVertical()) {
-            tmpLine = (int32)tmpOffset / (ItemHeight + PaddingY);
-        }
-        else {
-            tmpLine = (int32)tmpOffset / (ItemWidth + PaddingX);
-        }
+        tmpLine = (int32)tmpOffset;
         if (tmpLine != CurLine) {
             CurLine = tmpLine;
             ScrollUpdate(tmpOffset);
