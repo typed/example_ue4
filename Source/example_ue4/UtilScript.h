@@ -72,5 +72,11 @@ public:
     static void BeginCost(FString key);
     UFUNCTION(BlueprintCallable)
     static void EndCost(FString key);
+
+    UFUNCTION(BlueprintCallable)
+    static void UpdateAniKeyValue(UWidgetAnimation* InAnimation, float InTime, const TArray<float>& v);
+
+    UFUNCTION(BlueprintCallable)
+    static void UpdateAniKeyValue_2DTransform_Rotation(UWidgetAnimation* InAnimation, const FString& InName, float InTime, float v);
 	
 };

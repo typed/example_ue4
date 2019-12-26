@@ -10,7 +10,7 @@
 #include "UtilGame.h"
 #include "UMG.h"
 #include "LogDefine.h"
-
+#include "Runtime/MovieScene/Public/MovieScene.h"
 
 
 UUserWidget* UUtilScript::CreateUserWidget(FString name)
@@ -177,5 +177,81 @@ void UUtilScript::EndCost(FString key)
         FString str = FString::Format(TEXT("{0} cost {1} s."), Args);
         UE_LOG(LogUtil, Log, TEXT("%s"), (*str));
         ScreenMessage(str);
+    }
+}
+
+void UUtilScript::UpdateAniKeyValue(UWidgetAnimation* InAnimation, float InTime, const TArray<float>& v)
+{
+    if (v.Num() <= 0)
+        return;
+    UMovieScene* ms = InAnimation->GetMovieScene();
+    TArray<UMovieSceneSection*> amss = ms->GetAllSections();
+    for (int32 i = 0; i < amss.Num(); i++) {
+        UMovieSceneSection* mss = amss[i];
+        if (mss->IsA(UMovieScene2DTransformSection::StaticClass())) {
+            UMovieScene2DTransformSection* ms2dts = Cast<UMovieScene2DTransformSection>(mss);
+            FRichCurve& rc = ms2dts->GetRotationCurve();
+            FKeyHandle kh = rc.FindKey(InTime);
+            if (rc.IsKeyHandleValid(kh)) {
+                FRichCurveKey& rck = rc.GetKey(kh);
+                rck.Value = v[0];
+                ms2dts->Modify();
+            }
+        }
+    }
+}
+
+static const FMovieSceneBinding* FindMovieSceneBinding(UWidgetAnimation* InAnimation, const FString& InName)
+{
+    if (InAnimation == nullptr || !InAnimation->IsValidLowLevel()) {
+        return nullptr;
+    }
+    UMovieScene* ms = InAnimation->GetMovieScene();
+    if (ms == nullptr || !ms->IsValidLowLevel()) {
+        return nullptr;
+    }
+    const TArray<FMovieSceneBinding>& ar_msb = ms->GetBindings();
+    for (int32 i = 0; i < ar_msb.Num(); i++) {
+        const FMovieSceneBinding& msb = ar_msb[i];
+        if (msb.GetName() == InName) {
+            return &msb;
+        }
+    }
+    return nullptr;
+}
+
+static UMovieSceneTrack* FindMovieSceneTrack(const FMovieSceneBinding* InBinding, const FString& InName)
+{
+    if (InBinding == nullptr) {
+        return nullptr;
+    }
+    const TArray<UMovieSceneTrack*>& ar_track = InBinding->GetTracks();
+    for (int32 j = 0; j < ar_track.Num(); j++) {
+        UMovieSceneTrack* mst = ar_track[j];
+        if (mst->GetDisplayName().ToString() == InName) {
+            return mst;
+        }
+    }
+    return nullptr;
+}
+
+void UUtilScript::UpdateAniKeyValue_2DTransform_Rotation(UWidgetAnimation* InAnimation, const FString& InName, float InTime, float v)
+{
+    UMovieSceneTrack* mst = FindMovieSceneTrack(FindMovieSceneBinding(InAnimation, InName), TEXT("Transform"));
+    if (mst == nullptr)
+        return;
+    const TArray<UMovieSceneSection*>& amss = mst->GetAllSections();
+    for (int32 i = 0; i < amss.Num(); i++) {
+        UMovieSceneSection* mss = amss[i];
+        if (mss->IsA(UMovieScene2DTransformSection::StaticClass())) {
+            UMovieScene2DTransformSection* ms2dts = Cast<UMovieScene2DTransformSection>(mss);
+            FRichCurve& rc = ms2dts->GetRotationCurve();
+            FKeyHandle kh = rc.FindKey(InTime);
+            if (rc.IsKeyHandleValid(kh)) {
+                FRichCurveKey& rck = rc.GetKey(kh);
+                rck.Value = v;
+                ms2dts->Modify();
+            }
+        }
     }
 }
