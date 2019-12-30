@@ -4,6 +4,7 @@
 #include "Runtime/MovieScene/Public/MovieScene.h"
 #include "Runtime/UMG/Public/Animation/WidgetAnimation.h"
 #include "Runtime/UMG/Public/Animation/MovieScene2DTransformSection.h"
+#include "Runtime/MovieSceneTracks/Public/Tracks/MovieScenePropertyTrack.h"
 #include "Runtime/MovieSceneTracks/Public/Sections/MovieSceneVectorSection.h"
 
 static const FMovieSceneBinding* FindMovieSceneBinding(UWidgetAnimation* InAnimation, const FString& InName)
@@ -29,8 +30,8 @@ static UMovieSceneTrack* FindMovieSceneTrack(const FMovieSceneBinding* InBinding
         return nullptr;
     const TArray<UMovieSceneTrack*>& ar_track = InBinding->GetTracks();
     for (int32 j = 0; j < ar_track.Num(); j++) {
-        UMovieSceneTrack* mst = ar_track[j];
-        if (mst->GetDisplayName().ToString() == InName) {
+        UMovieScenePropertyTrack* mst = Cast<UMovieScenePropertyTrack>(ar_track[j]);
+        if (mst && mst->GetPropertyName().ToString() == InName) {
             return mst;
         }
     }
@@ -47,179 +48,115 @@ static UMovieSceneSection* FindMovieSceneSection(UMovieSceneTrack* InTrack, int3
     return nullptr;
 }
 
-void UMovieSceneHelper::UpdateAniKeyValue_Float(UWidgetAnimation* InAnimation, const FString& InBindingName,
-    const FString& InTrackName, EMovieSceneHelperProperty InProperty, float InTime, float v, int32 section)
+static UMovieSceneSection* FindMovieSceneSection(UWidgetAnimation* InAnimation, const FString& InBindingName, EMovieSceneHelperProperty InProperty, int32 section)
 {
     const FMovieSceneBinding* msb = FindMovieSceneBinding(InAnimation, InBindingName);
     if (msb == nullptr)
-        return;
+        return nullptr;
+    FString InTrackName;
+    switch (InProperty) {
+    case EMovieSceneHelperProperty::TranslationX:
+    case EMovieSceneHelperProperty::TranslationY:
+    case EMovieSceneHelperProperty::Rotation:
+    case EMovieSceneHelperProperty::ScaleX:
+    case EMovieSceneHelperProperty::ScaleY:
+        InTrackName = TEXT("RenderTransform");
+        break;
+    case EMovieSceneHelperProperty::PivotX:
+    case EMovieSceneHelperProperty::PivotY:
+        InTrackName = TEXT("RenderTransformPivot");
+        break;
+    }
     UMovieSceneTrack* mst = FindMovieSceneTrack(msb, InTrackName);
     if (mst == nullptr)
-        return;
-    UMovieSceneSection* mss = FindMovieSceneSection(mst, section);
+        return nullptr;
+    return FindMovieSceneSection(mst, section);
+}
+
+static FRichCurve* FindRichCurve(UMovieSceneSection* mss, EMovieSceneHelperProperty InProperty)
+{
     if (mss == nullptr)
-        return;
+        return nullptr;
+    FRichCurve* p_rc = nullptr;
     if (mss->IsA(UMovieScene2DTransformSection::StaticClass())) {
         UMovieScene2DTransformSection* ms2dts = Cast<UMovieScene2DTransformSection>(mss);
         if (ms2dts) {
-            FRichCurve* p_rc = nullptr;
-            if (InProperty == EMovieSceneHelperProperty::TranslationX) {
+            switch (InProperty) {
+            case EMovieSceneHelperProperty::TranslationX:
                 p_rc = &ms2dts->GetTranslationCurve(EAxis::X);
-            }
-            else if (InProperty == EMovieSceneHelperProperty::TranslationY) {
+                break;
+            case EMovieSceneHelperProperty::TranslationY:
                 p_rc = &ms2dts->GetTranslationCurve(EAxis::Y);
-            }
-            else if (InProperty == EMovieSceneHelperProperty::Rotation) {
+                break;
+            case EMovieSceneHelperProperty::Rotation:
                 p_rc = &ms2dts->GetRotationCurve();
-            }
-            else if (InProperty == EMovieSceneHelperProperty::ScaleX) {
+                break;
+            case EMovieSceneHelperProperty::ScaleX:
                 p_rc = &ms2dts->GetScaleCurve(EAxis::X);
-            }
-            else if (InProperty == EMovieSceneHelperProperty::ScaleY) {
+                break;
+            case EMovieSceneHelperProperty::ScaleY:
                 p_rc = &ms2dts->GetScaleCurve(EAxis::Y);
-            }
-            if (p_rc) {
-                FKeyHandle kh = p_rc->FindKey(InTime);
-                if (p_rc->IsKeyHandleValid(kh)) {
-                    p_rc->GetKey(kh).Value = v;
-                    ms2dts->Modify();
-                }
+                break;
             }
         }
     }
     else if (mss->IsA(UMovieSceneVectorSection::StaticClass())) {
         UMovieSceneVectorSection* ms2dts = Cast<UMovieSceneVectorSection>(mss);
         if (ms2dts) {
-            FRichCurve* p_rc = nullptr;
-            if (InProperty == EMovieSceneHelperProperty::PivotX) {
+            switch (InProperty) {
+            case EMovieSceneHelperProperty::PivotX:
                 p_rc = &ms2dts->GetCurve(0);
-            }
-            else if (InProperty == EMovieSceneHelperProperty::PivotY) {
+                break;
+            case EMovieSceneHelperProperty::PivotY:
                 p_rc = &ms2dts->GetCurve(1);
-            }
-            if (p_rc) {
-                FKeyHandle kh = p_rc->FindKey(InTime);
-                if (p_rc->IsKeyHandleValid(kh)) {
-                    p_rc->GetKey(kh).Value = v;
-                    ms2dts->Modify();
-                }
+                break;
             }
         }
+    }
+    return p_rc;
+}
+
+void UMovieSceneHelper::UpdateAniKeyValue_Float(UWidgetAnimation* InAnimation, const FString& InBindingName,
+    EMovieSceneHelperProperty InProperty, int32 section, float InTime, float v)
+{
+    UMovieSceneSection* mss = FindMovieSceneSection(InAnimation, InBindingName, InProperty, section);
+    if (mss == nullptr)
+        return;
+    FRichCurve* p_rc = FindRichCurve(mss, InProperty);
+    if (p_rc == nullptr)
+        return;
+    FKeyHandle kh = p_rc->FindKey(InTime);
+    if (p_rc->IsKeyHandleValid(kh)) {
+        p_rc->GetKey(kh).Value = v;
+        mss->Modify();
     }
 }
 
 void UMovieSceneHelper::RemoveAniKey(UWidgetAnimation* InAnimation, const FString& InBindingName,
-    const FString& InTrackName, EMovieSceneHelperProperty InProperty, float InTime, int32 section)
+    EMovieSceneHelperProperty InProperty, int32 section, float InTime)
 {
-    const FMovieSceneBinding* msb = FindMovieSceneBinding(InAnimation, InBindingName);
-    if (msb == nullptr)
-        return;
-    UMovieSceneTrack* mst = FindMovieSceneTrack(msb, InTrackName);
-    if (mst == nullptr)
-        return;
-    UMovieSceneSection* mss = FindMovieSceneSection(mst, section);
+    UMovieSceneSection* mss = FindMovieSceneSection(InAnimation, InBindingName, InProperty, section);
     if (mss == nullptr)
         return;
-    if (mss->IsA(UMovieScene2DTransformSection::StaticClass())) {
-        UMovieScene2DTransformSection* ms2dts = Cast<UMovieScene2DTransformSection>(mss);
-        if (ms2dts) {
-            FRichCurve* p_rc = nullptr;
-            if (InProperty == EMovieSceneHelperProperty::TranslationX) {
-                p_rc = &ms2dts->GetTranslationCurve(EAxis::X);
-            }
-            else if (InProperty == EMovieSceneHelperProperty::TranslationY) {
-                p_rc = &ms2dts->GetTranslationCurve(EAxis::Y);
-            }
-            else if (InProperty == EMovieSceneHelperProperty::Rotation) {
-                p_rc = &ms2dts->GetRotationCurve();
-            }
-            else if (InProperty == EMovieSceneHelperProperty::ScaleX) {
-                p_rc = &ms2dts->GetScaleCurve(EAxis::X);
-            }
-            else if (InProperty == EMovieSceneHelperProperty::ScaleY) {
-                p_rc = &ms2dts->GetScaleCurve(EAxis::Y);
-            }
-            if (p_rc) {
-                FKeyHandle kh = p_rc->FindKey(InTime);
-                if (p_rc->IsKeyHandleValid(kh)) {
-                    p_rc->DeleteKey(kh);
-                    ms2dts->Modify();
-                }
-            }
-        }
-    }
-    else if (mss->IsA(UMovieSceneVectorSection::StaticClass())) {
-        UMovieSceneVectorSection* ms2dts = Cast<UMovieSceneVectorSection>(mss);
-        if (ms2dts) {
-            FRichCurve* p_rc = nullptr;
-            if (InProperty == EMovieSceneHelperProperty::PivotX) {
-                p_rc = &ms2dts->GetCurve(0);
-            }
-            else if (InProperty == EMovieSceneHelperProperty::PivotY) {
-                p_rc = &ms2dts->GetCurve(1);
-            }
-            if (p_rc) {
-                FKeyHandle kh = p_rc->FindKey(InTime);
-                if (p_rc->IsKeyHandleValid(kh)) {
-                    p_rc->DeleteKey(kh);
-                    ms2dts->Modify();
-                }
-            }
-        }
+    FRichCurve* p_rc = FindRichCurve(mss, InProperty);
+    if (p_rc == nullptr)
+        return;
+    FKeyHandle kh = p_rc->FindKey(InTime);
+    if (p_rc->IsKeyHandleValid(kh)) {
+        p_rc->DeleteKey(kh);
+        mss->Modify();
     }
 }
 
 void UMovieSceneHelper::UpdateOrAddAniKey_Float(UWidgetAnimation* InAnimation, const FString& InBindingName,
-    const FString& InTrackName, EMovieSceneHelperProperty InProperty, float InTime, float v, int32 section)
+    EMovieSceneHelperProperty InProperty, int32 section, float InTime, float v)
 {
-    const FMovieSceneBinding* msb = FindMovieSceneBinding(InAnimation, InBindingName);
-    if (msb == nullptr)
-        return;
-    UMovieSceneTrack* mst = FindMovieSceneTrack(msb, InTrackName);
-    if (mst == nullptr)
-        return;
-    UMovieSceneSection* mss = FindMovieSceneSection(mst, section);
+    UMovieSceneSection* mss = FindMovieSceneSection(InAnimation, InBindingName, InProperty, section);
     if (mss == nullptr)
         return;
-    if (mss->IsA(UMovieScene2DTransformSection::StaticClass())) {
-        UMovieScene2DTransformSection* ms2dts = Cast<UMovieScene2DTransformSection>(mss);
-        if (ms2dts) {
-            FRichCurve* p_rc = nullptr;
-            if (InProperty == EMovieSceneHelperProperty::TranslationX) {
-                p_rc = &ms2dts->GetTranslationCurve(EAxis::X);
-            }
-            else if (InProperty == EMovieSceneHelperProperty::TranslationY) {
-                p_rc = &ms2dts->GetTranslationCurve(EAxis::Y);
-            }
-            else if (InProperty == EMovieSceneHelperProperty::Rotation) {
-                p_rc = &ms2dts->GetRotationCurve();
-            }
-            else if (InProperty == EMovieSceneHelperProperty::ScaleX) {
-                p_rc = &ms2dts->GetScaleCurve(EAxis::X);
-            }
-            else if (InProperty == EMovieSceneHelperProperty::ScaleY) {
-                p_rc = &ms2dts->GetScaleCurve(EAxis::Y);
-            }
-            if (p_rc) {
-                p_rc->UpdateOrAddKey(InTime, v);
-                ms2dts->Modify();
-            }
-        }
-    }
-    else if (mss->IsA(UMovieSceneVectorSection::StaticClass())) {
-        UMovieSceneVectorSection* ms2dts = Cast<UMovieSceneVectorSection>(mss);
-        if (ms2dts) {
-            FRichCurve* p_rc = nullptr;
-            if (InProperty == EMovieSceneHelperProperty::PivotX) {
-                p_rc = &ms2dts->GetCurve(0);
-            }
-            else if (InProperty == EMovieSceneHelperProperty::PivotY) {
-                p_rc = &ms2dts->GetCurve(1);
-            }
-            if (p_rc) {
-                p_rc->UpdateOrAddKey(InTime, v);
-                ms2dts->Modify();
-            }
-        }
-    }
+    FRichCurve* p_rc = FindRichCurve(mss, InProperty);
+    if (p_rc == nullptr)
+        return;
+    p_rc->UpdateOrAddKey(InTime, v);
+    mss->Modify();
 }

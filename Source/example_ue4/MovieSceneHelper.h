@@ -31,14 +31,14 @@ public:
 
     UFUNCTION(BlueprintCallable)
     static void UpdateAniKeyValue_Float(UWidgetAnimation* InAnimation, const FString& InBindingName,
-        const FString& InTrackName, EMovieSceneHelperProperty InProperty, float InTime, float v, int32 section = 0);
+        EMovieSceneHelperProperty InProperty, int32 section, float InTime, float v);
 
     UFUNCTION(BlueprintCallable)
     static void RemoveAniKey(UWidgetAnimation* InAnimation, const FString& InBindingName,
-        const FString& InTrackName, EMovieSceneHelperProperty InProperty, float InTime, int32 section = 0);
+        EMovieSceneHelperProperty InProperty, int32 section, float InTime);
 
     UFUNCTION(BlueprintCallable)
     static void UpdateOrAddAniKey_Float(UWidgetAnimation* InAnimation, const FString& InBindingName,
-        const FString& InTrackName, EMovieSceneHelperProperty InProperty, float InTime, float v, int32 section = 0);
+        EMovieSceneHelperProperty InProperty, int32 section, float InTime, float v);
 	
 };
