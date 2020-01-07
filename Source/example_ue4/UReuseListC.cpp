@@ -118,7 +118,7 @@ void UReuseListC::Reload(int32 __ItemCount)
 void UReuseListC::Refresh()
 {
     for (TMap<int32, TWeakObjectPtr<UUserWidget> >::TConstIterator iter(ItemMap); iter; ++iter) {
-        AddDelayUpdate(iter->Key);
+        RefreshOne(iter->Key);
     }
 }
 
@@ -126,7 +126,7 @@ void UReuseListC::RefreshOne(int32 __Idx)
 {
     TWeakObjectPtr<UUserWidget>* v = ItemMap.Find(__Idx);
     if (v && (*v).IsValid()) {
-        AddDelayUpdate(__Idx);
+        OnUpdateItem.Broadcast((*v).Get(), __Idx);
     }
 }
 

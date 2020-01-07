@@ -41,6 +41,7 @@ function ExampleReuseList:OnClickItem1()
         --log("create widget="..tostring(widget))
     end)
     self.widget.ReuseList2:Reload(100000)
+    self.widget.ReuseList2:ScrollToStart()
     --self.widget.ReuseList2:Refresh()
     --self.widget.ReuseList2:Reload(3)
 end

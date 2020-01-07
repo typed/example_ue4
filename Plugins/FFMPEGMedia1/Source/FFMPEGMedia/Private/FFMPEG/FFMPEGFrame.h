@@ -27,13 +27,13 @@ public:
     bool  IsVerticalFlip();
     AVSubtitle& GetSub();
     
-    void UpdateFrame(AVFrame* src_frame, double pts, double duration, int64_t pos, int serial);
+    void UpdateFrame(AVFrame* src_frame, double v_pts, double v_duration, int64_t v_pos, int v_serial);
     void UpdateSize(FFMPEGFrame *vp);
 
     
     void SetPos(int64_t pos);
-    void SetDuration(double duration);
-    void SetPts(double pts);
+    void SetDuration(double d);
+    void SetPts(double p);
     void SetSerial(int serial);
     void SetWidth(int width);
     void SetHeight(int height);

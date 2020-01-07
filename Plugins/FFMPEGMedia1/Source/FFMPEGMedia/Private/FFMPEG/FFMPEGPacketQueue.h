@@ -13,8 +13,8 @@ public:
     FFMPEGPacketQueue();
     ~FFMPEGPacketQueue();
 
-    int Get(AVPacket *pkt, int block, int *serial);
-    int Put(AVPacket *pkt);
+    int Get(AVPacket* pkt, int block, int* v_serial);
+    int Put(AVPacket* pkt);
     int PutFlush();
     int PutNullPacket(int stream_index);
     void Start();

@@ -470,7 +470,8 @@ bool FFFMPEGMediaTracks::FetchCaption(TRange<FTimespan> TimeRange, TSharedPtr<IM
 		return false;
 	}
 
-	OutSample = Sample;
+	//OutSample = Sample;
+    OutSample = nullptr;
 
 	return true;
 }
@@ -513,8 +514,9 @@ bool FFFMPEGMediaTracks::FetchVideo(TRange<FTimespan> TimeRange, TSharedPtr<IMed
 	}
 
 	const FTimespan SampleTime = Sample->GetTime();
+    const FTimespan SampleDuration = Sample->GetDuration();
 
-	if (!TimeRange.Overlaps(TRange<FTimespan>(SampleTime, SampleTime + Sample->GetDuration())))
+	if (!TimeRange.Overlaps(TRange<FTimespan>(SampleTime, SampleTime + SampleDuration)))
 	{
         VideoSampleQueue.RequestFlush();
      	return false;
@@ -1362,18 +1364,18 @@ TArray<const AVCodec*>  FFFMPEGMediaTracks::FindDecoders(int codecId, bool hwacc
 
         tmp.Insert(candidates, tmp.Num()); 
        
-        for (const AVCodec* codec : tmp) {
-            if (isHwAccel(codec)) {
-                codecs.Add(codec);
+        for (const AVCodec* codec1 : tmp) {
+            if (isHwAccel(codec1)) {
+                codecs.Add(codec1);
             }
         }
     }
 
     if (candidates.Num() > 0) {
         if (!hwaccell) {
-            for (const AVCodec* codec : candidates) {
-                if (!isHwAccel(codec)) {
-                    codecs.Add(codec);
+            for (const AVCodec* codec1 : candidates) {
+                if (!isHwAccel(codec1)) {
+                    codecs.Add(codec1);
                 }
             }
         }
@@ -1879,16 +1881,16 @@ int FFFMPEGMediaTracks::UploadTexture(FFMPEGFrame* vp, AVFrame *frame, struct Sw
 
     FIntPoint Dim = {frame->width, frame->height};
 
-    FTimespan Time = FTimespan::FromSeconds(vp->GetPts());
-    FTimespan Duration = FTimespan::FromSeconds(vp->GetDuration());
+    FTimespan vTime = FTimespan::FromSeconds(vp->GetPts());
+    FTimespan vDuration = FTimespan::FromSeconds(vp->GetDuration());
 
     if (TextureSample->Initialize(
         dataBuffer.GetData(),
         dataBuffer.Num()-1,
         Dim,
         pitch[0],
-        Time,
-        Duration))
+        vTime,
+        vDuration))
     {
         VideoSampleQueue.Enqueue(TextureSample);
     }
@@ -1898,62 +1900,50 @@ int FFFMPEGMediaTracks::UploadTexture(FFMPEGFrame* vp, AVFrame *frame, struct Sw
 }
 
 void FFFMPEGMediaTracks::VideoDisplay () {
-    if (videoStream) {
-            FFMPEGFrame *vp;
-            FFMPEGFrame *sp = NULL;
-            
-
-            vp = pictq.PeekLast();
-            if (subTitleStream) {
-                if (subpq.GetNumRemaining() > 0) {
-                    sp = subpq.Peek();
-
-                    if (vp->GetPts() >= sp->GetPts() + ((float)sp->GetSub().start_display_time / 1000)) {
-                        if (!sp->IsUploaded()) {
-                            
-                            int i;
-                            if (!sp->GetWidth() || !sp->GetHeight()) {
-                                sp->UpdateSize(vp);
-                            }
-                            
-                            FTimespan Time = FTimespan::FromSeconds(sp->GetPts());
-                            FTimespan Duration = FTimespan::FromSeconds(sp->GetDuration());
-
-                            for (i = 0; i < (int)sp->GetSub().num_rects; i++) {
-                                AVSubtitleRect *sub_rect = sp->GetSub().rects[i];
-                                sub_rect->x = av_clip(sub_rect->x, 0, sp->GetWidth());
-                                sub_rect->y = av_clip(sub_rect->y, 0, sp->GetHeight());
-                                sub_rect->w = av_clip(sub_rect->w, 0, sp->GetWidth() - sub_rect->x);
-                                sub_rect->h = av_clip(sub_rect->h, 0, sp->GetHeight() - sub_rect->y);
-
-                                if ( sub_rect->type == SUBTITLE_TEXT ||  sub_rect->type == SUBTITLE_ASS) {
-                                    FScopeLock Lock(&CriticalSection);
-
-                                    const auto CaptionSample = MakeShared<FFFMPEGMediaOverlaySample, ESPMode::ThreadSafe>();
-
-                                    if (CaptionSample->Initialize(sub_rect->type == SUBTITLE_TEXT?sub_rect->text:sub_rect->ass, FVector2D(sub_rect->x, sub_rect->y), Time, Duration))
-                                    {
-                                        CaptionSampleQueue.Enqueue(CaptionSample);
-                                    }
-                                }
-
-                            }
-                            sp->SetUploaded(true);
+    if (videoStream == NULL)
+        return;
+    FFMPEGFrame* vp;
+    FFMPEGFrame* sp = NULL;
+    vp = pictq.PeekLast();
+    do {
+        if (subTitleStream == NULL || subpq.GetNumRemaining() <= 0)
+            break;
+        sp = subpq.Peek();
+        if (vp->GetPts() >= sp->GetPts() + ((float)sp->GetSub().start_display_time / 1000)) {
+            if (!sp->IsUploaded()) {
+                if (!sp->GetWidth() || !sp->GetHeight()) {
+                    sp->UpdateSize(vp);
+                }
+                FTimespan vTime = FTimespan::FromSeconds(sp->GetPts());
+                FTimespan vDuration = FTimespan::FromSeconds(sp->GetDuration());
+                for (int i = 0; i < (int)sp->GetSub().num_rects; i++) {
+                    AVSubtitleRect *sub_rect = sp->GetSub().rects[i];
+                    sub_rect->x = av_clip(sub_rect->x, 0, sp->GetWidth());
+                    sub_rect->y = av_clip(sub_rect->y, 0, sp->GetHeight());
+                    sub_rect->w = av_clip(sub_rect->w, 0, sp->GetWidth() - sub_rect->x);
+                    sub_rect->h = av_clip(sub_rect->h, 0, sp->GetHeight() - sub_rect->y);
+                    if (sub_rect->type == SUBTITLE_TEXT || sub_rect->type == SUBTITLE_ASS) {
+                        FScopeLock Lock(&CriticalSection);
+                        const auto CaptionSample = MakeShared<FFFMPEGMediaOverlaySample, ESPMode::ThreadSafe>();
+                        if (CaptionSample->Initialize(sub_rect->type == SUBTITLE_TEXT ? sub_rect->text : sub_rect->ass,
+                            FVector2D(sub_rect->x, sub_rect->y), vTime, vDuration)) {
+                            CaptionSampleQueue.Enqueue(CaptionSample);
                         }
                     }
-                    else
-                        sp = NULL;
                 }
+                sp->SetUploaded(true);
             }
-
-            if (!vp->IsUploaded()) {
-                vp->SetVerticalFlip(vp->GetFrame()->linesize[0] < 0);
-                if (UploadTexture(vp, vp->GetFrame(), &imgConvertCtx) < 0)
-                    return;
-                vp->SetUploaded(true);
-                
-            } 
-        }   
+        }
+        else {
+            sp = NULL;
+        }
+    } while (false);
+    if (!vp->IsUploaded()) {
+        vp->SetVerticalFlip(vp->GetFrame()->linesize[0] < 0);
+        if (UploadTexture(vp, vp->GetFrame(), &imgConvertCtx) < 0)
+            return;
+        vp->SetUploaded(true);
+    }
 }
 
 void FFFMPEGMediaTracks::StreamSeek( int64_t pos, int64_t rel, int seek_by_bytes) {
@@ -2222,44 +2212,46 @@ int FFFMPEGMediaTracks::SubtitleThread() {
 int FFFMPEGMediaTracks::SynchronizeAudio( int nb_samples) {
      int wanted_nb_samples = nb_samples;
 
-        /* if not master, then we try to remove or add samples to correct the clock */
-        if (getMasterSyncType() != ESynchronizationType::AudioMaster) {
-            double diff, avg_diff;
-            int min_nb_samples, max_nb_samples;
+    /* if not master, then we try to remove or add samples to correct the clock */
+    if (getMasterSyncType() != ESynchronizationType::AudioMaster) {
+        double diff, avg_diff;
+        int min_nb_samples, max_nb_samples;
 
-            diff = audclk.Get() - GetMasterClock();
+        diff = audclk.Get() - GetMasterClock();
 
-            if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD) {
-                audioDiffCum = diff + audioDiffAvgCoef * audioDiffCum;
-                if (audioDiffAvgCount < AUDIO_DIFF_AVG_NB) {
-                    /* not enough measures to have a correct estimate */
-                    audioDiffAvgCount++;
-                } else {
-                    /* estimate the A-V difference */
-                    avg_diff = audioDiffCum * (1.0 - audioDiffAvgCoef);
+        if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD) {
+            audioDiffCum = diff + audioDiffAvgCoef * audioDiffCum;
+            if (audioDiffAvgCount < AUDIO_DIFF_AVG_NB) {
+                /* not enough measures to have a correct estimate */
+                audioDiffAvgCount++;
+            }
+            else {
+                /* estimate the A-V difference */
+                avg_diff = audioDiffCum * (1.0 - audioDiffAvgCoef);
 
-                    if (fabs(avg_diff) >= audioDiffThreshold) {
-                        wanted_nb_samples = nb_samples + (int)(diff * srcAudio.SampleRate);
-                        min_nb_samples = ((nb_samples * (100 - SAMPLE_CORRECTION_PERCENT_MAX) / 100));
-                        max_nb_samples = ((nb_samples * (100 + SAMPLE_CORRECTION_PERCENT_MAX) / 100));
-                        wanted_nb_samples = av_clip(wanted_nb_samples, min_nb_samples, max_nb_samples);
-                    }
-                    /*OFX_LOGP(ofx_trace, "diff=%f adiff=%f sample_diff=%d apts=%0.3f %f\n",
-                            diff, avg_diff, wanted_nb_samples - nb_samples,
-                            audioClock, audioDiffThreshold);*/
+                if (fabs(avg_diff) >= audioDiffThreshold) {
+                    wanted_nb_samples = nb_samples + (int)(diff * srcAudio.SampleRate);
+                    min_nb_samples = ((nb_samples * (100 - SAMPLE_CORRECTION_PERCENT_MAX) / 100));
+                    max_nb_samples = ((nb_samples * (100 + SAMPLE_CORRECTION_PERCENT_MAX) / 100));
+                    wanted_nb_samples = av_clip(wanted_nb_samples, min_nb_samples, max_nb_samples);
                 }
-            } else {
-                /* too big difference : may be initial PTS errors, so
-                   reset A-V filter */
-                audioDiffAvgCount = 0;
-                audioDiffCum       = 0;
+                /*OFX_LOGP(ofx_trace, "diff=%f adiff=%f sample_diff=%d apts=%0.3f %f\n",
+                        diff, avg_diff, wanted_nb_samples - nb_samples,
+                        audioClock, audioDiffThreshold);*/
             }
         }
+        else {
+            /* too big difference : may be initial PTS errors, so
+                reset A-V filter */
+            audioDiffAvgCount = 0;
+            audioDiffCum       = 0;
+        }
+    }
 
-        return wanted_nb_samples;
+    return wanted_nb_samples;
 }
 
-int FFFMPEGMediaTracks::AudioDecodeFrame(FTimespan& Time, FTimespan& Duration) {
+int FFFMPEGMediaTracks::AudioDecodeFrame(FTimespan& vTime, FTimespan& vDuration) {
     int data_size, resampled_data_size;
     int64_t dec_channel_layout;
     av_unused double audio_clock0;
@@ -2364,8 +2356,8 @@ int FFFMPEGMediaTracks::AudioDecodeFrame(FTimespan& Time, FTimespan& Duration) {
         audioClock = NAN;
     audioClockSerial = af->GetSerial();
 
-    Time = FTimespan::FromSeconds(audioClock);
-    Duration = FTimespan::FromSeconds(af->GetDuration());
+    vTime = FTimespan::FromSeconds(audioClock);
+    vDuration = FTimespan::FromSeconds(af->GetDuration());
     
     return resampled_data_size;
 }
@@ -2376,10 +2368,10 @@ void FFFMPEGMediaTracks::RenderAudio() {
     int audio_size, len1;
 
     audioCallbackTime = av_gettime_relative();
-    FTimespan Time = 0;
-    FTimespan Duration = 0;
+    FTimespan vTime = 0;
+    FTimespan vDuration = 0;
 
-    audio_size = AudioDecodeFrame(Time, Duration);
+    audio_size = AudioDecodeFrame(vTime, vDuration);
     if (audio_size < 0) {
         /* if error, just output silence */
         audioBuf = NULL;
@@ -2397,7 +2389,7 @@ void FFFMPEGMediaTracks::RenderAudio() {
             FScopeLock Lock(&CriticalSection);
             const TSharedRef<FFFMPEGMediaAudioSample, ESPMode::ThreadSafe> AudioSample = AudioSamplePool->AcquireShared();
 
-            if (AudioSample->Initialize((uint8_t *)audioBuf, len1, targetAudio.NumChannels, targetAudio.SampleRate, Time, Duration))
+            if (AudioSample->Initialize((uint8_t *)audioBuf, len1, targetAudio.NumChannels, targetAudio.SampleRate, vTime, vDuration))
             {
                 AudioSampleQueue.Enqueue(AudioSample);
             }
@@ -2476,122 +2468,129 @@ int FFFMPEGMediaTracks::AudioRenderThread() {
 }
 
 
-void FFFMPEGMediaTracks::VideoRefresh(double *remaining_time) {
+void FFFMPEGMediaTracks::VideoRefresh(double *remaining_time)
+{
     const auto Settings = GetDefault<UFFMPEGMediaSettings>();
     double time;
 
     FFMPEGFrame *sp, *sp2;
 
-    if (CurrentState == EMediaState::Playing && getMasterSyncType() == ESynchronizationType::ExternalClock && realtime)
+    if (CurrentState == EMediaState::Playing && getMasterSyncType() == ESynchronizationType::ExternalClock && realtime) {
         CheckExternalClockSpeed();
+    }
 
-      if (videoStream) {
+    if (videoStream) {
+
         bool retry = true;
 
         while (retry) {
+
             if (pictq.GetNumRemaining() == 0) {
                 // nothing to do, no picture to display in the queue
-            } else {
-                double last_duration, duration, delay;
-                FFMPEGFrame *vp, *lastvp;
+                continue;
+            }
 
+            double last_duration, duration, delay;
+            FFMPEGFrame *vp, *lastvp;
 
-                /* dequeue the picture */
-                lastvp = pictq.PeekLast();
-                vp = pictq.Peek();
-                ESynchronizationType sync_type = getMasterSyncType();
-                if ( sync_type  == ESynchronizationType::VideoMaster) {
-                    //CurrentTime = FTimespan::FromSeconds(vidclk.get());
-                    CurrentTime = FTimespan::FromSeconds(vp->GetPts());
-                } else if (sync_type == ESynchronizationType::ExternalClock) {
-                    CurrentTime = FTimespan::FromSeconds(extclk.Get());
+            /* dequeue the picture */
+            lastvp = pictq.PeekLast();
+            vp = pictq.Peek();
+            ESynchronizationType sync_type = getMasterSyncType();
+            if ( sync_type  == ESynchronizationType::VideoMaster) {
+                //CurrentTime = FTimespan::FromSeconds(vidclk.get());
+                CurrentTime = FTimespan::FromSeconds(vp->GetPts());
+            }
+            else if (sync_type == ESynchronizationType::ExternalClock) {
+                CurrentTime = FTimespan::FromSeconds(extclk.Get());
+            }
+
+            if (vp->GetSerial() != videoq.GetSerial()) {
+                pictq.Next();
+                continue;
+            }
+
+            if (lastvp->GetSerial() != vp->GetSerial()) {
+                frameTimer = av_gettime_relative() / 1000000.0;
+            }
+
+            if (CurrentState == EMediaState::Paused || CurrentState == EMediaState::Stopped) {
+                if (forceRefresh && pictq.GetIndexShown()) {
+                    VideoDisplay();
                 }
+                break;
+            }
+               
+            /* compute nominal last_duration */
+            last_duration = lastvp->GetDifference(vp, maxFrameDuration);
+            delay = ComputeTargetDelay(last_duration);
 
+            time = av_gettime_relative() / 1000000.0;
+            if (time < frameTimer + delay) {
+                *remaining_time = FFMIN(frameTimer + delay - time, *remaining_time);
+                if (forceRefresh && pictq.GetIndexShown()) {
+                    VideoDisplay();
+                }
+                break;
+            }
 
-                if (vp->GetSerial() != videoq.GetSerial()) {
+            frameTimer += delay;
+            if (delay > 0 && time - frameTimer > AV_SYNC_THRESHOLD_MAX)
+                frameTimer = time;
+
+            pictq.Lock();
+            if (!isnan(vp->GetPts())) {
+                UpdateVideoPts(vp->GetPts(), vp->GetPos(), vp->GetSerial());
+            }
+            pictq.Unlock();
+
+            if (pictq.GetNumRemaining() > 1) {
+                FFMPEGFrame *nextvp = pictq.PeekNext();
+                duration = vp->GetDifference(nextvp, maxFrameDuration);
+                if (!step && (Settings->AllowFrameDrop && getMasterSyncType() != ESynchronizationType::VideoMaster)
+                    && time > frameTimer + duration) {
+                    frameDropsLate++;
                     pictq.Next();
                     continue;
                 }
+            }
 
-                if (lastvp->GetSerial() != vp->GetSerial())
-                    frameTimer = av_gettime_relative() / 1000000.0;
+            if (subTitleStream) {
+                while (subpq.GetNumRemaining() > 0) {
+                    sp = subpq.Peek();
 
-                if (CurrentState == EMediaState::Paused || CurrentState == EMediaState::Stopped) {
-                    if (forceRefresh && pictq.GetIndexShown())
-                        VideoDisplay();
-                   
-                    forceRefresh = false;
-                    return;
-                }
+                    if (subpq.GetNumRemaining() > 1) {
+                        sp2 = subpq.PeekNext();
+                    }
+                    else {
+                        sp2 = NULL;
+                    }
 
-               
-                /* compute nominal last_duration */
-                last_duration = lastvp->GetDifference(vp, maxFrameDuration);
-                delay = ComputeTargetDelay(last_duration);
-
-                time= av_gettime_relative()/1000000.0;
-                if (time < frameTimer + delay) {
-                    *remaining_time = FFMIN(frameTimer + delay - time, *remaining_time);
-                    if (forceRefresh && pictq.GetIndexShown())
-                        VideoDisplay();
-
-                    forceRefresh = false;
-                    return;
-                }
-
-
-                frameTimer += delay;
-                if (delay > 0 && time - frameTimer > AV_SYNC_THRESHOLD_MAX)
-                    frameTimer = time;
-
-                pictq.Lock();
-                if (!isnan(vp->GetPts()))
-                    UpdateVideoPts(vp->GetPts(), vp->GetPos(), vp->GetSerial());
-                pictq.Unlock();
-
-                if (pictq.GetNumRemaining() > 1) {
-                    FFMPEGFrame *nextvp = pictq.PeekNext();
-                    duration = vp->GetDifference(nextvp, maxFrameDuration);
-                    if(!step && (Settings->AllowFrameDrop && getMasterSyncType() != ESynchronizationType::VideoMaster) && time > frameTimer + duration){
-                        frameDropsLate++;
-                        pictq.Next();
-                        continue;
+                    if (sp->GetSerial() != subtitleq.GetSerial()
+                        || (vidclk.GetPts() > (sp->GetPts() + ((float) sp->GetSub().end_display_time / 1000)))
+                        || (sp2 && vidclk.GetPts() > (sp2->GetPts() + ((float) sp2->GetSub().start_display_time / 1000)))) {
+                        subpq.Next();
+                    }
+                    else {
+                        break;
                     }
                 }
-
-                if (subTitleStream) {
-                        while (subpq.GetNumRemaining() > 0) {
-                            sp = subpq.Peek();
-
-                            if (subpq.GetNumRemaining() > 1)
-                                sp2 = subpq.PeekNext();
-                            else
-                                sp2 = NULL;
-
-                            if (sp->GetSerial() != subtitleq.GetSerial()
-                                    || (vidclk.GetPts() > (sp->GetPts() + ((float) sp->GetSub().end_display_time / 1000)))
-                                    || (sp2 && vidclk.GetPts() > (sp2->GetPts() + ((float) sp2->GetSub().start_display_time / 1000))))
-                            {
-                                subpq.Next();
-                            } else {
-                                break;
-                            }
-                        }
-                }
-
-                pictq.Next();
-                forceRefresh = true;
-
-                if (step && CurrentState == EMediaState::Playing)
-                    StreamTogglePause();
-
-                retry = false;
             }
+
+            pictq.Next();
+            forceRefresh = true;
+
+            if (step && CurrentState == EMediaState::Playing) {
+                StreamTogglePause();
+            }
+            
+            retry = false;
         }
 
         /* display picture */
-        if (forceRefresh && pictq.GetIndexShown())
+        if (forceRefresh && pictq.GetIndexShown()) {
             VideoDisplay();
+        }
     }
     forceRefresh = false;
  /*   if (show_status) {
@@ -2633,7 +2632,6 @@ void FFFMPEGMediaTracks::VideoRefresh(double *remaining_time) {
             last_time = cur_time;
         }
     }*/
-
 
 
 }

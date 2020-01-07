@@ -69,7 +69,8 @@ int FFMPEGPacketQueue::PutNullPacket(int stream_index) {
     return Put(pkt);
 }
 
-int FFMPEGPacketQueue::PutPrivate(AVPacket *pkt) {
+int FFMPEGPacketQueue::PutPrivate(AVPacket *pkt)
+{
     MyAVPacketList *pkt1;
 
     if (abort_request)
@@ -97,8 +98,9 @@ int FFMPEGPacketQueue::PutPrivate(AVPacket *pkt) {
     return 0;
 }
 
-int  FFMPEGPacketQueue::Get(AVPacket *pkt, int block, int *serial) {
-    MyAVPacketList *pkt1;
+int FFMPEGPacketQueue::Get(AVPacket* pkt, int block, int* v_serial)
+{
+    MyAVPacketList* pkt1;
     int ret;
 
     mutex.Lock();
@@ -118,8 +120,8 @@ int  FFMPEGPacketQueue::Get(AVPacket *pkt, int block, int *serial) {
             size -= pkt1->pkt.size + sizeof(*pkt1);
             duration -= pkt1->pkt.duration;
             *pkt = pkt1->pkt;
-            if (serial)
-                *serial = pkt1->serial;
+            if (v_serial)
+                *v_serial = pkt1->serial;
             delete pkt1;
             ret = 1;
             break;
