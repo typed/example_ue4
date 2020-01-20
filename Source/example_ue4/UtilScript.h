@@ -72,5 +72,10 @@ public:
     static void BeginCost(FString key);
     UFUNCTION(BlueprintCallable)
     static void EndCost(FString key);
+
+    UFUNCTION(BlueprintCallable)
+    static float Floor(float v);
+    UFUNCTION(BlueprintCallable)
+    static float Ceil(float v);
 	
 };

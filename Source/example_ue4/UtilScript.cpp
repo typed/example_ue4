@@ -179,3 +179,13 @@ void UUtilScript::EndCost(FString key)
         ScreenMessage(str);
     }
 }
+
+float UUtilScript::Floor(float v)
+{
+    return FMath::FloorToFloat(v);
+}
+
+float UUtilScript::Ceil(float v)
+{
+    return FMath::CeilToFloat(v);
+}

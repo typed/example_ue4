@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "UWrapBoxEx.h"
+#include "UGroupBox.h"
 
-DEFINE_LOG_CATEGORY(LogUWrapBoxEx);
+DEFINE_LOG_CATEGORY(LogUGroupBox);
 
-UWrapBoxEx::UWrapBoxEx(const FObjectInitializer& ObjectInitializer)
+UGroupBox::UGroupBox(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
     , ItemClass(nullptr)
     , LastItemClass(nullptr)
@@ -12,7 +12,7 @@ UWrapBoxEx::UWrapBoxEx(const FObjectInitializer& ObjectInitializer)
 {
 }
 
-void UWrapBoxEx::Reload(int32 __ItemCount)
+void UGroupBox::Reload(int32 __ItemCount)
 {
     if (ItemClass == nullptr) {
         return;
@@ -38,14 +38,14 @@ void UWrapBoxEx::Reload(int32 __ItemCount)
     }
 }
 
-void UWrapBoxEx::Reset(TSubclassOf<UUserWidget> __ItemClass)
+void UGroupBox::Reset(TSubclassOf<UUserWidget> __ItemClass)
 {
     ClearChildren();
     ItemClass = __ItemClass;
     LastItemClass = __ItemClass;
 }
 
-void UWrapBoxEx::SynchronizeProperties()
+void UGroupBox::SynchronizeProperties()
 {
     Super::SynchronizeProperties();
 #if WITH_EDITOR
