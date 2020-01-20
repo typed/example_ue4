@@ -45,4 +45,6 @@ Tmp
 *.db
 *.sln
 *.opendb
+*.opensdf
+*.sdf
 example_ue4.uproject
