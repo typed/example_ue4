@@ -10,14 +10,14 @@ Description: 封装WrapBox
 
 #include "CoreMinimal.h"
 #include "Runtime/UMG/Public/Components/WrapBox.h"
-#include "UGroupBox.generated.h"
+#include "UWrapGroupBox.generated.h"
 
 /**
 *
 */
 
 UCLASS()
-class EXAMPLE_UE4_API UGroupBox : public UWrapBox
+class EXAMPLE_UE4_API UWrapGroupBox : public UWrapBox
 {
     GENERATED_BODY()
 
@@ -25,7 +25,7 @@ public:
 
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateItemDelegate, UUserWidget*, Widget, int32, Idx);
 
-    UGroupBox(const FObjectInitializer& ObjectInitializer);
+    UWrapGroupBox(const FObjectInitializer& ObjectInitializer);
 
     UPROPERTY(BlueprintAssignable)
     FOnUpdateItemDelegate OnUpdateItem;
@@ -52,4 +52,4 @@ protected:
 
 };
 
-DECLARE_LOG_CATEGORY_EXTERN(LogUGroupBox, Verbose, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogUWrapGroupBox, Verbose, All);
