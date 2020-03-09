@@ -30,21 +30,21 @@ enum class EReuseListSStyle : uint8
     Horizontal,
 };
 
-enum EReuseListSMsgType
-{
-    AdjustItem,
-    FillArrOffset,
-    AdjustItemWidgetSize,
-    DoReload,
-    Num,
-};
-
 UCLASS()
 class EXAMPLE_UE4_API UReuseListS : public UUserWidget
 {
     GENERATED_BODY()
 
 public:
+
+	enum EReuseListSMsgType
+	{
+		RLST_AdjustItem,
+		RLST_FillArrOffset,
+		RLST_AdjustItemWidgetSize,
+		RLST_DoReload,
+		RLST_Num,
+	};
 
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateItemDelegate, UUserWidget*, Widget, int32, Idx);
     DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCreateItemDelegate, UUserWidget*, Widget);
@@ -186,7 +186,7 @@ protected:
     TMap<int32, FBox2D> TransMap;
     TMap<int32, FVector2D> SpecialSizeMap;
     float LastOffset;
-    int8 MsgMap[EReuseListSMsgType::Num];
+    int8 MsgMap[RLST_Num];
 };
 
 DECLARE_LOG_CATEGORY_EXTERN(LogUReuseListS, Verbose, All);

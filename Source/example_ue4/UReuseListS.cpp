@@ -33,7 +33,7 @@ UReuseListS::UReuseListS(const FObjectInitializer& ObjectInitializer)
     , LastOffset(0.f)
     , ArrOffset(FBox2D(FVector2D::ZeroVector, FVector2D(99999.f,99999.f)))
 {
-    for (int32 i = 0; i < EReuseListSMsgType::Num; ++i) {
+    for (int32 i = 0; i < RLST_Num; ++i) {
         MsgMap[i] = 0;
     }
     ScrollBoxStyle.LeftShadowBrush = FSlateNoResource();
@@ -65,23 +65,23 @@ void UReuseListS::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     if (IsInvalidParam())
         return;
 
-    for (int32 i = 0; i < EReuseListSMsgType::Num; ++i) {
+    for (int32 i = 0; i < RLST_Num; ++i) {
         if (MsgMap[i] > 0) {
             --MsgMap[i];
             switch (i) {
-            case EReuseListSMsgType::AdjustItem: {
+            case RLST_AdjustItem: {
                 AdjustItem();
                 break;
             }
-            case EReuseListSMsgType::FillArrOffset: {
+            case RLST_FillArrOffset: {
                 FillArrOffset();
                 break;
             }
-            case EReuseListSMsgType::AdjustItemWidgetSize: {
+            case RLST_AdjustItemWidgetSize: {
                 AdjustItemWidgetSize();
                 break;
             }
-            case EReuseListSMsgType::DoReload: {
+            case RLST_DoReload: {
                 DoReload();
                 break;
             }
@@ -100,7 +100,7 @@ void UReuseListS::Reload(int32 __ItemCount)
     if (lzSz.Equals(FVector2D::ZeroVector, 0.0001f)) {
         ViewSize = lzSz;
         ReleaseAllItem();
-        MsgMap[EReuseListSMsgType::DoReload] = 1;
+        MsgMap[RLST_DoReload] = 1;
         return;
     }
     DoReload();
@@ -157,15 +157,15 @@ void UReuseListS::InitWidgetPtr()
 void UReuseListS::ClearSpecialSize()
 {
     SpecialSizeMap.Empty();
-    MsgMap[EReuseListSMsgType::FillArrOffset] = 1;
-    MsgMap[EReuseListSMsgType::AdjustItemWidgetSize] = 1;
+    MsgMap[RLST_FillArrOffset] = 1;
+    MsgMap[RLST_AdjustItemWidgetSize] = 1;
 }
 
 void UReuseListS::AddSpecialSize(int32 __Idx, const FVector2D& __Size)
 {
     SpecialSizeMap.Add(__Idx, __Size);
-    MsgMap[EReuseListSMsgType::FillArrOffset] = 1;
-    MsgMap[EReuseListSMsgType::AdjustItemWidgetSize] = 1;
+    MsgMap[RLST_FillArrOffset] = 1;
+    MsgMap[RLST_AdjustItemWidgetSize] = 1;
 }
 
 void UReuseListS::FillArrOffset()
@@ -237,8 +237,6 @@ void UReuseListS::FillArrOffset()
     }
     UpdateContentSize(SizeBoxBg);
     UpdateContentSize(CanvasPanelList);
-
-    //NeedAdjustScrollOffset = true;
 }
 
 FVector2D UReuseListS::GetItemSize(int32 idx)
@@ -299,7 +297,7 @@ void UReuseListS::ScrollUpdate(float __Offset)
                     cps->SetOffsets(FMargin(box.Min.X, box.Min.Y, box.Max.X - box.Min.X, box.Max.Y - box.Min.Y));
                     ItemMap.Add(i, w);
                     OnUpdateItem.Broadcast(w.Get(), i);
-                    MsgMap[EReuseListSMsgType::AdjustItem] = 5;
+                    MsgMap[RLST_AdjustItem] = 5;
                 }
             }
         }

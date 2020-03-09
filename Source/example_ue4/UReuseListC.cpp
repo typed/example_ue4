@@ -261,7 +261,7 @@ void UReuseListC::ScrollUpdate(float __Offset)
     }
     else if (Style == EReuseListStyle::HorizontalGrid) {
         BIdx = FMath::Max((Offset / ItemWidthAndPad) * RowNum, 0);
-        int32 tmp = FMath::CeilToFloat((float)OffsetEnd / ItemWidthAndPad) + 1;
+        int32 tmp = FMath::CeilToFloat((float)OffsetEnd / ItemWidthAndPad);
         EIdx = FMath::Min(tmp * RowNum - 1, ItemCount - 1);
     }
     RemoveNotUsed(BIdx, EIdx);
@@ -628,6 +628,15 @@ void UReuseListC::Reset(TSubclassOf<UUserWidget> __ItemClass, EReuseListStyle __
     ItemHeight = __ItemHeight;
     PaddingX = __PaddingX;
     PaddingY = __PaddingY;
+}
+
+UUserWidget* UReuseListC::FindItem(int32 idx)
+{
+	TWeakObjectPtr<UUserWidget>* v = ItemMap.Find(idx);
+	if (v && (*v).IsValid()) {
+		return v->Get();
+	}
+	return nullptr;
 }
 
 #if WITH_EDITOR

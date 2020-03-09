@@ -21,7 +21,7 @@ bool UImageDownloaderAsync::s_bCheckDiskFile = true;
 TMap<FString, int32> UImageDownloaderAsync::s_mapInvalidFormatTryCount;
 int32 UImageDownloaderAsync::s_nInvalidFormatTryMaxCount = 5;
 
-inline TWeakObjectPtr<UTexture2D> GetTexture2DFromArray(const TArray<uint8>& OutArray, bool& InvalidImageFormat)
+static TWeakObjectPtr<UTexture2D> GetTexture2DFromArrayA(const TArray<uint8>& OutArray, bool& InvalidImageFormat)
 {
 	InvalidImageFormat = false;
 	IImageWrapperModule& imageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
@@ -47,7 +47,7 @@ inline TWeakObjectPtr<UTexture2D> GetTexture2DFromArray(const TArray<uint8>& Out
 	return OutTex;
 }
 
-inline TWeakObjectPtr<UTexture2D> GetTexture2DFromDisk(FString PathName, bool& InvalidImageFormat)
+static TWeakObjectPtr<UTexture2D> GetTexture2DFromDiskA(FString PathName, bool& InvalidImageFormat)
 {
 	InvalidImageFormat = false;
 	if (!FPaths::FileExists(PathName)) {
@@ -55,7 +55,7 @@ inline TWeakObjectPtr<UTexture2D> GetTexture2DFromDisk(FString PathName, bool& I
 	}
 	TArray<uint8> OutArray;
 	if (FFileHelper::LoadFileToArray(OutArray, *PathName)) {
-		return GetTexture2DFromArray(OutArray, InvalidImageFormat);
+		return GetTexture2DFromArrayA(OutArray, InvalidImageFormat);
 	}
 	return nullptr;
 }
@@ -200,7 +200,7 @@ void UImageDownloaderAsync::Start(FString Url)
     
     
 	//from disk
-    TWeakObjectPtr<UTexture2D> pTexture = GetTexture2DFromDisk(FileSavePath, InvalidImageFormat);
+    TWeakObjectPtr<UTexture2D> pTexture = GetTexture2DFromDiskA(FileSavePath, InvalidImageFormat);
 	if (pTexture.IsValid()) {
         s_mapTexture.Add(UrlHash, pTexture);
 		UE_LOG(LogImageDownloaderAsync, Log, TEXT("from disk %s"), *pTexture->GetPathName());
@@ -270,7 +270,7 @@ void UImageDownloaderAsync::HandleRequest(FHttpRequestPtr HttpRequest, FHttpResp
 		}
         
 
-        TWeakObjectPtr<UTexture2D> pTexture = GetTexture2DFromArray(OutArray, InvalidImageFormat);
+        TWeakObjectPtr<UTexture2D> pTexture = GetTexture2DFromArrayA(OutArray, InvalidImageFormat);
 		if (pTexture.IsValid()) {
             s_mapTexture.Add(UrlHash, pTexture);
 			UE_LOG(LogImageDownloaderAsync, Log, TEXT("from http %s"), *pTexture->GetPathName());
